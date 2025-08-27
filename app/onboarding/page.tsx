@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -60,7 +59,9 @@ const OnboardingFlow: React.FC = () => {
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
-      console.log("Boading completed");
+      localStorage.removeItem("route");
+      // call function that calls route to save prefrences
+      console.log(preferences);
       router.push("/mainpage");
     }
   };
@@ -79,6 +80,7 @@ const OnboardingFlow: React.FC = () => {
         : [...prev.selectedTags, tag],
     }));
   };
+  if (localStorage.getItem("register") !== "onboard") return;
 
   const renderStep = () => {
     switch (steps[currentStep].id) {
@@ -363,24 +365,6 @@ const OnboardingFlow: React.FC = () => {
                   </button>
                 ))}
               </div>
-
-              {preferences.selectedTags.length > 0 && (
-                <div className="bg-neutral-50 rounded-lg p-4">
-                  <p className="text-sm font-medium text-neutral-900 mb-2">
-                    Selected tags ({preferences.selectedTags.length}):
-                  </p>
-                  <div className="flex flex-wrap gap-1">
-                    {preferences.selectedTags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="px-2 py-1 bg-primary-100 text-primary-800 text-xs rounded-full"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         );

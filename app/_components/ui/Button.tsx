@@ -8,6 +8,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   size?: "sm" | "md" | "lg" | "icon";
   loading?: boolean;
   children: React.ReactNode;
+  onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -17,6 +18,7 @@ const Button: React.FC<ButtonProps> = ({
   className,
   children,
   disabled,
+  onClick,
   ...props
 }) => {
   const baseStyles =
@@ -44,6 +46,7 @@ const Button: React.FC<ButtonProps> = ({
     <button
       className={cn(baseStyles, variants[variant], sizes[size], className)}
       disabled={disabled || loading}
+      onClick={onClick}
       {...props}
     >
       {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}

@@ -1,9 +1,0 @@
-{
-  "/_not-found/page": "/_not-found",
-  "/auth/password/page": "/auth/password",
-  "/auth/register/page": "/auth/register",
-  "/mainpage/page": "/mainpage",
-  "/onboarding/page": "/onboarding",
-  "/page": "/",
-  "/auth/login/page": "/auth/login"
-}

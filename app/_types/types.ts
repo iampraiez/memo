@@ -1,6 +1,10 @@
+// how to handle the searchparams props
 export interface AuthPageProps {
   type: "login" | "signup" | "passwordless";
-  onSubmit: (data: { email: string; password?: string }) => void;
+  searchParams?: {
+    callbackUrl?: string | undefined;
+    // [key: string]: string | string[] | undefined;
+  };
 }
 
 export interface OnboardingFlowProps {

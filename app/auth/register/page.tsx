@@ -1,8 +1,6 @@
 "use client";
-import AuthForm from "../auth_page";
+import AuthForm from "../../_components/auth_page";
 
-const SignupPage = () => (
-  <AuthForm type="signup" onSubmit={(data) => console.log("Signup:", data)} />
-);
+const SignupPage = () => <AuthForm type="signup" />;
 
 export default SignupPage;

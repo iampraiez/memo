@@ -1,11 +1,6 @@
 "use client";
-import AuthForm from "../auth_page";
+import AuthForm from "../../_components/auth_page";
 
-const ForgetPage = () => (
-  <AuthForm
-    type="passwordless"
-    onSubmit={(data) => console.log("Signup:", data)}
-  />
-);
+const ForgetPage = () => <AuthForm type="passwordless" />;
 
 export default ForgetPage;

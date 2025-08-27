@@ -115,7 +115,7 @@ const MemoryCard: React.FC<MemoryCardProps> = ({
                 variant="ghost"
                 size="icon"
                 className="w-8 h-8"
-                onClick={handleMenuClick}
+                onClick={(e) => handleMenuClick(e)}
               >
                 <MoreHorizontal className="w-4 h-4" />
               </Button>

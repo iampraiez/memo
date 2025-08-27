@@ -7,7 +7,9 @@
       "@/lib/*": ["app/_lib/*"],
       "@/types/*": ["app/_types/*"],
       "@/data/*": ["app/_data/*"],
-      "@/pages/*": ["app/_pages/*"]
+      "@/pages/*": ["app/_pages/*"],
+      "@/db/*": ["drizzle/*"],
+      "@/libs/*": ["lib/*"]
     },
     "target": "ES2017",
     "lib": ["dom", "dom.iterable", "esnext"],

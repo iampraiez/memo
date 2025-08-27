@@ -1,17 +1,6 @@
 "use client";
-import AuthForm from "../auth_page";
+import AuthForm from "../../_components/auth_page";
 
-const LoginPage = () => (
-  <AuthForm type="login" onSubmit={(data) => console.log("Login:", data)} />
-);
+const LoginPage = () => <AuthForm type="login" />;
 
 export default LoginPage;
-// export const SignupPage = () => (
-//   <AuthPage type="signup" onSubmit={(data) => console.log("Signup:", data)} />
-// );
-// export const PasswordlessPage = () => (
-//   <AuthPage
-//     type="passwordless"
-//     onSubmit={(data) => console.log("Passwordless:", data)}
-//   />
-// );

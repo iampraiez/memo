@@ -11,6 +11,7 @@ interface HeaderProps {
   syncStatus: "online" | "offline" | "syncing";
   notificationCount?: number;
   className?: string;
+  onNavigate: (page: string) => void; // Add onNavigate prop
 }
 
 const Header: React.FC<HeaderProps> = ({
@@ -20,6 +21,7 @@ const Header: React.FC<HeaderProps> = ({
   syncStatus,
   notificationCount = 0,
   className,
+  onNavigate, // Destructure onNavigate
 }) => {
   const syncIcons = {
     online: Cloud,
@@ -114,7 +116,7 @@ const Header: React.FC<HeaderProps> = ({
 
             {/* Profile */}
             <Button
-              onClick={() => localStorage.setItem("route", "settings")}
+              onClick={() => onNavigate("settings")} // Use onNavigate directly
               variant="ghost"
               size="icon"
             >

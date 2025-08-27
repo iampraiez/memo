@@ -1,6 +1,13 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { User as Icon, Download, Trash2, Cloud, Palette } from "lucide-react";
+import {
+  User as Icon,
+  Download,
+  Trash2,
+  Cloud,
+  Palette,
+  LogOut,
+} from "lucide-react";
 import Modal from "@/components/ui/Modal";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
@@ -11,6 +18,7 @@ import { sampleUser } from "@/data/sampleData";
 import { db, useNetworkStatus, UserSettings } from "@/lib/utils";
 import { useLiveQuery } from "dexie-react-hooks";
 import MediaUploader from "@/components/ui/MediaUploader";
+import { signOut } from "next-auth/react";
 
 const SettingsPage: React.FC = () => {
   const [activeSection, setActiveSection] = useState("account");
@@ -127,24 +135,6 @@ const SettingsPage: React.FC = () => {
     const remainingSeconds = seconds % 60;
     return `${minutes}:${remainingSeconds < 10 ? "0" : ""}${remainingSeconds}`;
   };
-
-  //  <div className="flex items-center justify-between p-4 border border-blue-200 rounded-lg bg-blue-50">
-  //                 <div>
-  //                   <h3 className="font-medium text-blue-900">Auto Backup</h3>
-  //                   <p className="text-sm text-blue-700">
-  //                     All memories are automatically backed up
-  //                   </p>
-  //                 </div>
-  //                 <label className="relative inline-flex items-center cursor-pointer">
-  //                   <input
-  //                     type="checkbox"
-  //                     checked={true}
-  //                     className="sr-only peer"
-  //                     disabled
-  //                   />
-  //                   <div className="w-11 h-6 bg-neutral-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-  //                 </label>
-  //               </div>
 
   const renderSection = () => {
     switch (activeSection) {
@@ -386,6 +376,13 @@ const SettingsPage: React.FC = () => {
                           </button>
                         );
                       })}
+                      <button
+                        onClick={() => signOut({ redirectTo: "/auth/login" })}
+                        className="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors text-left text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        <span>Logout</span>
+                      </button>
                     </nav>
                   </Card>
                 </div>

@@ -1,0 +1,36 @@
+"use client";
+import { signIn } from "next-auth/react";
+import { AuthError } from "next-auth";
+
+export async function handleSignIn(
+  provider?: string,
+  options?: { redirectTo?: string },
+  formData?: { email: string; password: string },
+  emailFromForm?: string
+) {
+  try {
+    console.log("email init", emailFromForm);
+    if (provider === "nodemailer" && emailFromForm) {
+      return await signIn(provider, { email: emailFromForm, redirect: false });
+    }
+
+    if (emailFromForm) {
+      return await signIn(provider, {
+        email: emailFromForm,
+        redirect: false,
+      });
+    }
+    return await signIn(
+      provider,
+      options || { ...formData, redirect: false } || {
+          email: emailFromForm,
+          callbackUrl: "/dashboard",
+        }
+    );
+  } catch (error) {
+    if (error instanceof AuthError) {
+      throw error;
+    }
+    throw error;
+  }
+}

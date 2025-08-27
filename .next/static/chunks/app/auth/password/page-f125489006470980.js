@@ -1,1 +1,0 @@
-(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[775],{4524:(e,s,l)=>{"use strict";l.r(s),l.d(s,{default:()=>t});var n=l(71729),o=l(63241);let t=()=>(0,n.jsx)(o.A,{type:"passwordless",onSubmit:e=>console.log("Signup:",e)})},6874:(e,s,l)=>{Promise.resolve().then(l.bind(l,4524))}},e=>{e.O(0,[390,320,241,598,340,358],()=>e(e.s=6874)),_N_E=e.O()}]);

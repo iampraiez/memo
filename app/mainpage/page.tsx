@@ -12,7 +12,6 @@ import SettingsPage from "@/pages/SettingsPage";
 import AdminPage from "@/pages/AdminPage";
 import AnalyticsPage from "@/pages/AnalyticsPage";
 import FamilyTimelinePage from "@/pages/FamilyTimelinePage";
-import ProfilePage from "@/pages/ProfilePage";
 import PrivacySettingsPage from "@/pages/PrivacySettingPage";
 import OfflineBanner from "@/components/ui/OfflineBanner";
 import NotificationToast from "@/components/ui/NotificationToast";
@@ -21,6 +20,8 @@ import { Memory } from "@/types/types";
 import { useNetworkStatus, db } from "@/lib/utils";
 import { useLiveQuery } from "dexie-react-hooks";
 import { Comment, Like, UserSettings } from "@/lib/utils";
+import { usePathname, useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 function App() {
   const [currentPage, setCurrentPage] = useState("timeline");
@@ -35,6 +36,25 @@ function App() {
   const memories = useLiveQuery(() => db.memories.toArray(), []) || [];
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState(notification);
+  // redirect to login page which checks for id or something before redirecting here with a useEffect
+
+  const pathname = usePathname();
+  const route = useRouter();
+  const { data: session, status } = useSession();
+  // easiest way to make it run infintely
+  useEffect(() => {
+    if (status == undefined || status === "loading") return;
+    if (!session && (pathname == "/onboading" || pathname == "/mainpage")) {
+      if (localStorage.getItem("route") == "onboard") {
+        route.push("/onboarding");
+      } else {
+        route.push("/auth/login");
+      }
+    }
+  }, [pathname, status]);
+  console.log(status);
+
+  console.log(session);
 
   useEffect(() => {
     const loadInitialMemories = async () => {
@@ -54,15 +74,6 @@ function App() {
       syncOfflineChanges();
     }
   }, [isOnline]);
-
-  useEffect(() => {
-    setInterval(() => {
-      if (localStorage.getItem("route")) {
-        setCurrentPage(localStorage.getItem("route"));
-        localStorage.removeItem("route");
-      }
-    }, 1000); // Show notifications every 5 seconds
-  });
 
   const syncOfflineChanges = async () => {
     console.log("Attempting to sync offline changes...");
@@ -239,6 +250,7 @@ function App() {
         //set sync status
         syncStatus={isOnline ? "online" : "offline"}
         notificationCount={notifications.filter((n) => !n.read).length}
+        onNavigate={setCurrentPage} // Pass setCurrentPage as onNavigate
       />
       <OfflineBanner isVisible={!isOnline} />
 
@@ -302,7 +314,6 @@ function App() {
           {currentPage === "privacy" && <PrivacySettingsPage />}
           {currentPage === "analytics" && <AnalyticsPage />}
           {currentPage === "admin" && <AdminPage />}
-          {currentPage === "profile" && <ProfilePage />}
         </main>
       </div>
 
