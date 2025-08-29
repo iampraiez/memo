@@ -53,20 +53,18 @@ const providers: Provider[] = [
   Nodemailer({
     server: process.env.EMAIL_SERVER,
     from: process.env.EMAIL_FROM,
-    async sendVerificationRequest({
-      identifier: email,
-      url: baseUrl,
-      provider: { server, from },
-    }) {
-      const url = `${baseUrl}/verify-request?verificationRequestToken=${encodeURIComponent(
-        email
-      )}`;
+    sendVerificationRequest: async ({ identifier, url, provider }) => {
+      console.log("Sending verification email:");
+      console.log("  To:", identifier);
+      console.log("  Generated URL:", url); // Log the URL being sent
+      console.log("  Provider server:", provider.server);
+      console.log("  Provider from:", provider.from);
 
-      const transport = nodemailer.createTransport(server);
+      const transport = nodemailer.createTransport(provider.server);
       try {
         await transport.sendMail({
-          to: email,
-          from,
+          to: identifier, // Use identifier from the parameters
+          from: provider.from, // Use provider.from from the parameters
           subject: "Sign in to Memory Lane",
           text: `Sign in to Memory Lane using this link: ${url}`,
           html: `<!DOCTYPE html>
@@ -97,7 +95,7 @@ const providers: Provider[] = [
                   <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
                     <tr>
                       <td style="text-align: center; padding: 16px 0;">
-                        <a href="${url}" style="background-color: #A78BFA; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-size: 16px; font-weight: bold; display: inline-block;">Sign In Now</a>
+                        <a href="${url}" style="background-color: #F472B6; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-size: 16px; font-weight: bold; display: inline-block;">Sign In Now</a>
                       </td>
                     </tr>
                   </table>
@@ -109,9 +107,6 @@ const providers: Provider[] = [
                   <p style="color: #4B5563; font-size: 14px; line-height: 1.5; margin: 16px 0;">
                     <strong>Security Note:</strong> This link is valid for 24 hours. If you didn't request this sign-in, please ignore this email or contact our support team.
                     <strong>PS:</strong> You're never restting your password lil bro, I'm too lazy to do it.
-                  </p>
-                    <p style="color: #4B5563; font-size: 14px; line-height: 1.5; margin: 16px 0;">
-                    <strong>PS:</strong> You're never resetting your password lil bro, I'm too lazy to do it.
                   </p>
                 </td>
               </tr>
@@ -129,8 +124,14 @@ const providers: Provider[] = [
           </body>
           </html>`,
         });
-      } catch (err) {
-        throw new Error(err);
+        console.log("Verification email sent successfully for:", identifier);
+      } catch (error) {
+        console.error(
+          "Error sending verification email for:",
+          identifier,
+          error
+        );
+        throw new Error(`Email(s) could not be sent: ${error.message}`); // Re-throw with a more descriptive error
       }
     },
   }),
@@ -178,6 +179,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.id = user.id;
       }
       return session;
+    },
+    async jwt({ token, user }) {
+      // Add a jwt callback
+      if (user) {
+        token.id = user.id;
+      }
+      return token;
     },
   },
 });

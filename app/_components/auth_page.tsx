@@ -82,7 +82,7 @@ const AuthPage: React.FC<AuthPageProps> = (props: {
           const lastRequest = localStorage.getItem(
             `magicLinkRequestTimestamp_${email}`
           );
-          const tenMinutes = 10 * 60 * 1000;
+          const tenMinutes = -10 * 60 * 1000;
           if (lastRequest) {
             const timeElapsed = Date.now() - parseInt(lastRequest);
             if (timeElapsed < tenMinutes) {
