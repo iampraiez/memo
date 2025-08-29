@@ -131,10 +131,22 @@ const AuthPage: React.FC<AuthPageProps> = (props: {
             } else {
               const res = await registerUser(formData);
               if (res?.data.success == true) {
-                // sessionStorage.setItem('onboard', 'true')
-                await handleSignIn("credentials", undefined, formData);
-                localStorage.setItem("register", "onboard");
-                route.push("/onboarding");
+                const emailRes = await handleSignIn(
+                  "nodemailer",
+                  undefined,
+                  undefined,
+                  email
+                );
+
+                if (emailRes && emailRes.ok === false) {
+                  setError("Error sending verification email.");
+                  setTimeout(() => {
+                    setError("");
+                  }, 5000);
+                } else {
+                  localStorage.setItem("register", "onboard");
+                  route.push("/onboarding"); // Redirect to onboarding after email is sent for verification
+                }
               } else if (res?.data.error) {
                 setError(res.data.error || "Error registering user");
                 setTimeout(() => {
@@ -187,6 +199,7 @@ const AuthPage: React.FC<AuthPageProps> = (props: {
   };
 
   if (props.type === "passwordless" && emailSent) {
+    // Only show this for passwordless sign-in
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 flex items-center justify-center px-4">
         <Card className="w-full max-w-md text-center space-y-6" padding="lg">
@@ -205,7 +218,7 @@ const AuthPage: React.FC<AuthPageProps> = (props: {
           <div className="text-sm text-neutral-500">
             Didn&apos;t receive the email? Check your spam folder or{" "}
             <button
-              onClick={() => setEmailSent(false)}
+              onClick={() => setEmailSent(false)} // Only reset passwordless state
               className="text-primary-600 hover:text-primary-700 font-medium"
             >
               try again
