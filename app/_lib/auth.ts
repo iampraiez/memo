@@ -54,9 +54,12 @@ const providers: Provider[] = [
     from: process.env.EMAIL_FROM,
     async sendVerificationRequest({
       identifier: email,
-      url,
+      url: baseUrl,
       provider: { server, from },
     }) {
+      const url = `${baseUrl}/verify-request?verificationRequestToken=${encodeURIComponent(
+        email
+      )}`;
       const transport = nodemailer.createTransport(server);
       try {
         await transport.sendMail({
@@ -92,7 +95,7 @@ const providers: Provider[] = [
                   <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
                     <tr>
                       <td style="text-align: center; padding: 16px 0;">
-                        <a href="${url}" style="background-color: #F472B6; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-size: 16px; font-weight: bold; display: inline-block;">Sign In Now</a>
+                        <a href="${url}" style="background-color: #A78BFA; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-size: 16px; font-weight: bold; display: inline-block;">Sign In Now</a>
                       </td>
                     </tr>
                   </table>
@@ -104,6 +107,9 @@ const providers: Provider[] = [
                   <p style="color: #4B5563; font-size: 14px; line-height: 1.5; margin: 16px 0;">
                     <strong>Security Note:</strong> This link is valid for 24 hours. If you didn't request this sign-in, please ignore this email or contact our support team.
                     <strong>PS:</strong> You're never restting your password lil bro, I'm too lazy to do it.
+                  </p>
+                    <p style="color: #4B5563; font-size: 14px; line-height: 1.5; margin: 16px 0;">
+                    <strong>PS:</strong> You're never resetting your password lil bro, I'm too lazy to do it.
                   </p>
                 </td>
               </tr>
@@ -148,13 +154,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     verificationTokensTable: verificationTokens,
   }),
   session: {
-    strategy: "jwt", // Explicitly set JWT strategy for Credentials provider compatibility
+    strategy: "jwt",
   },
   pages: {
-    signIn: "/auth/login", // This is your custom login page
+    signIn: "/auth/login",
   },
   callbacks: {
-    // This callback handles redirects after successful authentication
     async redirect({ url, baseUrl }) {
       console.log("url or base url", url, baseUrl);
 
@@ -163,8 +168,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       } else if (new URL(url).origin === baseUrl) {
         return url;
       }
-      // Always redirect to the mainpage after login via credentials
-      // You can add more complex logic here if you have other dynamic redirects
+
       return baseUrl + "/mainpage";
     },
 

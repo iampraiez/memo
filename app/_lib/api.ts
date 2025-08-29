@@ -1,9 +1,10 @@
 import axios from "axios";
 
+const url = `${process.env.NEXT_PUBLIC_URL}/api`;
 async function userExists(user: string) {
   try {
     const res = await axios.post(
-      "http://localhost:3000/api/auth/sign_in",
+      `${url}/auth/sign_in`,
       { user },
       {
         headers: {
@@ -20,15 +21,11 @@ async function userExists(user: string) {
 
 async function registerUser(userData: { email: string; password: string }) {
   try {
-    const res = await axios.post(
-      "http://localhost:3000/api/auth/register",
-      userData,
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    const res = await axios.post(`${url}/auth/register`, userData, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
     console.log("una", res);
 
     return res;

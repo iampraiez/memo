@@ -22,20 +22,12 @@ export async function handleSignIn(
     }
     console.log("I wish", provider);
 
-    if (formData) {
-      return await signIn(provider, {
-        ...options,
-        ...formData,
-        redirect: false,
-      });
-    }
-
     return await signIn(
       provider,
-      options || {
-        email: emailFromForm,
-        callbackUrl: "/dashboard",
-      }
+      options || { ...formData, redirect: false } || {
+          email: emailFromForm,
+          callbackUrl: "/dashboard",
+        }
     );
   } catch (error) {
     if (error instanceof AuthError) {

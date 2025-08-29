@@ -47,7 +47,11 @@ const AuthPage: React.FC<AuthPageProps> = (props: {
     // if status is loading make it load or whatever
     if (status === "loading") return;
     if (session && pathname !== "/mainpage" && pathname !== "/onboarding") {
-      route.push("/mainpage");
+      if (localStorage.getItem("register") == "onboard") {
+        route.push("/onboarding");
+      } else {
+        route.push("/mainpage");
+      }
     } else if (
       !session &&
       (pathname == "/onboarding" || pathname == "/mainpage")
@@ -146,10 +150,8 @@ const AuthPage: React.FC<AuthPageProps> = (props: {
                     setError("");
                   }, 5000);
                 } else {
-                  // Set the new state to show the verification message after successful email sending
                   setShowEmailVerificationMessage(true);
-                  // Do NOT redirect to onboarding here. The user will be redirected to onboarding ONLY after clicking the email verification link.
-                  localStorage.setItem("register", "onboard"); // Still set this for later onboarding flow
+                  localStorage.setItem("register", "onboard");
                 }
               } else if (res?.data.error) {
                 setError(res.data.error || "Error registering user");
@@ -226,7 +228,7 @@ const AuthPage: React.FC<AuthPageProps> = (props: {
                 <>
                   We sent a verification email to{" "}
                   <span className="font-medium">{email}</span>. Please click the
-                  link in the email to confirm your account and continue.
+                  link in the email to confirm your account to continue.
                 </>
               )}
             </p>

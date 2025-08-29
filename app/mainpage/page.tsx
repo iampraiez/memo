@@ -45,11 +45,7 @@ function App() {
   useEffect(() => {
     if (status == undefined || status === "loading") return;
     if (!session && (pathname == "/onboading" || pathname == "/mainpage")) {
-      if (localStorage.getItem("route") == "onboard") {
-        route.push("/onboarding");
-      } else {
-        route.push("/auth/login");
-      }
+      route.push("/auth/login");
     }
   }, [pathname, status]);
   console.log(status);
