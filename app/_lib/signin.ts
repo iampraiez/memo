@@ -11,7 +11,10 @@ export async function handleSignIn(
   try {
     console.log("email init", emailFromForm, formData);
     if (provider === "nodemailer" && emailFromForm) {
-      return await signIn(provider, { email: emailFromForm, redirect: false });
+      return await signIn(provider, {
+        email: emailFromForm,
+        redirect: false,
+      });
     }
 
     if (emailFromForm) {
@@ -22,12 +25,21 @@ export async function handleSignIn(
     }
     console.log("I wish", provider);
 
+    if (formData) {
+      return await signIn(provider, {
+        ...options,
+        email: formData.email,
+        password: formData.password,
+        redirect: false,
+      });
+    }
+
     return await signIn(
       provider,
-      options || { ...formData, redirect: false } || {
-          email: emailFromForm,
-          callbackUrl: "/dashboard",
-        }
+      options || {
+        email: emailFromForm,
+        callbackUrl: "/dashboard",
+      }
     );
   } catch (error) {
     if (error instanceof AuthError) {

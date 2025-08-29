@@ -52,6 +52,7 @@ const AuthPage: React.FC<AuthPageProps> = (props: {
       } else {
         route.push("/mainpage");
       }
+      localStorage.removeItem("register");
     } else if (
       !session &&
       (pathname == "/onboarding" || pathname == "/mainpage")
@@ -164,6 +165,10 @@ const AuthPage: React.FC<AuthPageProps> = (props: {
           }
           // login logic
         } else {
+          console.log("Attempting credentials sign-in with:", {
+            email,
+            password,
+          }); // Debug log
           const res = await handleSignIn(
             "credentials",
             { redirectTo: props.searchParams?.callbackUrl ?? "/mainpage" },

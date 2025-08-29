@@ -11,11 +11,13 @@ import {
   Check,
 } from "lucide-react";
 import Button from "@/components/ui/Button";
+import { useSession } from "next-auth/react";
 import Card from "@/components/ui/Card";
 import { cn } from "@/lib/utils";
 
 const OnboardingFlow: React.FC = () => {
   const router = useRouter();
+  const { data: session } = useSession();
   const [currentStep, setCurrentStep] = useState(0);
   const [preferences, setPreferences] = useState({
     importData: false,
@@ -80,7 +82,10 @@ const OnboardingFlow: React.FC = () => {
         : [...prev.selectedTags, tag],
     }));
   };
-  if (localStorage.getItem("register") !== "onboard") return;
+  if (!session) {
+    router.push("/");
+    return null; // Explicitly return null after initiating the redirect
+  }
 
   const renderStep = () => {
     switch (steps[currentStep].id) {

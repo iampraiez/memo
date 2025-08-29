@@ -25,6 +25,7 @@ const providers: Provider[] = [
       password: { label: "Password", type: "password" },
     },
     authorize: async (c) => {
+      console.log("Credentials authorize function received:", c); // Debug log
       if (!c.email || !c.password) {
         throw new Error("Please enter both email and password.");
       }
@@ -60,6 +61,7 @@ const providers: Provider[] = [
       const url = `${baseUrl}/verify-request?verificationRequestToken=${encodeURIComponent(
         email
       )}`;
+
       const transport = nodemailer.createTransport(server);
       try {
         await transport.sendMail({
@@ -171,11 +173,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
       return baseUrl + "/mainpage";
     },
-
-    // You might also need a session callback to include custom user data in the session
     async session({ session, token, user }) {
-      // For example, if your 'user' object has an 'id' or other custom fields
-      // session.user.id = user.id;
       if (user) {
         session.user.id = user.id;
       }
