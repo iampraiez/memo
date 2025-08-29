@@ -147,6 +147,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     sessionsTable: sessions,
     verificationTokensTable: verificationTokens,
   }),
+  session: {
+    strategy: "jwt", // Explicitly set JWT strategy for Credentials provider compatibility
+  },
   pages: {
     signIn: "/auth/login", // This is your custom login page
   },
@@ -166,10 +169,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
 
     // You might also need a session callback to include custom user data in the session
-    // async session({ session, token, user }) {
-    //   // For example, if your 'user' object has an 'id' or other custom fields
-    //   // session.user.id = user.id;
-    //   return session;
-    // },
+    async session({ session, token, user }) {
+      // For example, if your 'user' object has an 'id' or other custom fields
+      // session.user.id = user.id;
+      if (user) {
+        session.user.id = user.id;
+      }
+      return session;
+    },
   },
 });

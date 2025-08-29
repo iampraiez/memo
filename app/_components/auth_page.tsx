@@ -96,7 +96,8 @@ const AuthPage: React.FC<AuthPageProps> = (props: {
             undefined,
             email
           );
-          if (res.ok == false) {
+          console.log("Email response", res);
+          if (res && res.ok == false) {
             setError("Error sending email");
             setTimeout(() => {
               setError("");
@@ -145,7 +146,11 @@ const AuthPage: React.FC<AuthPageProps> = (props: {
           }
           // login logic
         } else {
-          const res = await handleSignIn("credentials", undefined, formData);
+          const res = await handleSignIn(
+            "credentials",
+            { redirectTo: props.searchParams?.callbackUrl ?? "/mainpage" },
+            formData
+          );
           if (res && res?.error) {
             setError("Invalid credentials");
             setTimeout(() => {

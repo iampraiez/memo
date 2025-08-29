@@ -7,12 +7,15 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
 
     const { user: email } = body;
+    console.log(email, body);
 
     if (!email) {
       return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
 
     const user = await userExists(email);
+    console.log(user);
+
     // Return the result as JSON
     return NextResponse.json({ user }, { status: 200 });
   } catch (error) {
