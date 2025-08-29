@@ -24,6 +24,8 @@ const AuthPage: React.FC<AuthPageProps> = (props: {
   const [emailSent, setEmailSent] = useState(false);
   const [error, setError] = useState("");
   const route = useRouter();
+  const [showEmailVerificationMessage, setShowEmailVerificationMessage] =
+    useState(false); // Reintroducing this state
 
   const pathname = usePathname();
   const { data: session, status } = useSession();
@@ -144,8 +146,10 @@ const AuthPage: React.FC<AuthPageProps> = (props: {
                     setError("");
                   }, 5000);
                 } else {
-                  localStorage.setItem("register", "onboard");
-                  route.push("/onboarding"); // Redirect to onboarding after email is sent for verification
+                  // Set the new state to show the verification message after successful email sending
+                  setShowEmailVerificationMessage(true);
+                  // Do NOT redirect to onboarding here. The user will be redirected to onboarding ONLY after clicking the email verification link.
+                  localStorage.setItem("register", "onboard"); // Still set this for later onboarding flow
                 }
               } else if (res?.data.error) {
                 setError(res.data.error || "Error registering user");
@@ -198,8 +202,10 @@ const AuthPage: React.FC<AuthPageProps> = (props: {
     signup: "Start preserving your memories today",
   };
 
-  if (props.type === "passwordless" && emailSent) {
-    // Only show this for passwordless sign-in
+  if (
+    (props.type === "passwordless" && emailSent) ||
+    showEmailVerificationMessage
+  ) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 flex items-center justify-center px-4">
         <Card className="w-full max-w-md text-center space-y-6" padding="lg">
@@ -211,14 +217,27 @@ const AuthPage: React.FC<AuthPageProps> = (props: {
               Check your email
             </h1>
             <p className="text-neutral-600">
-              We sent a magic link to{" "}
-              <span className="font-medium">{email}</span>
+              {props.type === "passwordless" ? (
+                <>
+                  We sent a magic link to{" "}
+                  <span className="font-medium">{email}</span>
+                </>
+              ) : (
+                <>
+                  We sent a verification email to{" "}
+                  <span className="font-medium">{email}</span>. Please click the
+                  link in the email to confirm your account and continue.
+                </>
+              )}
             </p>
           </div>
           <div className="text-sm text-neutral-500">
             Didn&apos;t receive the email? Check your spam folder or{" "}
             <button
-              onClick={() => setEmailSent(false)} // Only reset passwordless state
+              onClick={() => {
+                setEmailSent(false); // Reset passwordless state
+                setShowEmailVerificationMessage(false); // Reset signup verification state
+              }}
               className="text-primary-600 hover:text-primary-700 font-medium"
             >
               try again
