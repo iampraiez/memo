@@ -86,12 +86,12 @@ const LandingPage: React.FC = () => {
             <div className="w-9 h-9 bg-gradient-to-tr from-primary-600 to-secondary-500 rounded-full flex items-center justify-center shadow-md">
               <span className="text-white font-bold text-sm tracking-tight">ML</span>
             </div>
-            <h1 className="text-lg font-display font-bold text-neutral-900 tracking-tight hidden sm:block">
+            <h1 className="text-base sm:text-lg font-display font-bold text-neutral-900 tracking-tight">
               Memory Lane
             </h1>
           </div>
           <Link href={"/auth/register"}>
-            <Button className="rounded-full px-6 shadow-lg shadow-primary-500/20 bg-primary-600 hover:bg-primary-700 transition-all duration-300 hover:scale-105">
+            <Button size="sm" className="rounded-full px-4 sm:px-6 text-sm sm:text-base shadow-lg shadow-primary-500/20 bg-primary-600 hover:bg-primary-700 transition-all duration-300 hover:scale-105">
               Get Started
             </Button>
           </Link>
@@ -288,58 +288,58 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-neutral-950 text-neutral-400 py-16 border-t border-neutral-900">
+      <footer className="bg-gradient-to-br from-neutral-50 to-neutral-100 border-t border-neutral-200 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
             <div className="col-span-1 md:col-span-1 space-y-4">
               <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-gradient-to-br from-primary-600 to-secondary-600 rounded-full flex items-center justify-center">
+                <div className="w-8 h-8 bg-gradient-to-br from-primary-600 to-secondary-600 rounded-full flex items-center justify-center shadow-md">
                   <span className="text-white font-bold text-xs">ML</span>
                 </div>
-                <span className="text-lg font-display font-bold text-white">
+                <span className="text-lg font-display font-bold text-neutral-900">
                   Memory Lane
                 </span>
               </div>
-              <p className="text-sm leading-relaxed text-neutral-500">
+              <p className="text-sm leading-relaxed text-neutral-600">
                 Preserving life's precious moments with the power of AI and beautiful design.
               </p>
             </div>
 
             <div>
-              <h4 className="font-semibold text-white mb-4 text-sm uppercase tracking-wider">Product</h4>
-              <ul className="space-y-3 text-sm">
-                <li><Link href="/auth/register" className="hover:text-primary-500 transition-colors">Features</Link></li>
-                <li><Link href="https://github.com/iampraiez/memo" className="hover:text-primary-500 transition-colors">GitHub</Link></li>
-                <li><Link href="https://github.com/iampraiez/memo#readme" className="hover:text-primary-500 transition-colors">Documentation</Link></li>
+              <h4 className="font-semibold text-neutral-900 mb-4 text-sm uppercase tracking-wider">Product</h4>
+              <ul className="space-y-3 text-sm text-neutral-600">
+                <li><Link href="/auth/register" className="hover:text-primary-600 transition-colors">Features</Link></li>
+                <li><a href="https://github.com/iampraiez/memo" target="_blank" rel="noopener noreferrer" className="hover:text-primary-600 transition-colors">GitHub</a></li>
+                <li><a href="https://github.com/iampraiez/memo#readme" target="_blank" rel="noopener noreferrer" className="hover:text-primary-600 transition-colors">Documentation</a></li>
               </ul>
             </div>
 
             <div>
-              <h4 className="font-semibold text-white mb-4 text-sm uppercase tracking-wider">Developer</h4>
-              <ul className="space-y-3 text-sm">
-                <li><a href="https://iampraiez.vercel.app" target="_blank" rel="noopener noreferrer" className="hover:text-primary-500 transition-colors">Portfolio</a></li>
-                <li><a href="https://iampraiez.vercel.app/#contact" target="_blank" rel="noopener noreferrer" className="hover:text-primary-500 transition-colors">Contact</a></li>
-                <li><a href="https://github.com/iampraiez" target="_blank" rel="noopener noreferrer" className="hover:text-primary-500 transition-colors">GitHub Profile</a></li>
+              <h4 className="font-semibold text-neutral-900 mb-4 text-sm uppercase tracking-wider">Developer</h4>
+              <ul className="space-y-3 text-sm text-neutral-600">
+                <li><a href="https://iampraiez.vercel.app" target="_blank" rel="noopener noreferrer" className="hover:text-primary-600 transition-colors">Portfolio</a></li>
+                <li><a href="https://iampraiez.vercel.app/#contact" target="_blank" rel="noopener noreferrer" className="hover:text-primary-600 transition-colors">Contact</a></li>
+                <li><a href="https://github.com/iampraiez" target="_blank" rel="noopener noreferrer" className="hover:text-primary-600 transition-colors">GitHub Profile</a></li>
               </ul>
             </div>
 
             <div>
-              <h4 className="font-semibold text-white mb-4 text-sm uppercase tracking-wider">Resources</h4>
-              <ul className="space-y-3 text-sm">
-                <li><Link href="https://github.com/iampraiez/memo/blob/main/README.md" className="hover:text-primary-500 transition-colors">Getting Started</Link></li>
-                <li><Link href="https://github.com/iampraiez/memo/blob/main/CONTRIBUTING.md" className="hover:text-primary-500 transition-colors">Contributing</Link></li>
-                <li><Link href="https://github.com/iampraiez/memo/blob/main/LICENSE" className="hover:text-primary-500 transition-colors">License</Link></li>
+              <h4 className="font-semibold text-neutral-900 mb-4 text-sm uppercase tracking-wider">Resources</h4>
+              <ul className="space-y-3 text-sm text-neutral-600">
+                <li><a href="https://github.com/iampraiez/memo/blob/main/README.md" target="_blank" rel="noopener noreferrer" className="hover:text-primary-600 transition-colors">Getting Started</a></li>
+                <li><a href="https://github.com/iampraiez/memo/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener noreferrer" className="hover:text-primary-600 transition-colors">Contributing</a></li>
+                <li><a href="https://github.com/iampraiez/memo/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" className="hover:text-primary-600 transition-colors">License</a></li>
               </ul>
             </div>
           </div>
 
-          <div className="border-t border-neutral-900 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center text-xs text-neutral-600">
+          <div className="border-t border-neutral-200 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center text-sm text-neutral-500">
             <p>&copy; 2025 Memory Lane. All rights reserved.</p>
             <div className="flex space-x-6 mt-4 md:mt-0">
-              <a href="https://github.com/iampraiez/memo" target="_blank" rel="noopener noreferrer" className="hover:text-primary-500 transition-colors">
+              <a href="https://github.com/iampraiez/memo" target="_blank" rel="noopener noreferrer" className="hover:text-primary-600 transition-colors">
                 <Github className="w-5 h-5" />
               </a>
-              <a href="https://iampraiez.vercel.app/#contact" target="_blank" rel="noopener noreferrer" className="hover:text-primary-500 transition-colors">
+              <a href="https://iampraiez.vercel.app/#contact" target="_blank" rel="noopener noreferrer" className="hover:text-primary-600 transition-colors">
                 <Mail className="w-5 h-5" />
               </a>
             </div>

@@ -19,18 +19,32 @@ async function userExists(user: string) {
   }
 }
 
-async function registerUser(userData: { email: string; password: string }) {
+async function registerUser(userData: { email: string; password: string; name?: string }) {
   try {
-    const res = await axios.post(`${url}/auth/register`, userData, {
+    const res = await axios.post(`${url}/auth/register`, {
+      ...userData,
+      name: userData.name || userData.email.split('@')[0], // Use email username as default name
+    }, {
       headers: {
         "Content-Type": "application/json",
       },
     });
-    console.log("una", res);
-
-    return res;
-  } catch (err) {
-    console.log(err);
+    
+    return { 
+      data: { 
+        success: res.status === 201,
+        requiresVerification: res.data.requiresVerification,
+        error: null 
+      } 
+    };
+  } catch (err: any) {
+    console.error('Registration error:', err);
+    return { 
+      data: { 
+        success: false, 
+        error: err.response?.data?.message || 'Registration failed' 
+      } 
+    };
   }
 }
 
