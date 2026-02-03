@@ -1,395 +1,294 @@
-# Memory Lane UI Kit & Component Library
+# Memory Lane 🌟
 
-A comprehensive design system and component library for Memory Lane - an AI-powered personal timeline application.
+> **Your personal history, beautifully preserved.**
 
-## 🎨 Complete Feature Set
+Memory Lane is a modern, AI-powered personal timeline application that helps you capture, organize, and rediscover your most precious memories. Built with Next.js, PostgreSQL, and Google's Gemini AI.
 
-This UI kit now includes ALL requested features:
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Next.js](https://img.shields.io/badge/Next.js-16.1-black)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue)](https://www.typescriptlang.org/)
+[![pnpm](https://img.shields.io/badge/pnpm-10.28-orange)](https://pnpm.io/)
 
-### ✅ Completed Components & Pages
-- **Core UI Components**: Button, Input, Card, Modal, Select, DatePicker, MediaUploader, Tag, Loader, Toast, NotificationToast
-- **Specialized Components**: MemoryCard, Timeline, EmptyState, OfflineBanner, ConfirmDialog, StatCard, Lightbox, Calendar
-- **Complete Pages**: Landing, Auth (Login/Signup/Passwordless), Onboarding, Timeline, Family Timeline, Search, Tags, Story Generator, Settings, Privacy Settings, Analytics, Admin, Memory Detail
-- **Advanced Features**: Multi-select, Lightbox gallery, Job queue monitoring, System logs, Export functionality, Family sharing, Notifications system
+## ✨ Features
 
-## Design Philosophy
+- **📝 Rich Memory Capture** - Create detailed memories with text, images, tags, and mood tracking
+- **🤖 AI-Powered Stories** - Generate beautiful narratives from your memories using Google Gemini
+- **🔍 Advanced Search** - Full-text search with filters for tags, dates, and moods
+- **📅 Timeline View** - Visualize your life story with an interactive, chronological timeline
+- **👥 Family Sharing** - Share memories with family members and collaborate on your history
+- **🔐 Secure & Private** - End-to-end encryption with NextAuth.js authentication
+- **📱 Progressive Web App** - Install on any device with offline support
+- **📊 Analytics Dashboard** - Insights into your memory patterns and trends
+- **📤 Export Options** - Download your memories as PDF or Word documents
 
-Memory Lane follows a warm, human-centered design approach with:
-- **Warm Color Palette**: Primary violet (#8b4cf7) and secondary teal (#14b5aa)
-- **Friendly Typography**: Inter for UI and Playfair Display for headings
-- **Soft Shadows**: Subtle elevation with soft shadow system
-- **Rounded Corners**: Consistent border radius for friendly feel
-- **Accessibility First**: WCAG 2.1 AA compliant contrast ratios
+## 🚀 Quick Start
 
-## Breakpoints
+### Prerequisites
 
-- **Mobile**: ≤640px (sm)
-- **Tablet**: 641-1024px (md/lg) 
-- **Desktop**: >1024px (xl+)
+- **Node.js** 18+ and **pnpm** 10+
+- **PostgreSQL** 14+ database
+- **Google Cloud** account (for OAuth and Gemini AI)
 
-## Core Components
+### Installation
 
-### Buttons
-```jsx
-// Primary button
-<Button variant="primary" size="md">Save Memory</Button>
-// Classes: bg-primary-600 hover:bg-primary-700 text-white shadow-soft
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/yourusername/memory-lane.git
+   cd memory-lane
+   ```
 
-// Secondary button
-<Button variant="secondary" size="md">Cancel</Button>
-// Classes: bg-white border border-neutral-300 hover:bg-neutral-50
+2. **Install dependencies**
+   ```bash
+   pnpm install
+   ```
 
-// Ghost button
-<Button variant="ghost" size="icon">
-  <Icon className="w-5 h-5" />
-</Button>
-// Classes: hover:bg-neutral-100 text-neutral-600
-```
+3. **Set up environment variables**
+   ```bash
+   cp .env.example .env
+   ```
+   
+   Edit `.env` with your configuration:
+   ```env
+   # Database
+   DATABASE_URL=postgresql://user:password@localhost:5432/memo
+   
+   # Authentication
+   AUTH_SECRET=your-secret-key-here
+   AUTH_URL=http://localhost:3000
+   AUTH_GOOGLE_ID=your-google-client-id
+   AUTH_GOOGLE_SECRET=your-google-client-secret
+   
+   # Email (Gmail SMTP)
+   EMAIL_USER=your-email@gmail.com
+   EMAIL_PASS=your-app-specific-password
+   
+   # AI
+   GEMINI_API_KEY=your-gemini-api-key
+   
+   # Optional
+   DROPBOX_ACCESS_TOKEN=your-dropbox-token
+   
+   # App
+   NODE_ENV=development
+   NEXT_PUBLIC_APP_URL=http://localhost:3000
+   ```
 
-### Advanced Components
-```jsx
-// Multi-Select with search
-<MultiSelect
-  options={tagOptions}
-  value={selectedTags}
-  onChange={setSelectedTags}
-  placeholder="Select tags..."
-/>
+4. **Set up the database**
+   ```bash
+   pnpm drizzle-kit push
+   ```
 
-// Media Uploader with progress
-<MediaUploader
-  accept="image/*"
-  multiple={true}
-  maxSize={10}
-  files={uploadedFiles}
-  onFilesChange={setUploadedFiles}
-  onUpload={handleUpload}
-/>
+5. **Run the development server**
+   ```bash
+   pnpm dev
+   ```
 
-// Date Picker with calendar
-<DatePicker
-  value={selectedDate}
-  onChange={setSelectedDate}
-  label="Memory Date"
-/>
-```
+6. **Open your browser**
+   Navigate to [http://localhost:3000](http://localhost:3000)
 
-### Complete Page Examples
-```jsx
-// Search Page with filters and results
-<SearchPage />
+## 🏗️ Tech Stack
 
-// Story Generator with AI progress
-<StoryGeneratorPage />
+### Core
+- **[Next.js 16](https://nextjs.org/)** - React framework with App Router
+- **[TypeScript](https://www.typescriptlang.org/)** - Type-safe development
+- **[React 19](https://react.dev/)** - UI library
+- **[Tailwind CSS 4](https://tailwindcss.com/)** - Utility-first styling
 
-// Settings with all preference categories
-<SettingsPage />
+### Backend & Database
+- **[PostgreSQL](https://www.postgresql.org/)** - Primary database
+- **[Drizzle ORM](https://orm.drizzle.team/)** - Type-safe database toolkit
+- **[NextAuth.js 5](https://next-auth.js.org/)** - Authentication
+- **[Nodemailer](https://nodemailer.com/)** - Email delivery
 
-// Admin dashboard with system monitoring
-<AdminPage />
-```
+### State & Data
+- **[TanStack Query](https://tanstack.com/query)** - Server state management
+- **[Zustand](https://zustand-demo.pmnd.rs/)** - Client state management
+- **[Dexie.js](https://dexie.org/)** - IndexedDB wrapper for offline support
 
-### Input Fields
-```jsx
-<Input
-  label="Memory Title"
-  placeholder="What happened?"
-  error="This field is required"
-/>
-// Classes: w-full px-3 py-2 rounded-lg border border-neutral-300 focus:ring-2 focus:ring-primary-500
-```
+### AI & Integrations
+- **[Google Gemini AI](https://ai.google.dev/)** - Story generation
+- **[Axios](https://axios-http.com/)** - HTTP client
 
-### Cards
-```jsx
-<Card hover padding="md">
-  <h3>Memory Title</h3>
-  <p>Content...</p>
-</Card>
-// Classes: bg-white rounded-xl border border-neutral-200 shadow-soft hover:shadow-soft-lg
-```
+### UI Components
+- **[Phosphor Icons](https://phosphoricons.com/)** - Icon library
+- **[Lucide React](https://lucide.dev/)** - Additional icons
+- **[Sonner](https://sonner.emilkowal.ski/)** - Toast notifications
+- **[Framer Motion](https://www.framer.com/motion/)** - Animations
 
-### Memory Timeline Cell
-```jsx
-<MemoryCard
-  memory={memoryData}
-  onClick={handleClick}
-/>
-// Classes: bg-white rounded-xl shadow-soft hover:shadow-soft-lg transition-shadow p-6
-```
+### Development
+- **[ESLint](https://eslint.org/)** - Code linting
+- **[Drizzle Kit](https://orm.drizzle.team/kit-docs/overview)** - Database migrations
+- **[tsx](https://github.com/privatenumber/tsx)** - TypeScript execution
 
-## Key Features
-
-### Complete Application Flow
-- Landing page with marketing content and pricing
-- Full authentication system (OAuth + email + passwordless)
-- Step-by-step onboarding with progress tracking
-- Timeline with year/month/day grouping and infinite scroll
-- Advanced search with filters and suggestions
-- Tag management with cloud visualization
-- AI story generation with progress tracking
-- Comprehensive settings with all preference categories
-- Admin dashboard with job queue and system logs
-- Memory detail view with lightbox gallery
-
-### Responsive Design
-- Mobile-first approach
-- Collapsible sidebar on mobile becomes bottom navigation
-- Adaptive layouts for timeline and memory cards
-- Touch-friendly tap targets (44px minimum)
-
-### Advanced Features
-- **Offline Support**: Visual indicators, sync status, pending operations queue
-- **AI Integration**: Progress tracking, job status, auto-tagging, story generation
-- **Media Management**: Drag-drop upload, progress tracking, image optimization
-- **Search & Discovery**: Full-text search, tag filtering, date ranges, suggestions
-- **Data Export**: PDF/Word export, data backup, account management
-- **Admin Tools**: System monitoring, job queue management, user analytics
-
-### Accessibility
-- Semantic HTML structure
-- ARIA labels and descriptions
-- Keyboard navigation support
-- Screen reader optimized
-- High contrast mode support
-- Reduced motion preferences respected
-
-### Complete State Management
-- **Memory States**: Creating, editing, syncing, offline, error
-- **Upload States**: Pending, progress, completed, failed
-- **AI Job States**: Queued, processing, completed, error
-- **Sync States**: Online, offline, syncing, conflicts
-- **Form States**: Validation, submission, success, error
-
-### Offline Support
-- Visual indicators for sync status (Cloud, CloudOff icons)
-- Optimistic UI updates
-- Pending state displays
-- Offline banner notifications
-
-### Production-Ready Features
-- **Error Handling**: Comprehensive error states and recovery
-- **Loading States**: Skeleton screens, progress indicators, optimistic UI
-- **Empty States**: Helpful messaging and clear next actions
-- **Confirmation Dialogs**: Destructive action protection
-- **Toast Notifications**: Success, error, and info messages
-- **Responsive Design**: Mobile-first with tablet and desktop variants
-
-### AI Features
-- Progress indicators for AI processing
-- AI-generated content labeling
-- Smart suggestions UI
-- Story generation interface
-
-### Advanced UI Patterns
-- **Timeline Grouping**: Collapsible year/month/day sections
-- **Infinite Scroll**: Performance-optimized memory loading
-- **Lightbox Gallery**: Full-screen image viewing with navigation
-- **Multi-step Forms**: Tabbed interfaces with validation
-- **Filter Drawers**: Advanced search and filtering options
-- **Progress Tracking**: Real-time job and upload progress
-- **Optimistic Updates**: Immediate UI feedback with rollback
-
-## Animation System
-
-### Micro-interactions
-- Button press: `transform: scale(0.98)` on active
-- Card hover: `shadow-soft` to `shadow-soft-lg` transition
-- Loading states: Spinner and three-dot animations
-- Page transitions: `animate-fade-in` (200ms ease-out)
-
-### Accessibility Considerations
-```css
-@media (prefers-reduced-motion: reduce) {
-  * {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-```
-
-## Color Accessibility
-
-All color combinations meet WCAG 2.1 AA standards:
-- Primary text on white: 4.5:1 contrast ratio
-- Secondary text on white: 3:1 contrast ratio
-- Interactive elements: Minimum 3:1 contrast ratio
-- Focus indicators: 3:1 contrast ratio against background
-
-## File Structure
+## 📁 Project Structure
 
 ```
-src/
-├── components/
-│   ├── ui/           # Base UI components
-│   │   ├── Button.tsx
-│   │   ├── Input.tsx
-│   │   ├── Card.tsx
-│   │   ├── Select.tsx
-│   │   ├── DatePicker.tsx
-│   │   ├── MediaUploader.tsx
-│   │   ├── MultiSelect.tsx
-│   │   ├── EmptyState.tsx
-│   │   ├── OfflineBanner.tsx
-│   │   ├── ConfirmDialog.tsx
-│   │   ├── StatCard.tsx
+memory-lane/
+├── app/                      # Next.js App Router
+│   ├── _pages/              # Page components
+│   ├── api/                 # API routes
+│   │   ├── auth/           # Authentication endpoints
+│   │   ├── memories/       # Memory CRUD
+│   │   ├── stories/        # AI story generation
 │   │   └── ...
-│   ├── MemoryCard.tsx
-│   ├── Timeline.tsx
-│   ├── TimelineGroupHeader.tsx
-│   └── ...
-├── pages/            # Page components
-│   ├── LandingPage.tsx
-│   ├── AuthPages.tsx
-│   ├── OnboardingFlow.tsx
-│   ├── SearchPage.tsx
-│   ├── TagsPage.tsx
-│   ├── StoryGeneratorPage.tsx
-│   ├── SettingsPage.tsx
-│   ├── AdminPage.tsx
-│   └── MemoryDetailPage.tsx
-├── types/            # TypeScript definitions
-├── data/            # Sample data and constants
-└── lib/             # Utilities
+│   ├── auth/               # Auth pages
+│   ├── mainpage/           # Main application
+│   └── onboarding/         # User onboarding
+├── components/              # React components
+│   ├── ui/                 # Base UI components
+│   └── ...                 # Feature components
+├── config/                  # Configuration
+│   └── env.ts              # Environment validation
+├── drizzle/                 # Database
+│   ├── db/                 # Schema definitions
+│   └── index.ts            # Database client
+├── hooks/                   # Custom React hooks
+├── lib/                     # Utilities
+│   ├── auth.ts             # Auth configuration
+│   ├── api.ts              # API helpers
+│   └── utils.ts            # Utility functions
+├── public/                  # Static assets
+├── services/                # External services
+├── stores/                  # Zustand stores
+└── types/                   # TypeScript types
 ```
 
-## Complete Sample Data
+## 🔧 Available Scripts
 
-### Memory Content Examples
-- **Short**: Quick daily moments and brief reflections
-- **Medium**: Detailed event descriptions with context
-- **Long**: Comprehensive narratives with rich detail
+```bash
+# Development
+pnpm dev              # Start dev server
+pnpm build            # Build for production
+pnpm start            # Start production server
+pnpm lint             # Run ESLint
 
-### AI Story Example
-- **Year in Review**: Complete narrative connecting memories across time
-- **Thematic Stories**: Stories organized by topics or relationships
-- **Milestone Summaries**: Key life events and achievements
+# Database
+pnpm drizzle-kit push        # Push schema changes
+pnpm drizzle-kit studio      # Open Drizzle Studio
+```
 
-### Sample Tags & Moods
-- **Categories**: family, travel, work, friends, hobbies, celebrations
-- **Moods**: joyful, peaceful, excited, nostalgic, grateful, reflective
-- **Locations**: home, work, travel destinations, special places
+## 🔐 Authentication Setup
 
-## Usage Guidelines
+### Google OAuth
 
-### Component Props
-- Always provide `aria-label` for icon buttons
-- Use semantic HTML elements (`<main>`, `<nav>`, `<article>`)
-- Include loading and error states for all interactive components
-- Implement keyboard navigation for custom components
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project or select existing
+3. Enable Google+ API
+4. Create OAuth 2.0 credentials
+5. Add authorized redirect URIs:
+   - `http://localhost:3000/api/auth/callback/google` (development)
+   - `https://yourdomain.com/api/auth/callback/google` (production)
+6. Copy Client ID and Client Secret to `.env`
 
-### State Management
-- Optimistic UI updates for better perceived performance
-- Clear error handling with user-friendly messages
-- Loading states with appropriate feedback
-- Offline-first approach with sync status indicators
+### Email Authentication
 
-### Content Guidelines
-- Use sentence case for buttons and labels
-- Keep microcopy friendly and conversational
-- Provide clear empty states with actionable next steps
-- Use progressive disclosure for complex features
+For Gmail SMTP:
+1. Enable 2-factor authentication on your Google account
+2. Generate an [App Password](https://myaccount.google.com/apppasswords)
+3. Add credentials to `.env` as `EMAIL_USER` and `EMAIL_PASS`
 
-### Advanced Implementation Notes
-- **Optimistic UI**: Update interface immediately, handle errors gracefully
-- **Offline Queue**: Store pending operations, sync when online
-- **Conflict Resolution**: Handle sync conflicts with user choice
-- **Performance**: Virtual scrolling for large lists, image lazy loading
-- **Security**: Input validation, XSS prevention, secure file uploads
-- **Analytics**: Track user interactions, performance metrics
+## 🤖 AI Story Generation
 
-## Suggested Animations
+Memory Lane uses Google's Gemini AI to generate personalized stories from your memories.
 
-1. **Card Hover Elevation**: `hover:shadow-soft-lg transition-shadow duration-200`
-2. **Button Press**: `active:scale-98 transition-transform duration-75`
-3. **Fade In**: `animate-fade-in` (opacity 0 to 1, 200ms)
-4. **Slide In**: `animate-slide-in` (translateY(10px) + opacity, 300ms)
-5. **Loading Dots**: `animate-dots` (scale animation with staggered delay)
+1. Get an API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
+2. Add to `.env` as `GEMINI_API_KEY`
+3. Navigate to the Story Generator page
+4. Select date range, tone, and length
+5. Generate your personalized narrative
 
-### Advanced Animations
-6. **Timeline Expand**: Smooth height transitions for collapsible sections
-7. **Image Lightbox**: Scale and fade transitions for gallery
-8. **Progress Bars**: Smooth width transitions with easing
-9. **Toast Slide**: Slide in from top with bounce effect
-10. **Modal Scale**: Scale in from center with backdrop fade
+## 🌍 Environment Variables
 
-## Suggested Icons (Lucide)
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `DATABASE_URL` | ✅ | PostgreSQL connection string |
+| `AUTH_SECRET` | ✅ | Random string for session encryption |
+| `AUTH_URL` | ⚠️ | Base URL (auto-detected in dev) |
+| `AUTH_GOOGLE_ID` | ❌ | Google OAuth client ID |
+| `AUTH_GOOGLE_SECRET` | ❌ | Google OAuth client secret |
+| `EMAIL_USER` | ❌ | SMTP email address |
+| `EMAIL_PASS` | ❌ | SMTP password/app password |
+| `GEMINI_API_KEY` | ✅ | Google Gemini API key |
+| `DROPBOX_ACCESS_TOKEN` | ❌ | Dropbox integration token |
+| `NODE_ENV` | ✅ | Environment (development/production) |
+| `NEXT_PUBLIC_APP_URL` | ✅ | Public app URL |
 
-1. **Plus**: Add new memory
-2. **Search**: Search functionality  
-3. **Calendar**: Date/timeline views
-4. **Heart**: Mood indicators
-5. **Cloud/CloudOff**: Sync status
+## 📊 Database Schema
 
-### Additional Icons
-6. **Upload**: File and media upload
-7. **Filter**: Search and filtering
-8. **Settings**: Configuration and preferences
-9. **Users**: Admin and user management
-10. **Activity**: Analytics and monitoring
+Key tables:
+- **users** - User accounts and profiles
+- **memories** - Memory entries with content
+- **memoryMedia** - Attached images and files
+- **memoryTags** - Tag associations
+- **tags** - Tag definitions
+- **stories** - AI-generated stories
+- **reactions** - Memory reactions/likes
+- **comments** - Memory comments
+- **familyMembers** - Family sharing relationships
 
-## Dev Handoff Checklist
+## 🚢 Deployment
 
-### Component Requirements
-- [ ] Props interface with TypeScript
-- [ ] Accessibility attributes (aria-label, role, etc.)
-- [ ] Keyboard navigation support
-- [ ] Focus management
-- [ ] Loading and error states
-- [ ] Responsive behavior
-- [ ] Unit tests for core functionality
-- [ ] Storybook stories for all variants
+### Vercel (Recommended)
 
-### Integration Points
-- [ ] API integration for data fetching
-- [ ] Offline storage implementation
-- [ ] File upload handling
-- [ ] Authentication flow
-- [ ] Push notification setup
-- [ ] Analytics event tracking
+1. Push your code to GitHub
+2. Import project in [Vercel](https://vercel.com)
+3. Add environment variables
+4. Deploy
 
-### Advanced Integration
-- [ ] Real-time sync with WebSocket connections
-- [ ] Push notifications for important events
-- [ ] Background job processing
-- [ ] Advanced search with Elasticsearch
-- [ ] AI service integration for content analysis
-- [ ] CDN integration for media files
-- [ ] Database optimization for large datasets
+### Docker
 
-### Performance Considerations
-- [ ] Image optimization and lazy loading
-- [ ] Virtual scrolling for large lists
-- [ ] Code splitting for routes
-- [ ] Bundle size monitoring
-- [ ] Caching strategy implementation
+```bash
+# Build image
+docker build -t memory-lane .
 
-### Security & Compliance
-- [ ] Data encryption at rest and in transit
-- [ ] GDPR compliance for data export/deletion
-- [ ] Rate limiting for API endpoints
-- [ ] Input sanitization and validation
-- [ ] Secure file upload with virus scanning
-- [ ] Audit logging for admin actions
+# Run container
+docker run -p 3000:3000 --env-file .env memory-lane
+```
 
-## Production Deployment
+### Manual Deployment
 
-### Environment Setup
-- [ ] Production environment variables
-- [ ] SSL certificate configuration
-- [ ] CDN setup for static assets
-- [ ] Database connection pooling
-- [ ] Redis for session management
-- [ ] Error monitoring (Sentry)
-- [ ] Performance monitoring (New Relic)
+```bash
+# Build
+pnpm build
 
-### Monitoring & Analytics
-- [ ] User behavior tracking
-- [ ] Performance metrics dashboard
-- [ ] Error rate monitoring
-- [ ] API response time tracking
-- [ ] Database query optimization
-- [ ] Memory usage monitoring
-- [ ] Uptime monitoring
+# Start
+pnpm start
+```
 
-This UI kit provides a solid foundation for building Memory Lane with consistent, accessible, and beautiful user experiences across all devices.
+## 🔒 Security
+
+- All passwords are hashed with bcrypt
+- Session tokens are encrypted
+- CSRF protection enabled
+- SQL injection prevention via Drizzle ORM
+- XSS protection with React
+- Environment variables validated with Zod
+
+## 🤝 Contributing
+
+Contributions are welcome! Please follow these steps:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- [Next.js](https://nextjs.org/) team for the amazing framework
+- [Vercel](https://vercel.com/) for hosting platform
+- [Google](https://ai.google.dev/) for Gemini AI
+- All open-source contributors
+
+## 📧 Support
+
+For support, email support@memorylane.app or open an issue on GitHub.
+
+---
+
+**Made with ❤️ by the Memory Lane team**

@@ -1,0 +1,52 @@
+# Auto-label PRs based on changed files
+
+# Frontend
+'frontend':
+  - 'app/**/*'
+  - 'components/**/*'
+  - '*.css'
+  - 'tailwind.config.js'
+
+# Backend/API
+'backend':
+  - 'app/api/**/*'
+  - 'lib/**/*'
+  - 'services/**/*'
+
+# Database
+'database':
+  - 'drizzle/**/*'
+  - 'drizzle.config.ts'
+
+# Authentication
+'auth':
+  - 'lib/auth.ts'
+  - 'lib/auth.config.ts'
+  - 'app/api/auth/**/*'
+  - 'app/auth/**/*'
+
+# Configuration
+'config':
+  - '*.config.*'
+  - '.env*'
+  - 'config/**/*'
+
+# Documentation
+'documentation':
+  - '*.md'
+  - 'docs/**/*'
+
+# Dependencies
+'dependencies':
+  - 'package.json'
+  - 'pnpm-lock.yaml'
+
+# CI/CD
+'ci/cd':
+  - '.github/**/*'
+
+# Tests
+'tests':
+  - '**/*.test.*'
+  - '**/*.spec.*'
+  - '__tests__/**/*'
