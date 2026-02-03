@@ -7,7 +7,7 @@ import {
   unique,
   json,
 } from "drizzle-orm/pg-core";
-import { sql } from "drizzle-orm";
+import { sql, relations } from "drizzle-orm";
 
 export const users = pgTable("users", {
   id: text("id").primaryKey(),
@@ -104,7 +104,9 @@ export const memories = pgTable("memories", {
   date: timestamp("date").notNull(),
   location: text("location"),
   mood: text("mood"),
+  isPublic: boolean("is_public").notNull().default(false),
   isAiGenerated: boolean("is_ai_generated").notNull().default(false),
+
   syncStatus: text("sync_status").notNull().default("synced"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
@@ -123,6 +125,8 @@ export const memoryMedia = pgTable("memory_media", {
   filename: text("filename").notNull(),
   size: integer("size"),
   metadata: json("metadata"),
+  storageProvider: text("storage_provider").notNull().default("local"), // 'local', 'dropbox'
+  storageKey: text("storage_key"), // External ID or path
 });
 
 export const tags = pgTable("tags", {
@@ -152,10 +156,11 @@ export const familyMembers = pgTable("family_members", {
   email: text("email").unique().notNull(),
   name: text("name"),
   relationship: text("relationship").notNull(),
+  role: text("role").notNull().default("member"), // 'admin', 'editor', 'viewer'
   status: text("status").notNull().default("pending"),
   permissions: json("permissions")
     .notNull()
-    .default('{"canView": true, "canComment": false, "canShare": false}'),
+    .default('{"canView": true, "canComment": true, "canShare": false}'),
   invitedAt: timestamp("invited_at").notNull().defaultNow(),
   joinedAt: timestamp("joined_at"),
 });
@@ -293,3 +298,40 @@ export const sessions = pgTable("sessions", {
     .references(() => users.id, { onDelete: "cascade" }),
   expires: timestamp("expires").notNull(),
 });
+
+export const usersRelations = relations(users, ({ many }) => ({
+  memories: many(memories),
+}));
+
+export const memoriesRelations = relations(memories, ({ one, many }) => ({
+  user: one(users, {
+    fields: [memories.userId],
+    references: [users.id],
+  }),
+  memoryTags: many(memoryTags),
+  memoryMedia: many(memoryMedia),
+}));
+
+export const tagsRelations = relations(tags, ({ many }) => ({
+  memoryTags: many(memoryTags),
+}));
+
+export const memoryTagsRelations = relations(memoryTags, ({ one }) => ({
+  memory: one(memories, {
+    fields: [memoryTags.memoryId],
+    references: [memories.id],
+  }),
+  tag: one(tags, {
+    fields: [memoryTags.tagId],
+    references: [tags.id],
+  }),
+}));
+
+export const memoryMediaRelations = relations(memoryMedia, ({ one }) => ({
+  memory: one(memories, {
+    fields: [memoryMedia.memoryId],
+    references: [memories.id],
+  }),
+}));
+
+

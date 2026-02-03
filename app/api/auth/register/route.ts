@@ -1,55 +1,98 @@
-import { NextResponse, NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import { hash } from "bcryptjs";
 import db from "@/drizzle/index";
-import { users } from "@/drizzle/db/schema";
+import { users, verificationTokens } from "@/drizzle/db/schema";
 import { eq } from "drizzle-orm";
-import bcrypt from "bcryptjs";
-import { v4 as uuidv4 } from "uuid"; // Import uuid
+import { z } from "zod";
+import { logger } from "@/lib/logger";
+import { v4 as uuidv4 } from "uuid";
+import { sendVerificationEmail } from "@/services/email.service";
 
-export async function POST(request: NextRequest) {
+const registerSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8),
+  name: z.string().min(2),
+});
+
+const generateVerificationCode = (): string => {
+  return Math.floor(10000000 + Math.random() * 90000000).toString();
+};
+
+export async function POST(req: Request) {
   try {
-    const body = await request.json();
-    const { email, password } = body;
-    console.log("Registration data:", { email, password });
+    const body = await req.json();
+    const { email, password, name } = registerSchema.parse(body);
 
-    // user exists?
-    const existingUser = await db
-      .select()
-      .from(users)
-      .where(eq(users.email, email))
-      .limit(1);
-    if (existingUser.length > 0) {
+    const existingUser = await db.query.users.findFirst({
+      where: eq(users.email, email),
+    });
+
+    if (existingUser) {
       return NextResponse.json(
-        { error: "User already exists", success: false },
-        { status: 200 } // Changed status to 409 Conflict
+        { message: "User with this email already exists" },
+        { status: 409 },
       );
     }
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hashSync(password, salt);
+
+    const hashedPassword = await hash(password, 12);
 
     const newUser = await db
       .insert(users)
       .values({
-        id: uuidv4(), // Generate a UUID for the id
-        email: email,
+        id: uuidv4(),
+        email,
         password: hashedPassword,
-        // stuffs for new users
+        name,
+        emailVerified: null,
       })
       .returning();
 
-    if (newUser.length === 0) {
-      throw new Error("Failed to create user.");
+    // Generate verification code and store it
+    const verificationCode = generateVerificationCode();
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+    // Delete any existing tokens for this email
+    await db
+      .delete(verificationTokens)
+      .where(eq(verificationTokens.identifier, email));
+
+    // Insert new verification token
+    await db.insert(verificationTokens).values({
+      identifier: email,
+      token: verificationCode,
+      expires: expiresAt,
+    });
+
+    // Send verification email
+    const emailResult = await sendVerificationEmail(email, verificationCode);
+
+    if (!emailResult.success) {
+      logger.error(`Failed to send verification email to ${email}`);
+      // Don't fail the registration, but log the error
     }
 
+    logger.info(`New user registered: ${email}, verification code sent`);
+
     return NextResponse.json(
-      { message: "User registered successfully", success: true },
-      { status: 201 }
+      {
+        message:
+          "User created successfully. Please check your email for verification code.",
+        user: { id: newUser[0].id, email: newUser[0].email },
+        requiresVerification: true,
+      },
+      { status: 201 },
     );
   } catch (error: any) {
-    // Type 'error' as 'any' to access message property
-    console.error("Registration error:", error);
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { message: "Invalid input", errors: error.issues },
+        { status: 400 },
+      );
+    }
+    logger.error("Registration error:", error);
     return NextResponse.json(
-      { error: error.message || "Internal server error" }, // Return error message
-      { status: 500 }
+      { message: "Internal Server Error" },
+      { status: 500 },
     );
   }
 }

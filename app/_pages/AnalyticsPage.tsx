@@ -1,169 +1,67 @@
 import React, { useState } from "react";
 import {
-  TrendingUp,
+  TrendUp,
   Calendar,
   Heart,
   Tag as TagIcon,
   Clock,
-  BarChart3,
-} from "lucide-react";
+  ChartBar,
+  ArrowsClockwise,
+} from "@phosphor-icons/react";
 import Card from "@/components/ui/Card";
 import StatCard from "@/components/ui/StatCard";
 import Select from "@/components/ui/Select";
-import {
-  moodColors,
-  analytics,
-  timeRangeOptions,
-  sampleMemories,
-} from "@/data/sampleData";
+import { useAnalytics } from "@/hooks/useAnalytics";
+import Button from "@/components/ui/Button";
+
+const timeRangeOptions = [
+  { value: "week", label: "Last Week" },
+  { value: "month", label: "Last Month" },
+  { value: "quarter", label: "Last Quarter" },
+  { value: "year", label: "Last Year" },
+  { value: "all", label: "All Time" },
+];
+
+const moodColors = {
+  joyful: "bg-yellow-100",
+  peaceful: "bg-blue-100",
+  excited: "bg-orange-100",
+  nostalgic: "bg-purple-100",
+  grateful: "bg-green-100",
+  reflective: "bg-gray-100",
+} as const;
 
 const AnalyticsPage: React.FC = () => {
   const [timeRange, setTimeRange] = useState("year");
+  const { data: analytics, isLoading, error, refetch } = useAnalytics(timeRange);
 
-  const filterMemories = (memories: typeof sampleMemories, range: string) => {
-    const now = new Date();
-    const startDate = new Date();
+  if (isLoading) {
+    return (
+      <div className="min-h-fit bg-neutral-50 flex items-center justify-center">
+        <div className="text-center">
+          <ArrowsClockwise className="w-8 h-8 text-primary-600 animate-spin mx-auto mb-4" />
+          <p className="text-neutral-600">Loading analytics...</p>
+        </div>
+      </div>
+    );
+  }
 
-    switch (range) {
-      case "week":
-        startDate.setDate(now.getDate() - 7);
-        break;
-      case "month":
-        startDate.setMonth(now.getMonth() - 1);
-        break;
-      case "quarter":
-        startDate.setMonth(now.getMonth() - 3);
-        break;
-      case "year":
-        startDate.setFullYear(now.getFullYear() - 1);
-        break;
-      case "all":
-      default:
-        return memories;
-    }
+  if (error) {
+    return (
+      <div className="min-h-fit bg-neutral-50 flex items-center justify-center">
+        <Card className="max-w-md">
+          <div className="text-center p-6">
+            <p className="text-destructive-600 mb-4">Failed to load analytics</p>
+            <Button onClick={() => refetch()}>Retry</Button>
+          </div>
+        </Card>
+      </div>
+    );
+  }
 
-    return memories.filter((memory) => {
-      const memoryDate = new Date(memory.date);
-      return memoryDate >= startDate && memoryDate <= now;
-    });
-  };
-
-  const filteredMemories = filterMemories(sampleMemories, timeRange);
-
-  // Recalculate analytics based on filtered memories
-  const calculatedAnalytics = {
-    totalMemories: filteredMemories.length,
-    memoriesThisMonth: filteredMemories.filter((memory) => {
-      const memoryDate = new Date(memory.date);
-      return (
-        memoryDate.getMonth() === new Date().getMonth() &&
-        memoryDate.getFullYear() === new Date().getFullYear()
-      );
-    }).length,
-    averagePerWeek: parseFloat(((filteredMemories.length / 52) * 4).toFixed(1)),
-    longestStreak: 0, // This would require more complex logic to calculate based on dates
-    topMoods: [], // Placeholder, will be calculated dynamically
-    topTags: [], // Placeholder, will be calculated dynamically
-    monthlyActivity: [], // Placeholder, will be calculated dynamically
-    weeklyPattern: [], // Placeholder, will be calculated dynamically
-  };
-
-  // Helper function to calculate top moods from filtered memories
-  const calculateTopMoods = (memories: typeof sampleMemories) => {
-    const moodCounts: { [key: string]: number } = {};
-    memories.forEach((memory) => {
-      moodCounts[memory.mood] = (moodCounts[memory.mood] || 0) + 1;
-    });
-
-    const total = memories.length;
-    return Object.entries(moodCounts)
-      .map(([mood, count]) => ({
-        mood,
-        count,
-        percentage:
-          total > 0 ? parseFloat(((count / total) * 100).toFixed(0)) : 0,
-      }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 5);
-  };
-
-  // Helper function to calculate top tags from filtered memories
-  const calculateTopTags = (memories: typeof sampleMemories) => {
-    const tagCounts: { [key: string]: number } = {};
-    memories.forEach((memory) => {
-      memory.tags.forEach((tag) => {
-        tagCounts[tag] = (tagCounts[tag] || 0) + 1;
-      });
-    });
-
-    const total = memories.length;
-    return Object.entries(tagCounts)
-      .map(([tag, count]) => ({
-        tag,
-        count,
-        percentage:
-          total > 0 ? parseFloat(((count / total) * 100).toFixed(0)) : 0,
-      }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 5);
-  };
-
-  // Helper function to calculate monthly activity
-  const calculateMonthlyActivity = (memories: typeof sampleMemories) => {
-    const monthlyCounts: { [key: string]: number } = {};
-    const monthNames = [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec",
-    ];
-
-    memories.forEach((memory) => {
-      const date = new Date(memory.date);
-      const month = monthNames[date.getMonth()];
-      monthlyCounts[month] = (monthlyCounts[month] || 0) + 1;
-    });
-
-    return monthNames.map((month) => ({
-      month,
-      memories: monthlyCounts[month] || 0,
-    }));
-  };
-
-  // Helper function to calculate weekly pattern
-  const calculateWeeklyPattern = (memories: typeof sampleMemories) => {
-    const weeklyCounts: { [key: string]: number } = {};
-    const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-
-    memories.forEach((memory) => {
-      const date = new Date(memory.date);
-      const day = dayNames[date.getDay()];
-      weeklyCounts[day] = (weeklyCounts[day] || 0) + 1;
-    });
-
-    return dayNames.map((day) => ({
-      day,
-      memories: weeklyCounts[day] || 0,
-    }));
-  };
-
-  // Update calculatedAnalytics with dynamic data
-  calculatedAnalytics.topMoods = calculateTopMoods(filteredMemories);
-  calculatedAnalytics.topTags = calculateTopTags(filteredMemories);
-  calculatedAnalytics.monthlyActivity =
-    calculateMonthlyActivity(filteredMemories);
-  calculatedAnalytics.weeklyPattern = calculateWeeklyPattern(filteredMemories);
-
-  const displayAnalytics =
-    timeRange === "all" ? analytics : calculatedAnalytics;
+  if (!analytics) {
+    return null;
+  }
 
   return (
     <div className="min-h-fit bg-neutral-50">
@@ -195,25 +93,25 @@ const AnalyticsPage: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <StatCard
                   title="Total Memories"
-                  value={displayAnalytics.totalMemories.toLocaleString()}
+                  value={analytics.totalMemories.toLocaleString()}
                   icon={Calendar}
                   change={{ value: "+12%", trend: "up" }}
                 />
                 <StatCard
                   title="This Month"
-                  value={displayAnalytics.memoriesThisMonth.toString()}
-                  icon={TrendingUp}
+                  value={analytics.memoriesThisMonth.toString()}
+                  icon={TrendUp}
                   change={{ value: "+3", trend: "up" }}
                 />
                 <StatCard
                   title="Weekly Average"
-                  value={displayAnalytics.averagePerWeek.toString()}
-                  icon={BarChart3}
+                  value={analytics.averagePerWeek.toString()}
+                  icon={ChartBar}
                   change={{ value: "+0.5", trend: "up" }}
                 />
                 <StatCard
                   title="Longest Streak"
-                  value={`${displayAnalytics.longestStreak} days`}
+                  value={`${analytics.longestStreak} days`}
                   icon={Clock}
                   change={{ value: "Personal best!", trend: "up" }}
                 />
@@ -230,7 +128,7 @@ const AnalyticsPage: React.FC = () => {
                   </div>
                   <div className="p-6">
                     <div className="space-y-4">
-                      {displayAnalytics.monthlyActivity.map((month) => (
+                      {analytics.monthlyActivity.map((month) => (
                         <div
                           key={month.month}
                           className="flex items-center space-x-4"
@@ -266,7 +164,7 @@ const AnalyticsPage: React.FC = () => {
                   </div>
                   <div className="p-6">
                     <div className="space-y-4">
-                      {displayAnalytics.weeklyPattern.map((day) => (
+                      {analytics.weeklyPattern.map((day) => (
                         <div
                           key={day.day}
                           className="flex items-center space-x-4"
@@ -308,7 +206,7 @@ const AnalyticsPage: React.FC = () => {
                   </div>
                   <div className="p-6">
                     <div className="space-y-4">
-                      {displayAnalytics.topMoods.map((mood) => (
+                      {analytics.topMoods.map((mood) => (
                         <div
                           key={mood.mood}
                           className="flex items-center space-x-4"
@@ -356,7 +254,7 @@ const AnalyticsPage: React.FC = () => {
                   </div>
                   <div className="p-6">
                     <div className="space-y-4">
-                      {displayAnalytics.topTags.map((tag) => (
+                      {analytics.topTags.map((tag) => (
                         <div
                           key={tag.tag}
                           className="flex items-center space-x-4"
@@ -386,11 +284,11 @@ const AnalyticsPage: React.FC = () => {
               </div>
 
               {/* AI Insights */}
-              <Card className="bg-gradient-to-r from-primary-50 to-secondary-50 border-primary-200">
+              <Card className="bg-linear-to-r from-primary-50 to-secondary-50 border-primary-200">
                 <div className="p-6">
                   <div className="flex items-start space-x-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-primary-600 to-secondary-600 rounded-xl flex items-center justify-center flex-shrink-0">
-                      <TrendingUp className="w-6 h-6 text-white" />
+                    <div className="w-12 h-12 bg-linear-to-br from-primary-600 to-secondary-600 rounded-xl flex items-center justify-center shrink-0">
+                      <TrendUp className="w-6 h-6 text-white" />
                     </div>
                     <div className="space-y-3">
                       <h3 className="text-lg font-semibold text-neutral-900">

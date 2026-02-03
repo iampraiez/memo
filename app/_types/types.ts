@@ -22,9 +22,10 @@ export interface FamilyMemories {
 
 export interface Memory {
   id: string;
-  title?: string;
-  content?: string;
-  summary?: string;
+  userId: string;
+  title: string;
+  content: string;
+  summary?: string | null;
   date: string;
   mood?:
     | "joyful"
@@ -32,16 +33,16 @@ export interface Memory {
     | "excited"
     | "nostalgic"
     | "grateful"
-    | "reflective";
-  tags: string[];
+    | "reflective"
+    | null;
+  tags?: string[];
   images?: string[];
-  location: string;
-  isAiGenerated?: boolean;
-  syncStatus?: "synced" | "pending" | "offline";
+  location?: string | null;
+  isAiGenerated?: boolean | null;
+  syncStatus?: "synced" | "pending" | "offline" | null;
   createdAt: string;
-  updatedAt?: string;
-  isPublic?: boolean;
-  userId?: string;
+  updatedAt: string;
+  isPublic: boolean;
 }
 
 export interface User {

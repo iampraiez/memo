@@ -76,6 +76,8 @@ export const familyMemories: FamilyMemories[] = [
       syncStatus: "synced",
       createdAt: "2024-06-01T15:00:00Z",
       updatedAt: "2024-06-01T15:00:00Z",
+      userId: "user-john",
+      isPublic: true,
     },
     user: {
       id: "user-john",
@@ -104,6 +106,8 @@ export const familyMemories: FamilyMemories[] = [
       syncStatus: "synced",
       createdAt: "2023-08-15T10:00:00Z",
       updatedAt: "2023-08-15T10:00:00Z",
+      userId: "user-emma",
+      isPublic: true,
     },
     user: {
       id: "user-emma",
@@ -132,6 +136,8 @@ export const familyMemories: FamilyMemories[] = [
       syncStatus: "synced",
       createdAt: "2023-07-20T17:00:00Z",
       updatedAt: "2023-07-20T17:00:00Z",
+      userId: "user-john",
+      isPublic: true,
     },
     user: {
       id: "user-john",

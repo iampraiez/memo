@@ -1,13 +1,12 @@
 import React, { useState } from "react";
-import { Tag as TagIcon, TrendingUp, Calendar, Search } from "lucide-react";
+import { Tag as TagIcon, TrendUp, Calendar, MagnifyingGlass, ArrowsClockwise } from "@phosphor-icons/react";
 import MemoryCard from "@/components/MemoryCard";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import { Memory } from "@/types/types";
-import { sampleTags } from "@/data/sampleData";
-import { db } from "@/lib/utils";
-import { useLiveQuery } from "dexie-react-hooks";
+import { useTags } from "@/hooks/useTags";
+import { useMemories } from "@/hooks/useMemories";
 
 interface TagPageProps {
   onEditMemory: (memory: Memory) => void;
@@ -24,14 +23,22 @@ const TagsPage: React.FC<TagPageProps> = ({
 }) => {
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const allMemories = useLiveQuery(() => db.memories.toArray(), []) || [];
+  
+  const { data: tagsData, isLoading: tagsLoading } = useTags();
+  const { data: memoriesData, isLoading: memoriesLoading } = useMemories();
 
-  const filteredTags = sampleTags.filter((tag) =>
+  const tags = tagsData?.tags || [];
+  const allMemories = memoriesData?.memories || [];
+
+  const filteredTags = tags.filter((tag) =>
     tag.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const tagMemories = selectedTag
-    ? allMemories.filter((memory) => memory.tags.includes(selectedTag))
+    ? allMemories.filter((memory) => {
+        const memoryTags = memory.tags as unknown as string[] | null;
+        return memoryTags?.includes(selectedTag);
+      })
     : [];
 
   const getTagSize = (count: number) => {
@@ -41,9 +48,20 @@ const TagsPage: React.FC<TagPageProps> = ({
     return "text-base";
   };
 
+  if (tagsLoading || memoriesLoading) {
+    return (
+      <div className="min-h-fit bg-neutral-50 flex items-center justify-center">
+        <div className="text-center">
+          <ArrowsClockwise className="w-8 h-8 text-primary-600 animate-spin mx-auto mb-4" />
+          <p className="text-neutral-600">Loading tags...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-fit bg-neutral-50">
-      <main className="flex   ">
+      <main className="flex">
         <div className="p-6">
           {!selectedTag ? (
             /* Tags Overview */
@@ -60,14 +78,14 @@ const TagsPage: React.FC<TagPageProps> = ({
               </div>
 
               {/* Search Tags */}
-              <div className="max-w-md">
+              <div className="max-w-md relative">
                 <Input
                   placeholder="Search tags..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"
                 />
-                <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 pointer-events-none" />
+                <MagnifyingGlass className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 pointer-events-none" />
               </div>
 
               {/* Tag Stats */}
@@ -77,17 +95,17 @@ const TagsPage: React.FC<TagPageProps> = ({
                     <TagIcon className="w-6 h-6 text-primary-600" />
                   </div>
                   <h3 className="text-2xl font-bold text-neutral-900">
-                    {sampleTags.length}
+                    {tags.length}
                   </h3>
                   <p className="text-neutral-600">Total Tags</p>
                 </Card>
 
                 <Card className="text-center space-y-2">
                   <div className="w-12 h-12 bg-secondary-100 rounded-lg flex items-center justify-center mx-auto">
-                    <TrendingUp className="w-6 h-6 text-secondary-600" />
+                    <TrendUp className="w-6 h-6 text-secondary-600" />
                   </div>
                   <h3 className="text-2xl font-bold text-neutral-900">
-                    {sampleTags[0]?.name}
+                    {tags[0]?.name || "N/A"}
                   </h3>
                   <p className="text-neutral-600">Most Used</p>
                 </Card>
@@ -97,14 +115,12 @@ const TagsPage: React.FC<TagPageProps> = ({
                     <Calendar className="w-6 h-6 text-accent-600" />
                   </div>
                   <h3 className="text-2xl font-bold text-neutral-900">
-                    {
-                      //filter sample memories for memoris created this month
-                      allMemories.filter(
-                        (mem) =>
-                          mem.date.split("-")[1] ===
-                          `${new Date().getMonth() + 1}`
-                      ).length
-                    }
+                    {allMemories.filter((mem) => {
+                      const date = new Date(mem.date);
+                      const now = new Date();
+                      return date.getMonth() === now.getMonth() && 
+                             date.getFullYear() === now.getFullYear();
+                    }).length}
                   </h3>
                   <p className="text-neutral-600">This Month</p>
                 </Card>
@@ -178,7 +194,7 @@ const TagsPage: React.FC<TagPageProps> = ({
                   className="w-8 h-8 rounded-full"
                   style={{
                     backgroundColor:
-                      sampleTags.find((t) => t.name === selectedTag)?.color ||
+                      tags.find((t) => t.name === selectedTag)?.color ||
                       "#3B82F6",
                   }}
                 />

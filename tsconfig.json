@@ -2,20 +2,52 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"],
-      "@/components/*": ["app/_components/*"],
-      "@/lib/*": ["app/_lib/*"],
-      "@/types/*": ["app/_types/*"],
-      "@/data/*": ["app/_data/*"],
-      "@/pages/*": ["app/_pages/*"],
-      "@/db/*": ["drizzle/*"],
-      "@/libs/*": ["lib/*"]
+      "@/*": [
+        "./*"
+      ],
+      "@/components/*": [
+        "components/*"
+      ],
+      "@/lib/*": [
+        "lib/*"
+      ],
+      "@/types/*": [
+        "app/_types/*"
+      ],
+      "@/services/*": [
+        "services/*"
+      ],
+      "@/hooks/*": [
+        "hooks/*"
+      ],
+      "@/utils/*": [
+        "lib/utils"
+      ],
+      "@/data/*": [
+        "app/_data/*"
+      ],
+      "@/pages/*": [
+        "app/_pages/*"
+      ],
+      "@/db/*": [
+        "drizzle/*"
+      ],
+      "@/libs/*": [
+        "lib/*"
+      ],
+      "@/config/*": [
+        "config/*"
+      ]
     },
     "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
-    "strict": false,
+    "strict": true,
     "noEmit": true,
     "incremental": true,
     "module": "esnext",
@@ -23,7 +55,7 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "plugins": [
       {
         "name": "next"
@@ -35,7 +67,10 @@
     ".next/types/**/*.ts",
     "**/*.ts",
     "**/*.tsx",
-    "node_modules/layout.tsx"
+    "node_modules/layout.tsx",
+    ".next/dev/types/**/*.ts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules"
+  ]
 }

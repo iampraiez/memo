@@ -1,16 +1,18 @@
 "use client";
 import React, { useState } from "react";
-import { BookOpen, Wand2, Download, FileText } from "lucide-react";
+import { MagicWand, BookOpen, FileText, Download, ArrowsClockwise } from "@phosphor-icons/react";
+
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import Select from "@/components/ui/Select";
 import DatePicker from "@/components/ui/DatePicker";
 import Loader from "@/components/ui/Loader";
-import { sampleStoryExample } from "@/data/sampleData";
 import { useNetworkStatus } from "@/lib/utils";
-import Input from "../_components/ui/Input";
+import Input from "@/components/ui/Input";
 import { jsPDF } from "jspdf";
 import { Document, Paragraph, Packer, TextRun } from "docx";
+import { useCreateStory } from "@/hooks/useStories";
+import { toast } from "sonner";
 
 interface StorySettings {
   dateRange: {
@@ -25,18 +27,20 @@ interface StorySettings {
 const StoryGeneratorPage: React.FC = () => {
   const [settings, setSettings] = useState<StorySettings>({
     dateRange: {
-      start: "2024-01-01",
-      end: "2024-12-31",
+      start: new Date(new Date().setFullYear(new Date().getFullYear() - 1)).toISOString().split('T')[0],
+      end: new Date().toISOString().split('T')[0],
     },
     tone: "reflective",
     length: "medium",
     includeimages: true,
   });
-  const [isGenerating, setIsGenerating] = useState(false);
+  
   const [generatedStory, setGeneratedStory] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
-  const [fileName, setFileName] = useState("story");
+  const [fileName, setFileName] = useState("my_story");
   const isOnline = useNetworkStatus();
+
+  const createStoryMutation = useCreateStory();
 
   const toneOptions = [
     { value: "reflective", label: "Reflective & Thoughtful" },
@@ -51,27 +55,31 @@ const StoryGeneratorPage: React.FC = () => {
   ];
 
   const handleGenerateStory = async () => {
-    setIsGenerating(true);
-    setProgress(0);
-    setGeneratedStory(null);
+    try {
+      setProgress(10);
+      const interval = setInterval(() => {
+        setProgress(prev => {
+          if (prev >= 90) return prev;
+          return prev + 5;
+        });
+      }, 500);
 
-    // Simulate AI story generation with progress
-    const steps = [
-      "Analyzing your memories...",
-      "Identifying key themes...",
-      "Crafting narrative structure...",
-      "Writing your story...",
-      "Adding finishing touches...",
-    ];
+      const result = await createStoryMutation.mutateAsync({
+        title: fileName,
+        tone: settings.tone,
+        length: settings.length,
+        dateRange: settings.dateRange,
+      });
 
-    for (let i = 0; i < steps.length; i++) {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setProgress(((i + 1) / steps.length) * 100);
+      clearInterval(interval);
+      setProgress(100);
+      setGeneratedStory(result.story.content);
+      toast.success("Story generated successfully!");
+    } catch (error) {
+      toast.error("Failed to generate story. Please try again.");
+    } finally {
+      setTimeout(() => setProgress(0), 1000);
     }
-    console.log("Settings", settings);
-
-    setGeneratedStory(sampleStoryExample);
-    setIsGenerating(false);
   };
 
   const handleExport = async (format: "pdf" | "docx") => {
@@ -160,7 +168,8 @@ const StoryGeneratorPage: React.FC = () => {
                 <div className="lg:col-span-1">
                   <Card className="space-y-6">
                     <div className="flex items-center space-x-2">
-                      <Wand2 className="w-5 h-5 text-primary-600" />
+                      <MagicWand className="w-5 h-5 text-primary-600" />
+
                       <h2 className="text-lg font-semibold text-neutral-900">
                         Story Settings
                       </h2>
@@ -252,8 +261,8 @@ const StoryGeneratorPage: React.FC = () => {
                     {/* Generate Button */}
                     <Button
                       onClick={handleGenerateStory}
-                      loading={isGenerating}
-                      disabled={isGenerating || !isOnline}
+                      loading={createStoryMutation.isPending}
+                      disabled={createStoryMutation.isPending || !isOnline}
                       className="w-full"
                     >
                       <BookOpen className="w-4 h-4 mr-2" />
@@ -261,7 +270,7 @@ const StoryGeneratorPage: React.FC = () => {
                     </Button>
 
                     {/* Progress */}
-                    {isGenerating && (
+                    {createStoryMutation.isPending && (
                       <div className="space-y-2">
                         <div className="flex justify-between text-sm">
                           <span className="text-neutral-600">
@@ -324,7 +333,7 @@ const StoryGeneratorPage: React.FC = () => {
                 {/* Story Preview */}
                 <div className="lg:col-span-2">
                   <Card className="min-h-96">
-                    {!generatedStory && !isGenerating && (
+                    {!generatedStory && !createStoryMutation.isPending && (
                       <div className="flex flex-col items-center justify-center py-20 text-center">
                         <BookOpen className="w-16 h-16 text-neutral-300 mb-4" />
                         <h3 className="text-lg font-semibold text-neutral-900 mb-2">
@@ -338,9 +347,9 @@ const StoryGeneratorPage: React.FC = () => {
                       </div>
                     )}
 
-                    {isGenerating && (
+                    {createStoryMutation.isPending && (
                       <div className="flex flex-col items-center justify-center py-20">
-                        <Loader size="lg" className="mb-4" />
+                        <ArrowsClockwise className="w-12 h-12 text-primary-600 animate-spin mb-4" />
                         <h3 className="text-lg font-semibold text-neutral-900 mb-2">
                           Creating Your Story
                         </h3>
@@ -350,6 +359,7 @@ const StoryGeneratorPage: React.FC = () => {
                         </p>
                       </div>
                     )}
+
 
                     {generatedStory && (
                       <div className="prose prose-neutral max-w-none">

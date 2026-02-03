@@ -85,7 +85,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
       case "welcome":
         return (
           <div className="text-center space-y-6">
-            <div className="w-20 h-20 bg-gradient-to-br from-primary-600 to-secondary-600 rounded-2xl flex items-center justify-center mx-auto">
+            <div className="w-20 h-20 bg-linear-to-br from-primary-600 to-secondary-600 rounded-2xl flex items-center justify-center mx-auto">
               <Sparkles className="w-10 h-10 text-white" />
             </div>
             <div className="space-y-3">
@@ -391,7 +391,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-linear-to-br from-primary-50 to-secondary-50 flex items-center justify-center px-4">
       <div className="w-full max-w-2xl">
         {/* Progress Bar */}
         <div className="mb-8">

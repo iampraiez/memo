@@ -1,13 +1,14 @@
 "use client";
 import React, { useState } from "react";
-import { Activity, Database, Users, RefreshCw, Trash2 } from "lucide-react";
+import { ChartLine, Database, Users, ArrowsClockwise, Trash } from "@phosphor-icons/react";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import StatCard from "@/components/ui/StatCard";
+import { useAdminStats } from "@/hooks/useAdminStats";
 
 interface JobQueueItem {
   id: string;
-  type: "ai_summary" | "image_processing" | "backup" | "export";
+  type: string;
   status: "pending" | "processing" | "completed" | "failed";
   createdAt: string;
   completedAt?: string;
@@ -27,59 +28,41 @@ const AdminPage: React.FC = () => {
     "overview"
   );
 
-  // Mock data
-  const stats = {
-    totalUsers: 1247,
-    activeUsers: 892,
-    totalMemories: 15432,
-    storageUsed: "2.4 TB",
+  const { data, isLoading, error, refetch } = useAdminStats();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-fit bg-neutral-50 flex items-center justify-center">
+        <div className="text-center">
+          <ArrowsClockwise className="w-8 h-8 text-primary-600 animate-spin mx-auto mb-4" />
+          <p className="text-neutral-600">Loading admin data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-fit bg-neutral-50 flex items-center justify-center">
+        <Card className="max-w-md">
+          <div className="text-center p-6">
+            <p className="text-destructive-600 mb-4">Failed to load admin data</p>
+            <Button onClick={() => refetch()}>Retry</Button>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  const stats = data?.stats || {
+    totalUsers: 0,
+    activeUsers: 0,
+    totalMemories: 0,
+    storageUsed: "0 TB",
   };
 
-  const jobQueue: JobQueueItem[] = [
-    {
-      id: "job-1",
-      type: "ai_summary",
-      status: "processing",
-      createdAt: "2024-01-15T10:30:00Z",
-    },
-    {
-      id: "job-2",
-      type: "image_processing",
-      status: "completed",
-      createdAt: "2024-01-15T10:25:00Z",
-      completedAt: "2024-01-15T10:28:00Z",
-    },
-    {
-      id: "job-3",
-      type: "backup",
-      status: "failed",
-      createdAt: "2024-01-15T10:20:00Z",
-      error: "Storage quota exceeded",
-    },
-  ];
-
-  const logs: LogEntry[] = [
-    {
-      id: "log-1",
-      level: "info",
-      message: "User authentication successful",
-      timestamp: "2024-01-15T10:35:00Z",
-      userId: "user-123",
-    },
-    {
-      id: "log-2",
-      level: "warning",
-      message: "High memory usage detected",
-      timestamp: "2024-01-15T10:32:00Z",
-    },
-    {
-      id: "log-3",
-      level: "error",
-      message: "Failed to process image upload",
-      timestamp: "2024-01-15T10:30:00Z",
-      userId: "user-456",
-    },
-  ];
+  const jobQueue: JobQueueItem[] = data?.jobQueue || [];
+  const logs: LogEntry[] = data?.logs || [];
 
   const getJobStatusColor = (status: JobQueueItem["status"]) => {
     switch (status) {
@@ -132,8 +115,8 @@ const AdminPage: React.FC = () => {
               <div className="border-b border-neutral-200">
                 <nav className="-mb-px flex space-x-8">
                   {[
-                    { id: "overview", label: "Overview", icon: Activity },
-                    { id: "jobs", label: "Job Queue", icon: RefreshCw },
+                    { id: "overview", label: "Overview", icon: ChartLine },
+                    { id: "jobs", label: "Job Queue", icon: ArrowsClockwise },
                     { id: "logs", label: "System Logs", icon: Database },
                   ].map((tab) => {
                     const Icon = tab.icon;
@@ -171,7 +154,7 @@ const AdminPage: React.FC = () => {
                     <StatCard
                       title="Active Users"
                       value={stats.activeUsers.toLocaleString()}
-                      icon={Activity}
+                      icon={ChartLine}
                       change={{ value: "+8%", trend: "up" }}
                     />
                     <StatCard
@@ -236,12 +219,12 @@ const AdminPage: React.FC = () => {
                       Job Queue
                     </h2>
                     <div className="flex space-x-2">
-                      <Button variant="secondary" size="sm">
-                        <RefreshCw className="w-4 h-4 mr-2" />
+                      <Button variant="secondary" size="sm" onClick={() => refetch()}>
+                        <ArrowsClockwise className="w-4 h-4 mr-2" />
                         Refresh
                       </Button>
                       <Button variant="secondary" size="sm">
-                        <Trash2 className="w-4 h-4 mr-2" />
+                        <Trash className="w-4 h-4 mr-2" />
                         Clear Completed
                       </Button>
                     </div>
@@ -310,8 +293,8 @@ const AdminPage: React.FC = () => {
                     <h2 className="text-xl font-semibold text-neutral-900">
                       System Logs
                     </h2>
-                    <Button variant="secondary" size="sm">
-                      <RefreshCw className="w-4 h-4 mr-2" />
+                    <Button variant="secondary" size="sm" onClick={() => refetch()}>
+                      <ArrowsClockwise className="w-4 h-4 mr-2" />
                       Refresh
                     </Button>
                   </div>

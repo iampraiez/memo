@@ -2,21 +2,21 @@
 import React, { useState } from "react";
 import {
   ArrowLeft,
-  Edit,
-  Share,
+  PencilSimple,
+  ShareNetwork,
   Download,
   Heart,
   MapPin,
   Calendar,
   Tag as TagIcon,
-} from "lucide-react";
+  ArrowsClockwise,
+} from "@phosphor-icons/react";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import Tag from "@/components/ui/Tag";
 import Modal from "@/components/ui/Modal";
 import { Memory } from "@/types/types";
-import { db } from "@/lib/utils";
-import { useLiveQuery } from "dexie-react-hooks";
+import { useMemory } from "@/hooks/useMemories";
 
 interface MemoryDetailPageProps {
   memoryId: string;
@@ -32,21 +32,10 @@ const MemoryDetailPage: React.FC<MemoryDetailPageProps> = ({
   onShareMemory,
 }) => {
   const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [currentimageIndex, setCurrentimageIndex] = useState(0);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  // Fetch the memory reactively from Dexie
-  const memory = useLiveQuery(() => db.memories.get(memoryId), [memoryId]);
-
-  // Handle case where memory is not found or still loading
-  if (!memory) {
-    return (
-      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
-        <p className="text-neutral-500">
-          Loading memory or memory not found...
-        </p>
-      </div>
-    );
-  }
+  const { data, isLoading, error } = useMemory(memoryId);
+  const memory = data?.memory;
 
   const moodColors = {
     joyful: "bg-yellow-100 text-yellow-800 border-yellow-200",
@@ -58,9 +47,36 @@ const MemoryDetailPage: React.FC<MemoryDetailPageProps> = ({
   };
 
   const openLightbox = (index: number) => {
-    setCurrentimageIndex(index);
+    setCurrentImageIndex(index);
     setLightboxOpen(true);
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+        <div className="text-center">
+          <ArrowsClockwise className="w-8 h-8 text-primary-600 animate-spin mx-auto mb-4" />
+          <p className="text-neutral-600">Loading memory...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !memory) {
+    return (
+      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+        <Card className="max-w-md">
+          <div className="text-center p-6">
+            <p className="text-destructive-600">Memory not found</p>
+            <Button onClick={onBack} className="mt-4">Go Back</Button>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  const memoryImages = memory.images || [];
+  const memoryTags = memory.tags || [];
 
   return (
     <div className="min-h-screen bg-neutral-50">
@@ -82,23 +98,22 @@ const MemoryDetailPage: React.FC<MemoryDetailPageProps> = ({
               size="icon"
               onClick={() => onEdit(memory)}
             >
-              <Edit className="w-4 h-4" />
+              <PencilSimple className="w-4 h-4" />
             </Button>
             <Button
               variant="secondary"
               onClick={(e) => {
                 e.stopPropagation();
-                onShareMemory?.(memory); // Pass memory object
+                onShareMemory?.(memory);
               }}
               size="icon"
             >
               {memory.isPublic ? (
                 <Download className="w-4 h-4" />
               ) : (
-                <Share className="w-4 h-4" />
-              )}{" "}
+                <ShareNetwork className="w-4 h-4" />
+              )}
             </Button>
-            {/* add download functionality */}
           </div>
         </div>
 
@@ -136,7 +151,7 @@ const MemoryDetailPage: React.FC<MemoryDetailPageProps> = ({
                     <Heart className="w-4 h-4" />
                     <span
                       className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${
-                        moodColors[memory.mood]
+                        moodColors[memory.mood as keyof typeof moodColors] || ""
                       }`}
                     >
                       {memory.mood}
@@ -146,23 +161,23 @@ const MemoryDetailPage: React.FC<MemoryDetailPageProps> = ({
               </div>
             </div>
 
-            {/* images */}
-            {memory.images && memory.images.length > 0 && (
+            {/* Images */}
+            {memoryImages.length > 0 && (
               <div className="space-y-4">
-                {memory.images.length === 1 ? (
+                {memoryImages.length === 1 ? (
                   <div
                     className="aspect-video bg-neutral-100 rounded-lg overflow-hidden cursor-pointer"
                     onClick={() => openLightbox(0)}
                   >
                     <img
-                      src={memory.images[0]}
+                      src={memoryImages[0]}
                       alt={memory.title}
                       className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
                     />
                   </div>
                 ) : (
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {memory.images.map((image, index) => (
+                    {memoryImages.map((image, index) => (
                       <div
                         key={index}
                         className="aspect-square bg-neutral-100 rounded-lg overflow-hidden cursor-pointer"
@@ -188,29 +203,28 @@ const MemoryDetailPage: React.FC<MemoryDetailPageProps> = ({
             </div>
 
             {/* Tags */}
-            {memory.tags &&
-              memory.tags.length > 0 && ( // Add null check for tags
-                <div className="space-y-2">
-                  <div className="flex items-center space-x-2">
-                    <TagIcon className="w-4 h-4 text-neutral-500" />
-                    <span className="text-sm font-medium text-neutral-700">
-                      Tags
-                    </span>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {memory.tags.map((tag) => (
-                      <Tag key={tag}>{tag}</Tag>
-                    ))}
-                  </div>
+            {memoryTags.length > 0 && (
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2">
+                  <TagIcon className="w-4 h-4 text-neutral-500" />
+                  <span className="text-sm font-medium text-neutral-700">
+                    Tags
+                  </span>
                 </div>
-              )}
+                <div className="flex flex-wrap gap-2">
+                  {memoryTags.map((tag) => (
+                    <Tag key={tag}>{tag}</Tag>
+                  ))}
+                </div>
+              </div>
+            )}
           </Card>
 
           {/* AI Summary */}
           {memory.summary && (
             <Card className="bg-primary-50 border-primary-200">
               <div className="flex items-start space-x-3">
-                <div className="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <div className="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center shrink-0">
                   <span className="text-primary-600 font-bold text-sm">AI</span>
                 </div>
                 <div className="space-y-2">
@@ -273,29 +287,29 @@ const MemoryDetailPage: React.FC<MemoryDetailPageProps> = ({
         </div>
       </div>
 
-      {/* image Lightbox */}
+      {/* Image Lightbox */}
       <Modal
         isOpen={lightboxOpen}
         onClose={() => setLightboxOpen(false)}
         size="full"
       >
         <div className="relative">
-          {memory.images && (
+          {memoryImages.length > 0 && (
             <img
-              src={memory.images[currentimageIndex]}
-              alt={`${memory.title} ${currentimageIndex + 1}`}
+              src={memoryImages[currentImageIndex]}
+              alt={`${memory.title} ${currentImageIndex + 1}`}
               className="w-full h-auto max-h-screen object-contain"
             />
           )}
 
-          {memory.images && memory.images.length > 1 && (
+          {memoryImages.length > 1 && (
             <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
-              {memory.images.map((_, index) => (
+              {memoryImages.map((_, index) => (
                 <button
                   key={index}
-                  onClick={() => setCurrentimageIndex(index)}
+                  onClick={() => setCurrentImageIndex(index)}
                   className={`w-3 h-3 rounded-full transition-colors ${
-                    index === currentimageIndex ? "bg-white" : "bg-white/50"
+                    index === currentImageIndex ? "bg-white" : "bg-white/50"
                   }`}
                 />
               ))}

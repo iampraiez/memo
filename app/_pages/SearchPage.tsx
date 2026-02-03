@@ -1,6 +1,11 @@
-/* eslint-disable react-hooks/rules-of-hooks, react-hooks/exhaustive-deps */
 import React, { useState, useEffect } from "react";
-import { Search, Filter, Tag as TagIcon, Clock } from "lucide-react";
+import {
+  MagnifyingGlass,
+  Funnel,
+  Tag as TagIcon,
+  Clock,
+  ArrowsClockwise,
+} from "@phosphor-icons/react";
 import MemoryCard from "@/components/MemoryCard";
 import EmptyState from "@/components/ui/EmptyState";
 import Modal from "@/components/ui/Modal";
@@ -10,8 +15,8 @@ import Tag from "@/components/ui/Tag";
 import { Memory } from "@/types/types";
 import DatePicker from "@/components/ui/DatePicker";
 import MultiSelect from "@/components/ui/MultiSelect";
-import { db } from "@/lib/utils";
-import { useLiveQuery } from "dexie-react-hooks";
+import { useMemories } from "@/hooks/useMemories";
+import { useTags } from "@/hooks/useTags";
 
 interface SearchPageProps {
   onMemoryClick: (memory: Memory) => void;
@@ -40,29 +45,37 @@ const SearchPage: React.FC<SearchPageProps> = ({
     "birthday party",
     "work milestone",
   ]);
-  const liveMemories = useLiveQuery(() => db.memories.toArray(), []) || [];
 
-  const allMemories = React.useMemo(() => liveMemories, [liveMemories]);
+  const { data: memoriesData, isLoading } = useMemories();
+  const { data: tagsData } = useTags();
+
+  const allMemories = memoriesData?.memories || [];
+  const availableTags = tagsData?.tags.map((t) => t.name) || [];
+  const availableMoods = Array.from(
+    new Set(allMemories.map((mem) => mem.mood).filter(Boolean)),
+  ) as string[];
 
   useEffect(() => {
     if (searchQuery.trim()) {
       setIsSearching(true);
-      // Simulate search delay
       const timer = setTimeout(() => {
-        const filtered = allMemories.filter(
-          (memory) =>
+        const filtered = allMemories.filter((memory) => {
+          const memoryTags = memory.tags as string[] | undefined;
+          return (
             memory.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
             memory.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            memory.tags.some((tag) =>
-              tag.toLowerCase().includes(searchQuery.toLowerCase())
-            ) ||
+            (memoryTags &&
+              memoryTags.some((tag) =>
+                tag.toLowerCase().includes(searchQuery.toLowerCase()),
+              )) ||
             (memory.location &&
               memory.location
                 .toLowerCase()
                 .includes(searchQuery.toLowerCase())) ||
             (memory.mood &&
               memory.mood.toLowerCase().includes(searchQuery.toLowerCase()))
-        );
+          );
+        });
         setSearchResults(filtered);
         setIsSearching(false);
       }, 300);
@@ -81,9 +94,12 @@ const SearchPage: React.FC<SearchPageProps> = ({
       const matchesDateRange =
         (!startDate || memoryDate >= startDate) &&
         (!endDate || memoryDate <= endDate);
+
+      const memoryTags = memory.tags as string[] | undefined;
       const matchesTags =
         selectedTags.length === 0 ||
-        selectedTags.every((tag) => memory.tags.includes(tag));
+        (memoryTags && selectedTags.every((tag) => memoryTags.includes(tag)));
+
       const matchesMoods =
         selectedMoods.length === 0 ||
         (memory.mood && selectedMoods.includes(memory.mood));
@@ -97,22 +113,26 @@ const SearchPage: React.FC<SearchPageProps> = ({
     selectedMoods,
     startDate,
     endDate,
-    allMemories, // Add allMemories to dependencies for filteredMemories
+    allMemories,
   ]);
 
-  const availableTags = Array.from(
-    new Set(allMemories.flatMap((mem) => mem.tags))
-  );
-  const availableMoods = Array.from(
-    new Set(allMemories.map((mem) => mem.mood).filter(Boolean))
-  ) as string[];
+  if (isLoading) {
+    return (
+      <div className="min-h-fit bg-neutral-50 flex items-center justify-center">
+        <div className="text-center">
+          <ArrowsClockwise className="w-8 h-8 text-primary-600 animate-spin mx-auto mb-4" />
+          <p className="text-neutral-600">Loading memories...</p>
+        </div>
+      </div>
+    );
+  }
 
   const groupedResults = {
-    memories: filteredMemories, // Use filteredMemories here
+    memories: filteredMemories,
     tags: availableTags.filter((tag) =>
-      tag.toLowerCase().includes(searchQuery.toLowerCase())
+      tag.toLowerCase().includes(searchQuery.toLowerCase()),
     ),
-    dates: [], // Could include date-based results
+    dates: [],
   };
 
   return (
@@ -139,10 +159,10 @@ const SearchPage: React.FC<SearchPageProps> = ({
                   placeholder="Search memories,..."
                   className="pl-12 text-lg py-3"
                 />
-                <Search className="w-5 h-5 absolute left-4 top-1/2 transform -translate-y-1/2 text-neutral-400" />
+                <MagnifyingGlass className="w-5 h-5 absolute left-4 top-1/2 transform -translate-y-1/2 text-neutral-400" />
                 {isSearching && (
                   <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
-                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-primary-600 border-t-transparent" />
+                    <ArrowsClockwise className="w-5 h-5 text-primary-600 animate-spin" />
                   </div>
                 )}
               </div>
@@ -154,7 +174,7 @@ const SearchPage: React.FC<SearchPageProps> = ({
                   size="sm"
                   onClick={() => setFilterModalOpen(true)}
                 >
-                  <Filter className="w-4 h-4 mr-2" />
+                  <Funnel className="w-4 h-4 mr-2" />
                   Filters
                 </Button>
               </div>
@@ -268,7 +288,7 @@ const SearchPage: React.FC<SearchPageProps> = ({
                 {/* No Results */}
                 {groupedResults.memories.length === 0 && !isSearching && (
                   <EmptyState
-                    icon={Search}
+                    icon={MagnifyingGlass}
                     title="No results found"
                     description={(() => {
                       if (searchQuery.trim()) {
@@ -303,7 +323,7 @@ const SearchPage: React.FC<SearchPageProps> = ({
                         onClick={() => setSearchQuery(search)}
                         className="flex items-center space-x-3 p-3 w-full text-left hover:bg-neutral-100 rounded-lg transition-colors"
                       >
-                        <Search className="w-4 h-4 text-neutral-400" />
+                        <MagnifyingGlass className="w-4 h-4 text-neutral-400" />
                         <span className="text-neutral-700">{search}</span>
                       </button>
                     ))}
