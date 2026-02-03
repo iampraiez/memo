@@ -391,29 +391,30 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50 flex items-center justify-center p-4">
       <div className="w-full max-w-2xl">
         {/* Progress Bar */}
-        <div className="mb-8">
+        <div className="mb-6 sm:mb-8">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-neutral-600">
+            <span className="text-xs sm:text-sm text-neutral-600">
               Step {currentStep + 1} of {steps.length}
             </span>
-            <span className="text-sm text-neutral-600">
+            <span className="text-xs sm:text-sm text-neutral-600">
               {Math.round(((currentStep + 1) / steps.length) * 100)}% complete
             </span>
           </div>
-          <div className="w-full bg-neutral-200 rounded-full h-2">
+          <div className="w-full bg-neutral-200 rounded-full h-1.5 sm:h-2">
             <div
-              className="bg-primary-600 h-2 rounded-full transition-all duration-300"
+              className="bg-primary-600 h-1.5 sm:h-2 rounded-full transition-all duration-300"
               style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
             />
           </div>
         </div>
 
         {/* Content Card */}
-        <Card className="p-8 space-y-8">
+        <Card className="p-4 sm:p-8 space-y-6 sm:space-y-8">
           {renderStep()}
+
 
           {/* Navigation */}
           <div className="flex items-center justify-between pt-6 border-t border-neutral-200">

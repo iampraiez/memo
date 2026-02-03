@@ -1,41 +1,68 @@
-import React from "react";
-import { LucideIcon } from "lucide-react";
-import { cn } from "../../lib/utils";
-import Button from "./Button";
+"use client";
+
+import React from 'react';
+import { Calendar, Plus, Sparkle } from '@phosphor-icons/react';
+import Button from './Button';
 
 interface EmptyStateProps {
-  icon: LucideIcon;
+  icon?: React.ReactNode;
   title: string;
   description: string;
-  action?: {
-    label: string;
-    onClick: () => void;
-  };
-  className?: string;
+  actionLabel?: string;
+  onAction?: () => void;
+  secondaryActionLabel?: string;
+  onSecondaryAction?: () => void;
 }
 
-const EmptyState: React.FC<EmptyStateProps> = ({
-  icon: Icon,
+export default function EmptyState({
+  icon,
   title,
   description,
-  action,
-  className,
-}) => {
+  actionLabel,
+  onAction,
+  secondaryActionLabel,
+  onSecondaryAction,
+}: EmptyStateProps) {
   return (
-    <div
-      className={cn(
-        "flex flex-col items-center justify-center text-center py-12 px-4",
-        className,
-      )}
-    >
-      <div className="w-16 h-16 bg-neutral-100 rounded-full flex items-center justify-center mb-4">
-        <Icon className="w-8 h-8 text-neutral-400" />
+    <div className="flex items-center justify-center min-h-[400px] p-8">
+      <div className="text-center max-w-md space-y-6">
+        <div className="w-20 h-20 bg-gradient-to-br from-primary-100 to-secondary-100 rounded-2xl flex items-center justify-center mx-auto shadow-sm">
+          {icon || <Calendar className="w-10 h-10 text-primary-600" weight="duotone" />}
+        </div>
+        
+        <div className="space-y-2">
+          <h3 className="text-xl font-bold text-neutral-900">
+            {title}
+          </h3>
+          <p className="text-neutral-600 leading-relaxed">
+            {description}
+          </p>
+        </div>
+
+        {(actionLabel || secondaryActionLabel) && (
+          <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+            {actionLabel && onAction && (
+              <Button
+                onClick={onAction}
+                className="inline-flex items-center"
+              >
+                <Plus className="w-4 h-4 mr-2" weight="bold" />
+                {actionLabel}
+              </Button>
+            )}
+            {secondaryActionLabel && onSecondaryAction && (
+              <Button
+                variant="secondary"
+                onClick={onSecondaryAction}
+                className="inline-flex items-center"
+              >
+                <Sparkle className="w-4 h-4 mr-2" weight="duotone" />
+                {secondaryActionLabel}
+              </Button>
+            )}
+          </div>
+        )}
       </div>
-      <h3 className="text-lg font-semibold text-neutral-900 mb-2">{title}</h3>
-      <p className="text-neutral-600 max-w-sm mb-6">{description}</p>
-      {action && <Button onClick={action.onClick}>{action.label}</Button>}
     </div>
   );
-};
-
-export default EmptyState;
+}

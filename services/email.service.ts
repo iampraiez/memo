@@ -15,20 +15,25 @@ interface SendEmailParams {
   html: string;
 }
 
-export const sendEmail = async ({ to, subject, html }: SendEmailParams) => {
-  try {
-    const info = await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to,
-      subject,
-      html,
-    });
-    logger.info(`Email sent to ${to}: ${info.messageId}`);
-    return { success: true, messageId: info.messageId };
-  } catch (error) {
-    logger.error(`Error sending email to ${to}:`, error);
-    return { success: false, error };
+export const sendEmail = async ({ to, subject, html }: SendEmailParams, retries = 3) => {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const info = await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to,
+        subject,
+        html,
+      });
+      logger.info(`Email sent to ${to}: ${info.messageId}`);
+      return { success: true, messageId: info.messageId };
+    } catch (error) {
+      logger.error(`Email attempt ${i + 1} for ${to} failed:`, error);
+      if (i === retries - 1) return { success: false, error };
+      // Exponential backoff
+      await new Promise((resolve) => setTimeout(resolve, Math.pow(2, i) * 1000));
+    }
   }
+  return { success: false, error: new Error("Max retries reached") };
 };
 
 export const sendVerificationEmail = async (email: string, code: string) => {

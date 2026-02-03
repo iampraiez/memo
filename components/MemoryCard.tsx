@@ -11,6 +11,7 @@ import {
   Share,
   Download,
 } from "lucide-react";
+import Image from "next/image";
 import { Memory } from "@/types/types";
 import Card from "./ui/Card";
 import Tag from "./ui/Tag";
@@ -81,7 +82,7 @@ const MemoryCard: React.FC<MemoryCardProps> = ({
         {/* Header */}
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <h3 className="font-semibold text-neutral-900 text-lg">
+            <h3 className="font-semibold text-neutral-900 text-base sm:text-lg line-clamp-1">
               {memory.title}
             </h3>
             <div className="flex items-center space-x-3 mt-1 text-sm text-neutral-500">
@@ -172,18 +173,23 @@ const MemoryCard: React.FC<MemoryCardProps> = ({
         </div>
 
         {/* image Thumbnail */}
-        {memory.images && memory.images.length > 0 && (
-          <div className="aspect-video bg-neutral-100 rounded-lg overflow-hidden">
-            <img
+        {memory.images && memory.images.length > 0 ? (
+          <div className="relative aspect-video bg-neutral-100 rounded-lg overflow-hidden group/image">
+            <Image
               src={memory.images[0]}
               alt={memory.title}
-              className="w-full h-full object-cover"
+              fill
+              className="object-cover transition-transform duration-500 group-hover/image:scale-105"
             />
             {memory.images.length > 1 && (
-              <div className="absolute bottom-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded">
+              <div className="absolute bottom-2 right-2 bg-black/50 backdrop-blur-sm text-white text-[10px] px-2 py-1 rounded-full font-medium">
                 +{memory.images.length - 1} more
               </div>
             )}
+          </div>
+        ) : (
+          <div className="aspect-video bg-gradient-to-br from-neutral-50 to-neutral-100 rounded-lg flex items-center justify-center border border-neutral-100">
+            <Calendar className="w-8 h-8 text-neutral-200" />
           </div>
         )}
 

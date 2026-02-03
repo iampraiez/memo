@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { Inter } from "next/font/google";
 import "./global.css";
 import { Providers } from "./providers";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import { Toaster } from "sonner";
 
 const inter = Inter({ 
@@ -34,10 +35,12 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <Providers session={session}>
-          {children}
-          <Toaster position="top-right" richColors />
-        </Providers>
+        <ErrorBoundary>
+          <Providers session={session}>
+            {children}
+            <Toaster position="top-right" richColors />
+          </Providers>
+        </ErrorBoundary>
       </body>
     </html>
   );

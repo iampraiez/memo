@@ -149,15 +149,12 @@ const StoryGeneratorPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-fit bg-neutral-50">
-      <div className="flex">
-        <main className="flex">
-          <div className="p-6 max-w-6xl mx-auto">
-            <div className="space-y-6">
-              <div>
-                <h1 className="text-3xl font-display font-bold text-neutral-900">
-                  AI Story Generator
-                </h1>
+    <div className="min-h-fit bg-neutral-50 p-4 sm:p-6">
+      <div className="max-w-6xl mx-auto space-y-6">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-display font-bold text-neutral-900">
+            AI Story Generator
+          </h1>
                 <p className="text-neutral-600 mt-1">
                   Create beautiful stories from your memories using AI
                 </p>
@@ -371,9 +368,6 @@ const StoryGeneratorPage: React.FC = () => {
                   </Card>
                 </div>
               </div>
-            </div>
-          </div>
-        </main>
       </div>
     </div>
   );

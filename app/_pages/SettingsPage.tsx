@@ -9,6 +9,7 @@ import {
   SignOut,
   ArrowsClockwise,
 } from "@phosphor-icons/react";
+import Image from "next/image";
 import Modal from "@/components/ui/Modal";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
@@ -90,23 +91,23 @@ const SettingsPage: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex gap-6">
+        <div className="flex flex-col lg:flex-row gap-6">
           {/* Sidebar */}
-          <div className="w-64 shrink-0">
-            <Card className="p-4">
-              <nav className="space-y-1">
+          <div className="w-full lg:w-64 shrink-0 overflow-x-auto pb-2 lg:pb-0">
+            <Card className="p-2 lg:p-4">
+              <nav className="flex lg:flex-col space-x-2 lg:space-x-0 lg:space-y-1">
                 {sections.map((section) => (
                   <button
                     key={section.id}
                     onClick={() => setActiveSection(section.id)}
-                    className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
+                    className={`flex items-center space-x-3 px-4 py-2 sm:py-3 rounded-lg transition-colors whitespace-nowrap lg:w-full ${
                       activeSection === section.id
-                        ? "bg-primary-100 text-primary-900"
+                        ? "bg-primary-100 text-primary-900 shadow-sm"
                         : "text-neutral-700 hover:bg-neutral-100"
                     }`}
                   >
-                    <section.icon className="w-5 h-5" />
-                    <span className="font-medium">{section.label}</span>
+                    <section.icon className="w-5 h-5 flex-shrink-0" />
+                    <span className="font-medium text-sm sm:text-base">{section.label}</span>
                   </button>
                 ))}
               </nav>
@@ -130,11 +131,14 @@ const SettingsPage: React.FC = () => {
                         Profile Picture
                       </label>
                       <div className="flex items-center space-x-4">
-                        <img
-                          src={localAvatar || "/default-avatar.png"}
-                          alt="Profile"
-                          className="w-20 h-20 rounded-full object-cover"
-                        />
+                        <div className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-neutral-100 shadow-sm">
+                          <Image
+                            src={localAvatar || "/default-avatar.png"}
+                            alt="Profile"
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
                         <input
                           type="file"
                           accept="image/*"

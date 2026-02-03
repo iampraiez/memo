@@ -288,7 +288,7 @@ const SearchPage: React.FC<SearchPageProps> = ({
                 {/* No Results */}
                 {groupedResults.memories.length === 0 && !isSearching && (
                   <EmptyState
-                    icon={MagnifyingGlass}
+                    icon={<MagnifyingGlass />}
                     title="No results found"
                     description={(() => {
                       if (searchQuery.trim()) {

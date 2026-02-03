@@ -15,6 +15,7 @@ import FamilyTimelinePage from "@/app/_pages/FamilyTimelinePage";
 import PrivacySettingsPage from "@/app/_pages/PrivacySettingPage";
 import OfflineBanner from "@/components/ui/OfflineBanner";
 import NotificationToast from "@/components/ui/NotificationToast";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import { Memory } from "@/types/types";
 import { useNetworkStatus } from "@/lib/utils";
 import { usePathname, useRouter } from "next/navigation";
@@ -206,6 +207,7 @@ function App() {
                         onEditMemory={handleEditMemory}
                         onDeleteMemory={handleDeleteMemory}
                         onShareMemory={handleShareMemory}
+                        onAddMemory={() => setCreateModalOpen(true)}
                       />
                     </div>
                   </div>
