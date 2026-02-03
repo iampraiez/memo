@@ -287,7 +287,7 @@ const AnalyticsPage: React.FC = () => {
               <Card className="bg-linear-to-r from-primary-50 to-secondary-50 border-primary-200">
                 <div className="p-6">
                   <div className="flex items-start space-x-4">
-                    <div className="w-12 h-12 bg-linear-to-br from-primary-600 to-secondary-600 rounded-xl flex items-center justify-center shrink-0">
+                    <div className="w-12 h-12 bg-gradient-to-br from-primary-600 to-secondary-600 rounded-xl flex items-center justify-center shrink-0">
                       <TrendUp className="w-6 h-6 text-white" />
                     </div>
                     <div className="space-y-3">

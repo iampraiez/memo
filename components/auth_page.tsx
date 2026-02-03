@@ -181,7 +181,7 @@ const AuthPage: React.FC<AuthPageProps> = (props) => {
     return (
       <div className="min-h-screen bg-neutral-50 flex items-center justify-center px-4">
         <div className="w-full max-w-md bg-white rounded-2xl shadow-sm border border-neutral-100 p-8 text-center space-y-6">
-          <div className="w-16 h-16 bg-linear-to-br from-primary-600 to-secondary-600 rounded-full flex items-center justify-center mx-auto">
+          <div className="w-16 h-16 bg-gradient-to-br from-primary-600 to-secondary-600 rounded-full flex items-center justify-center mx-auto">
             <EnvelopeSimple className="w-8 h-8 text-white" />
           </div>
           <div className="space-y-2">
@@ -226,7 +226,7 @@ const AuthPage: React.FC<AuthPageProps> = (props) => {
       <div className="w-full max-w-md bg-white rounded-2xl shadow-sm border border-neutral-100 p-8 space-y-6">
         {/* Header */}
         <div className="text-center space-y-3">
-          <div className="w-12 h-12 bg-linear-to-br from-primary-600 to-secondary-600 rounded-xl flex items-center justify-center mx-auto">
+          <div className="w-12 h-12 bg-gradient-to-br from-primary-600 to-secondary-600 rounded-xl flex items-center justify-center mx-auto">
             <button onClick={() => route.push("/")}>
               <span className="text-white font-bold text-sm">ML</span>
             </button>

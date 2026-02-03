@@ -13,7 +13,6 @@ export async function GET() {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    // Get user settings
     const [user] = await db.query.users.findMany({
       where: sql`email = ${session.user.email}`,
       limit: 1,
@@ -30,7 +29,7 @@ export async function GET() {
       email: user.email,
       avatar: user.image,
       preferences: {
-        theme: "light", // Default theme, can be extended
+        theme: "light",
       },
     };
 
