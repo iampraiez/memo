@@ -1,6 +1,6 @@
-"use client";
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   ArrowRight,
   Sparkles,
@@ -153,9 +153,12 @@ const LandingPage: React.FC = () => {
 
             <div className="mt-16 animate-fade-in-up animation-delay-500 relative">
               <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent z-10 h-20 bottom-0 pointer-events-none" />
-              <img
+              <Image
                 src="/memory.png"
                 alt="Memory Lane App Interface"
+                width={1200}
+                height={800}
+                priority
                 className="w-full max-w-5xl mx-auto rounded-3xl shadow-2xl border-4 border-white/50 backdrop-blur-xl ring-1 ring-black/5"
               />
             </div>

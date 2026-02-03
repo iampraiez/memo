@@ -4,13 +4,24 @@ import { auth } from "@/lib/auth";
 import { Inter } from "next/font/google";
 import "./global.css";
 import { Providers } from "./providers";
+import { Toaster } from "sonner";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ 
+  subsets: ["latin"],
+  display: 'swap',
+  preload: true,
+});
 
 export const metadata: Metadata = {
-  title: "Memory Lane",
-  description: "Your digital family memory book",
+  title: "Memory Lane - Your Personal Timeline",
+  description: "Capture, organize, and rediscover your most precious memories with AI-powered insights",
   robots: "index, follow",
+  keywords: ["memory", "timeline", "AI", "personal history", "family memories"],
+  openGraph: {
+    title: "Memory Lane - Your Personal Timeline",
+    description: "Capture, organize, and rediscover your most precious memories with AI-powered insights",
+    type: "website",
+  },
 };
 
 export default async function RootLayout({
@@ -25,6 +36,7 @@ export default async function RootLayout({
       <body className={inter.className}>
         <Providers session={session}>
           {children}
+          <Toaster position="top-right" richColors />
         </Providers>
       </body>
     </html>
