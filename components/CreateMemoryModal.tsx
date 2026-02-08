@@ -89,24 +89,39 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
     setAiGeneratedContent(""); // Clear AI generated content on modal open/edit
   }, [editingMemory, isOpen]); // Depend on editingMemory and isOpen
 
-  // Function to simulate file upload to a server-side 'files' directory
-  const simulateFileUpload = async (filesToUpload: File[]): Promise<void> => {
-    console.log("Simulating file upload for:", filesToUpload);
-    // /// UPLOAD TO BACKEND ///
-    // In a real application, you would send these files to your backend server
-    // using FormData and an API call (e.g., fetch or axios).
-    // The backend would then save them to a directory (like 'files/')
-    // and return the public URLs for these files.
+  // Real file upload to Dropbox via our API
+  const handleUpload = async (filesToUpload: File[]): Promise<void> => {
+    const formData = new FormData();
+    filesToUpload.forEach((file) => formData.append("file", file));
 
-    await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate network delay
+    try {
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
 
-    // For demonstration, we'll use Blob URLs and assume they are 'server URLs' like /files/image.jpg
-    // In a real scenario, the backend would return the actual server URLs.
-    const uploadedUrls = filesToUpload.map((file) => `/files/${file.name}`);
-    console.log("Simulated uploaded URLs:", uploadedUrls);
-    // The MediaUploader component manages its own internal state using its onFilesChange prop
-    // and expects the updated UploadedFile objects from there. We don't return URLs here directly
-    // but the onUpload prop is used to signal the completion of the upload process.
+      if (!response.ok) {
+        throw new Error("Upload failed");
+      }
+
+      const { urls } = await response.json();
+
+      // Update the formData with real Dropbox URLs
+      setFormData((prev) => ({
+        ...prev,
+        images: prev.images.map((img) => {
+          // Find the corresponding uploaded file by name
+          const uploadIndex = filesToUpload.findIndex((f) => f.name === img.name);
+          if (uploadIndex !== -1 && img.url.startsWith("blob:")) {
+            return { ...img, url: urls[uploadIndex] };
+          }
+          return img;
+        }),
+      }));
+    } catch (error) {
+      console.error("Upload failed:", error);
+      throw error;
+    }
   };
 
   const moods = [
@@ -378,8 +393,8 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
                   images: uploadedFiles, // Store UploadedFile[] directly in state
                 }));
               }}
-              // No backend yet
-              onUpload={simulateFileUpload} // Pass the simulated upload function
+              // real upload via Dropbox API
+              onUpload={handleUpload} // Pass the real upload function
             />
           </div>
         )}

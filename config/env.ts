@@ -11,6 +11,9 @@ const envSchema = z.object({
   EMAIL_USER: z.string().email(),
   EMAIL_PASS: z.string().optional(),
   DROPBOX_ACCESS_TOKEN: z.string().optional(),
+  DROPBOX_APP_KEY: z.string().optional(),
+  DROPBOX_APP_SECRET: z.string().optional(),
+  DROPBOX_REFRESH_TOKEN: z.string().optional(),
   GEMINI_API_KEY: z.string().min(1),
   NODE_ENV: z
     .enum(["development", "production", "test"])

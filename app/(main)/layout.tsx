@@ -27,6 +27,10 @@ export default function DashboardLayout({
   const { data: session, status } = useSession();
   const createMemoryMutation = useCreateMemory();
 
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [pathname]);
+
   // useEffect(() => {
   //   if (status === "unauthenticated") {
   //     router.push("/login");

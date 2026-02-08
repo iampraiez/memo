@@ -1,113 +1,11 @@
-"use client";
-import React, { useState } from "react";
-import Timeline from "@/components/Timeline";
-import { useMemories, useDeleteMemory, useUpdateMemory } from "@/hooks/useMemories";
-import { Memory } from "@/types/types";
-import { ArrowsClockwise } from "@phosphor-icons/react";
-import Loading from "@/components/ui/Loading";
-import { toast } from "sonner";
-import MemoryDetail from "@/components/MemoryDetail"; // Corrected import
-import CreateMemoryModal from "@/components/CreateMemoryModal";
+import React from "react";
+import TimelineClient from "./TimelineClient";
+import { getTimelineMemories } from "@/lib/timeline-ssr";
 
-export default function TimelinePage() {
-  const { data: memoriesData, isLoading: isLoadingMemories } = useMemories();
-  const deleteMemoryMutation = useDeleteMemory();
-  const updateMemoryMutation = useUpdateMemory();
-  const [viewingMemoryDetail, setViewingMemoryDetail] = useState<string | null>(null);
-  const [selectedMemory, setSelectedMemory] = useState<Memory | null>(null);
-  const [editModalOpen, setEditModalOpen] = useState(false);
-
-  const memories = memoriesData?.memories || [];
-
-  const handleEditMemory = (memory: Memory) => {
-    setSelectedMemory(memory);
-    setEditModalOpen(true);
-  };
-
-  const handleDeleteMemory = async (memoryId: string) => {
-    if (window.confirm("Are you sure you want to delete this memory?")) {
-      try {
-        await deleteMemoryMutation.mutateAsync(memoryId);
-        toast.success("Memory deleted");
-      } catch (error) {
-        toast.error("Failed to delete memory");
-      }
-    }
-  };
-
-  const handleShareMemory = async (memory: Memory) => {
-    try {
-      const response = await fetch(`/api/memories/${memory.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ isPublic: !memory.isPublic })
-       });
-       if(!response.ok) throw new Error("Failed");
-       toast.success(memory.isPublic ? "Memory is now private" : "Memory shared with sanctuary circle");
-    } catch (error) {
-      toast.error("Failed to update share status");
-    }
-  };
-
-  const handleSaveMemory = async (memory: Memory) => {
-    try {
-      const { title, content, date, mood, tags, location, images, isPublic } = memory;
-      await updateMemoryMutation.mutateAsync({ 
-        id: memory.id, 
-        data: { title, content, date, mood, tags, location, images, isPublic } 
-      });
-      toast.success("Memory saved");
-    } catch (error) {
-      toast.error("Failed to save memory");
-    }
-  };
-
-  if (viewingMemoryDetail) {
-    return (
-      <MemoryDetail
-        memoryId={viewingMemoryDetail}
-        onBack={() => setViewingMemoryDetail(null)}
-        onEdit={handleEditMemory}
-        onShareMemory={handleShareMemory}
-      />
-    );
-  }
+export default async function TimelinePage() {
+  const initialMemories = await getTimelineMemories() || [];
 
   return (
-    <div className="p-6">
-      <div className="space-y-6">
-        <h1 className="text-3xl font-display font-bold text-neutral-900">
-          Your Timeline
-        </h1>
-        {isLoadingMemories ? (
-          <Loading fullPage text="Retrieving your memories..." />
-        ) : (
-          <Timeline
-            memories={memories}
-            onMemoryClick={(m) => setViewingMemoryDetail(m.id)}
-            onEditMemory={handleEditMemory}
-            onDeleteMemory={handleDeleteMemory}
-            onShareMemory={handleShareMemory}
-          />
-        )}
-      </div>
-
-      <CreateMemoryModal
-        isOpen={editModalOpen}
-        onClose={() => {
-          setEditModalOpen(false);
-          setSelectedMemory(null);
-        }}
-        onSave={async (val) => {
-            if (selectedMemory) {
-               await updateMemoryMutation.mutateAsync({ id: selectedMemory.id, data: val });
-               toast.success("Memory updated");
-            }
-            setEditModalOpen(false);
-            setSelectedMemory(null);
-        }}
-        editingMemory={selectedMemory || undefined}
-      />
-    </div>
+    <TimelineClient initialMemories={initialMemories} />
   );
 }
