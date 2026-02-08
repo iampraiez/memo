@@ -15,6 +15,7 @@ export const users = pgTable("users", {
   name: text("name"),
   password: text("password"),
   image: text("image"),
+  bio: text("bio"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
   emailVerified: timestamp("email_verified"),
@@ -205,6 +206,17 @@ export const reactions = pgTable("reactions", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+export const follows = pgTable("follows", {
+  id: text("id").primaryKey(),
+  followerId: text("follower_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  followingId: text("following_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 export const stories = pgTable("stories", {
   id: text("id").primaryKey(),
   userId: text("user_id")
@@ -334,4 +346,15 @@ export const memoryMediaRelations = relations(memoryMedia, ({ one }) => ({
   }),
 }));
 
-
+export const followsRelations = relations(follows, ({ one }) => ({
+  follower: one(users, {
+    fields: [follows.followerId],
+    references: [users.id],
+    relationName: "follower",
+  }),
+  following: one(users, {
+    fields: [follows.followingId],
+    references: [users.id],
+    relationName: "following",
+  }),
+}));

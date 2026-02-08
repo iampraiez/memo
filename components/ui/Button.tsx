@@ -49,7 +49,14 @@ const Button: React.FC<ButtonProps> = ({
       onClick={onClick}
       {...props}
     >
-      {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+      {loading && (
+        <div className="mr-2">
+          <div className="w-4 h-4 rounded-md bg-white/20 flex items-center justify-center animate-pulse relative">
+            <div className="absolute inset-0 border-2 border-white/20 border-t-white rounded-md animate-spin" />
+            <span className="text-[6px] font-bold">M</span>
+          </div>
+        </div>
+      )}
       {children}
     </button>
   );

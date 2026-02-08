@@ -32,12 +32,12 @@ const Header: React.FC<HeaderProps> = ({
   return (
     <header
       className={cn(
-        "bg-white/80 backdrop-blur-xl border-b border-neutral-200/50 sticky top-0 z-40 transition-all duration-300",
+        "bg-white/90 backdrop-blur-xl border-b border-neutral-200/60 sticky top-0 z-40 transition-all duration-300 shadow-[0_1px_3px_rgba(0,0,0,0.02)]",
         className
       )}
     >
       <div className="px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 sm:h-18">
+        <div className="flex items-center justify-between h-16 sm:h-20">
           {/* Left Section */}
           <div className="flex items-center space-x-3">
             {/* Mobile Menu Button - Refined */}

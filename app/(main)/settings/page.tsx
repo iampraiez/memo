@@ -17,11 +17,12 @@ import Select from "@/components/ui/Select";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import { signOut } from "next-auth/react";
 import { useUserSettings, useUpdateUserSettings } from "@/hooks/useUserSettings";
+import Loading from "@/components/ui/Loading";
 
 const themeOptions = [
   { value: "light", label: "Light" },
   { value: "dark", label: "Dark" },
-  { value: "auto", label: "Auto" },
+  { value: "system", label: "System" },
 ];
 
 export default function SettingsPage() {
@@ -33,11 +34,13 @@ export default function SettingsPage() {
 
   const [localName, setLocalName] = useState("");
   const [localAvatar, setLocalAvatar] = useState("");
+  const [localBio, setLocalBio] = useState("");
 
   React.useEffect(() => {
     if (settings) {
       setLocalName(settings.name);
       setLocalAvatar(settings.avatar || "");
+      setLocalBio(settings.bio || "");
     }
   }, [settings]);
 
@@ -45,18 +48,12 @@ export default function SettingsPage() {
     await updateSettings.mutateAsync({
       name: localName,
       avatar: localAvatar,
+      bio: localBio,
     });
   };
 
   if (isLoading) {
-    return (
-      <div className="min-h-[400px] flex items-center justify-center">
-        <div className="text-center">
-          <ArrowsClockwise className="w-8 h-8 text-primary-600 animate-spin mx-auto mb-4" />
-          <p className="text-neutral-600">Loading settings...</p>
-        </div>
-      </div>
-    );
+    return <Loading fullPage text="Applying your preferences..." />;
   }
 
   if (error || !settings) {
@@ -163,6 +160,16 @@ export default function SettingsPage() {
                       value={localName}
                       onChange={(e) => setLocalName(e.target.value)}
                       placeholder="Your name"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 mb-2">Bio</label>
+                    <textarea
+                      value={localBio}
+                      onChange={(e) => setLocalBio(e.target.value)}
+                      placeholder="Tell us a bit about yourself..."
+                      className="w-full px-4 py-3 rounded-xl border border-neutral-200 focus:ring-2 focus:ring-primary-500 min-h-[100px] resize-none"
                     />
                   </div>
 

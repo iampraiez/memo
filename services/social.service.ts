@@ -48,4 +48,20 @@ export const socialService = {
   toggleReaction: (memoryId: string, type: string = "heart") => {
     return apiService.post<{ success: boolean }>(`/api/memories/${memoryId}/reactions`, { type });
   },
+
+  followUser: (userId: string) => {
+    return apiService.post<{ success: boolean }>(`/api/user/follow`, { userId });
+  },
+
+  unfollowUser: (userId: string) => {
+    return apiService.post<{ success: boolean }>(`/api/user/unfollow`, { userId });
+  },
+
+  getFollowers: (userId: string) => {
+    return apiService.get<{ followers: any[] }>(`/api/user/followers/${userId}`);
+  },
+
+  getFollowing: (userId: string) => {
+    return apiService.get<{ following: any[] }>(`/api/user/following/${userId}`);
+  },
 };

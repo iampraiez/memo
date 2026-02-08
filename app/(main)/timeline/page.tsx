@@ -4,6 +4,7 @@ import Timeline from "@/components/Timeline";
 import { useMemories, useDeleteMemory, useUpdateMemory } from "@/hooks/useMemories";
 import { Memory } from "@/types/types";
 import { ArrowsClockwise } from "@phosphor-icons/react";
+import Loading from "@/components/ui/Loading";
 import { toast } from "sonner";
 import MemoryDetail from "@/components/MemoryDetail"; // Corrected import
 import CreateMemoryModal from "@/components/CreateMemoryModal";
@@ -66,9 +67,7 @@ export default function TimelinePage() {
           Your Timeline
         </h1>
         {isLoadingMemories ? (
-          <div className="flex items-center justify-center py-20">
-            <ArrowsClockwise className="w-8 h-8 text-primary-600 animate-spin" />
-          </div>
+          <Loading fullPage text="Retrieving your memories..." />
         ) : (
           <Timeline
             memories={memories}

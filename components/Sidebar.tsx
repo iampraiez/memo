@@ -34,7 +34,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   
   const navigation = [
     { name: "Timeline", icon: House, id: "timeline" },
-    { name: "Family", icon: Users, id: "family" },
+    { name: "Friends", icon: Users, id: "family" },
     { name: "Search", icon: MagnifyingGlass, id: "search" },
     { name: "Tags", icon: Tag, id: "tags" },
     { name: "Stories", icon: BookOpen, id: "stories" },
@@ -60,17 +60,20 @@ const Sidebar: React.FC<SidebarProps> = ({
       <aside
         className={cn(
           "fixed inset-y-0 left-0 w-[280px] sm:w-[320px] lg:w-72 bg-white border-r border-neutral-200/50 shadow-2xl lg:shadow-none transform transition-all duration-500 ease-in-out z-[50]",
-          isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
-          "lg:pt-24 lg:pb-8"
+          "lg:translate-x-0",
+          "lg:pb-8"
         )}
       >
         <div className="flex flex-col h-full">
-          {/* Mobile Sidebar Logo - Refined */}
-          <div className="lg:hidden p-6 flex items-center space-x-3 border-b border-neutral-100 mb-2">
-            <div className="w-10 h-10 bg-primary-900 rounded-xl flex items-center justify-center shadow-lg transform rotate-3">
-              <span className="text-secondary-400/40 font-serif font-bold text-lg">M</span>
+          {/* Sidebar Branding - Premium */}
+          <div className="p-6 flex items-center space-x-3 mb-2">
+            <div className="w-10 h-10 bg-primary-900 rounded-xl flex items-center justify-center shadow-lg shadow-primary-900/20 transform rotate-3">
+              <span className="text-white font-serif font-bold text-xl">M</span>
             </div>
-            <span className="text-xl font-display font-bold text-neutral-900 tracking-tight">Memory Lane</span>
+            <div className="flex flex-col">
+              <span className="text-xl font-display font-bold text-neutral-900 tracking-tight leading-none">Memo</span>
+              <span className="text-[10px] font-bold text-primary-600 uppercase tracking-widest mt-1">Sanctuary</span>
+            </div>
           </div>
 
           {/* Navigation */}

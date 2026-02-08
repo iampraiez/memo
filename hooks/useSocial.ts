@@ -63,3 +63,39 @@ export const useDeleteComment = () => {
     },
   });
 };
+
+export const useFollowUser = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+      mutationFn: (userId: string) => socialService.followUser(userId),
+      onSuccess: (_, userId) => {
+        queryClient.invalidateQueries({ queryKey: ["profile", userId] });
+      },
+    });
+};
+
+export const useUnfollowUser = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+      mutationFn: (userId: string) => socialService.unfollowUser(userId),
+      onSuccess: (_, userId) => {
+        queryClient.invalidateQueries({ queryKey: ["profile", userId] });
+      },
+    });
+};
+
+export const useFollowers = (userId: string) => {
+    return useQuery({
+        queryKey: ["followers", userId],
+        queryFn: () => socialService.getFollowers(userId),
+        enabled: !!userId,
+    });
+};
+
+export const useFollowing = (userId: string) => {
+    return useQuery({
+        queryKey: ["following", userId],
+        queryFn: () => socialService.getFollowing(userId),
+        enabled: !!userId,
+    });
+};

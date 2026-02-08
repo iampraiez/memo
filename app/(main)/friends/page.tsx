@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { Users, ArrowsClockwise, Heart, ChatCircle } from "@phosphor-icons/react";
+import Loading from "@/components/ui/Loading";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import { useTimelineMemories } from "@/hooks/useSocial";
@@ -16,18 +17,14 @@ export default function FamilyTimelinePage() {
   const family = familyData?.members || [];
 
   if (isLoadingTimeline || isLoadingFamily) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <ArrowsClockwise className="w-8 h-8 text-primary-600 animate-spin" />
-      </div>
-    );
+    return <Loading fullPage text="Curating your feed..." />;
   }
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-12">
       <header>
-        <h1 className="text-4xl font-display font-bold text-neutral-900 tracking-tight">Family Archive</h1>
-        <p className="text-neutral-600 mt-2">A shared space for your collective history</p>
+        <h1 className="text-4xl font-display font-bold text-neutral-900 tracking-tight">Friends Feed</h1>
+        <p className="text-neutral-600 mt-2">Connect and share memories with your sanctuary circle</p>
       </header>
 
       <div className="space-y-8">
@@ -73,8 +70,8 @@ export default function FamilyTimelinePage() {
           <EmptyState
             icon={<Users className="w-12 h-12 text-secondary-400" weight="duotone" />}
             title="Shared Heritage"
-            description="Invite your family members to start building a collective archive of your shared journey."
-            actionLabel="Invite Family"
+            description="Invite your inner circle to start building a collective archive of your shared journey."
+            actionLabel="Invite Friends"
             onAction={() => {/* TODO: Implement invite logic */}}
           />
         )}

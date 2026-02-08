@@ -12,6 +12,7 @@ import { jsPDF } from "jspdf";
 import { Document, Paragraph, Packer, TextRun } from "docx";
 import { useCreateStory } from "@/hooks/useStories";
 import { toast } from "sonner";
+import Loading from "@/components/ui/Loading";
 
 interface StorySettings {
   dateRange: {
@@ -201,8 +202,7 @@ export default function StoriesPage() {
             )}
             {createStoryMutation.isPending && (
               <div className="flex flex-col items-center justify-center py-20">
-                <ArrowsClockwise className="w-12 h-12 text-primary-600 animate-spin mb-4" />
-                <p className="text-neutral-600">Our AI is crafting your narrative...</p>
+                <Loading size="lg" text="Our AI is crafting your narrative..." />
               </div>
             )}
             {generatedStory && (

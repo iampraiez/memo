@@ -6,6 +6,7 @@ import {
   Clock,
   ArrowsClockwise,
 } from "@phosphor-icons/react";
+import Loading from "@/components/ui/Loading";
 import MemoryCard from "@/components/MemoryCard";
 import EmptyState from "@/components/ui/EmptyState";
 import Modal from "@/components/ui/Modal";
@@ -53,11 +54,7 @@ export default function SearchPage() {
   }, [searchQuery, allMemories]);
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <ArrowsClockwise className="w-8 h-8 text-primary-600 animate-spin" />
-      </div>
-    );
+    return <Loading fullPage text="Searching your journey..." />;
   }
 
   return (

@@ -10,6 +10,7 @@ import { useSession } from "next-auth/react";
 import CreateMemoryModal from "@/components/CreateMemoryModal";
 import { useCreateMemory } from "@/hooks/useMemories";
 import { toast } from "sonner";
+import Loading from "@/app/loading";
 
 export default function DashboardLayout({
   children,

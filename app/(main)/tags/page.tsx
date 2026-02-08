@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { Tag as TagIcon, TrendUp, Calendar, MagnifyingGlass, ArrowsClockwise } from "@phosphor-icons/react";
+import Loading from "@/components/ui/Loading";
 import MemoryCard from "@/components/MemoryCard";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
@@ -34,11 +35,7 @@ export default function TagsPage() {
     : [];
 
   if (tagsLoading || memoriesLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <ArrowsClockwise className="w-8 h-8 text-primary-600 animate-spin" />
-      </div>
-    );
+    return <Loading fullPage text="Organizing your sanctuary..." />;
   }
 
   return (

@@ -6,6 +6,8 @@ export interface UserSettings {
   name: string;
   email: string;
   avatar?: string;
+  bio?: string;
+  createdAt: string;
   preferences: {
     theme: "light" | "dark" | "system";
     emailNotifications?: boolean;
@@ -20,5 +22,9 @@ export const userService = {
 
   updateSettings: (data: Partial<UserSettings>) => {
     return apiService.patch<UserSettings>("/api/user/settings", data);
+  },
+  
+  getProfile: (userId: string) => {
+    return apiService.get<UserSettings & { followersCount: number; followingCount: number; isFollowing: boolean }>(`/api/user/profile/${userId}`);
   },
 };

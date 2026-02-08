@@ -13,6 +13,7 @@ import Card from "@/components/ui/Card";
 import StatCard from "@/components/ui/StatCard";
 import Select from "@/components/ui/Select";
 import { useAnalytics } from "@/hooks/useAnalytics";
+import Loading from "@/components/ui/Loading";
 
 const timeRangeOptions = [
   { value: "week", label: "Last Week" },
@@ -25,11 +26,7 @@ export default function AnalyticsPage() {
   const { data: analytics, isLoading, error } = useAnalytics(timeRange);
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <ArrowsClockwise className="w-8 h-8 text-primary-600 animate-spin" />
-      </div>
-    );
+    return <Loading fullPage text="Decrypting emotional patterns..." />;
   }
 
   if (error || !analytics) {

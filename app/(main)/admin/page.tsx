@@ -5,17 +5,14 @@ import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import StatCard from "@/components/ui/StatCard";
 import { useAdminStats } from "@/hooks/useAdminStats";
+import Loading from "@/components/ui/Loading";
 
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState<"overview" | "jobs" | "logs">("overview");
   const { data, isLoading, error, refetch } = useAdminStats();
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <ArrowsClockwise className="w-8 h-8 text-primary-600 animate-spin" />
-      </div>
-    );
+    return <Loading fullPage text="Accessing system intelligence..." />;
   }
 
   if (error) {
@@ -88,7 +85,7 @@ export default function AdminPage() {
       {/* Simplified Jobs and Logs for brevity in this route migration */}
       {activeTab !== "overview" && (
           <Card className="p-20 text-center">
-              <ArrowsClockwise className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
+              <Loading size="md" className="mb-4" text="" />
               <p className="text-neutral-500 font-medium uppercase tracking-widest">Management tools coming to this route soon</p>
           </Card>
       )}

@@ -28,6 +28,8 @@ export async function GET() {
       name: user.name || "",
       email: user.email,
       avatar: user.image,
+      bio: user.bio,
+      createdAt: user.createdAt,
       preferences: {
         theme: "light",
       },
@@ -54,7 +56,7 @@ export async function PATCH(req: Request) {
     }
 
     const body = await req.json();
-    const { name, avatar } = body;
+    const { name, avatar, bio } = body;
 
     // Update user settings
     await db
@@ -62,6 +64,7 @@ export async function PATCH(req: Request) {
       .set({
         name,
         image: avatar,
+        bio,
         updatedAt: new Date(),
       })
       .where(eq(users.email, session.user.email));
