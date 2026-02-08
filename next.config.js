@@ -35,6 +35,24 @@ const nextConfig = {
   // Compress responses
   compress: true,
   
+  // URL Rewrites
+  async rewrites() {
+    return [
+      {
+        source: '/login',
+        destination: '/auth/login',
+      },
+      {
+        source: '/register',
+        destination: '/auth/register',
+      },
+      {
+        source: '/forgot-password',
+        destination: '/auth/forgot-password',
+      },
+    ];
+  },
+  
   // Production source maps for debugging (smaller)
   productionBrowserSourceMaps: false,
 };

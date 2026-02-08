@@ -1,25 +1,41 @@
-import React from "react";
+"use client";
+
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
   ArrowRight,
-  Sparkles,
+  Sparkle,
   Shield,
   Cloud,
   Calendar,
   BookOpen,
-  Zap,
+  Lightning,
   Star,
-  Github,
-  Mail,
-} from "lucide-react";
+  TwitterLogo,
+  LinkedinLogo,
+  InstagramLogo,
+  GithubLogo,
+  EnvelopeSimple,
+} from "@phosphor-icons/react";
 import Button from "@/components/ui/Button";
+import { cn } from "@/lib/utils";
 import "./global.css";
 
 const LandingPage: React.FC = () => {
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   const features = [
     {
-      icon: Sparkles,
+      icon: Sparkle,
       title: "AI-Powered Stories",
       description:
         "Let AI weave your memories into beautiful narratives and discover patterns in your life.",
@@ -32,27 +48,27 @@ const LandingPage: React.FC = () => {
     },
     {
       icon: Cloud,
-      title: "Sync Everywhere",
+      title: "Cloud Backup",
       description:
-        "Access your memories across all devices with seamless cloud synchronization.",
+        "Never lose a moment. Your memories are automatically backed up to our secure cloud.",
     },
     {
       icon: Calendar,
-      title: "Timeline View",
+      title: "Life Timeline",
       description:
-        "Visualize your life story with an interactive, chronological timeline.",
+        "View your journey through an intuitive timeline. Relive the best moments of your life.",
     },
     {
       icon: BookOpen,
-      title: "Story Generation",
+      title: "Personal Journal",
       description:
-        "Create beautiful stories from your memories with AI-powered insights.",
+        "A private space for your thoughts, reflections, and deepest memories.",
     },
     {
-      icon: Zap,
+      icon: Lightning,
       title: "Quick Capture",
       description:
-        "Rapidly capture moments with smart templates and voice-to-text.",
+        "Capture moments as they happen with our fast and easy-to-use interface.",
     },
   ];
 
@@ -79,73 +95,88 @@ const LandingPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50 selection:bg-primary-100 selection:text-primary-900">
-      {/* Floating Glass Header */}
-      <div className="fixed top-6 left-0 right-0 z-50 flex justify-center px-4">
-        <header className="w-full max-w-5xl bg-white/70 backdrop-blur-xl border border-white/40 shadow-xl shadow-black/5 rounded-full px-6 py-3 flex items-center justify-between transition-all duration-300 hover:bg-white/80 hover:shadow-2xl">
-          <div className="flex items-center space-x-2">
-            <div className="w-9 h-9 bg-gradient-to-tr from-primary-600 to-secondary-500 rounded-full flex items-center justify-center shadow-md">
-              <span className="text-white font-bold text-sm tracking-tight">ML</span>
+      {/* Refined Header */}
+      <header
+        className={cn(
+          "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
+          scrolled
+            ? "bg-white/90 backdrop-blur-xl border-b border-neutral-200/50 py-4"
+            : "bg-transparent py-6"
+        )}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+          <div className="flex items-center space-x-3 group cursor-pointer">
+            <div className="w-10 h-10 bg-gradient-to-br from-primary-700 to-primary-900 rounded-xl flex items-center justify-center shadow-lg shadow-primary-900/20 transform transition-transform group-hover:scale-110 group-hover:rotate-3">
+              <span className="text-secondary-400/40 font-serif font-bold text-lg tracking-tight">M</span>
             </div>
-            <h1 className="text-base sm:text-lg font-display font-bold text-neutral-900 tracking-tight">
+            <span className="text-xl font-display font-bold text-neutral-900 tracking-tight">
               Memory Lane
-            </h1>
+            </span>
           </div>
-          <Link href={"/auth/register"}>
-            <Button size="sm" className="rounded-full px-4 sm:px-6 text-sm sm:text-base shadow-lg shadow-primary-500/20 bg-primary-600 hover:bg-primary-700 transition-all duration-300 hover:scale-105">
-              Get Started
-            </Button>
-          </Link>
-        </header>
-      </div>
+          
+          <div className="flex items-center space-x-6">
+            <Link href={"/register"}>
+              <Button
+                className={cn(
+                  "rounded-full px-4 sm:px-8 py-2 sm:py-2.5 font-medium transition-all duration-300 shadow-md text-sm sm:text-base",
+                  scrolled 
+                    ? "bg-primary-800 text-white hover:bg-primary-900 shadow-primary-900/10" 
+                    : "bg-white text-primary-900 hover:bg-neutral-50 border border-primary-100 shadow-xl shadow-black/5"
+                )}
+              >
+                <span className="hidden sm:inline">Get Started</span>
+                <span className="sm:hidden">Start</span>
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </header>
 
       {/* Hero Section */}
       <section className="relative pt-40 pb-20 lg:pt-52 lg:pb-32 overflow-hidden">
-        {/* Animated Background Gradients */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[600px] bg-gradient-to-b from-primary-50/50 to-transparent pointer-events-none" />
-        <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-primary-300/20 rounded-full blur-[120px] mix-blend-multiply animate-blob" />
-        <div className="absolute top-20 -right-40 w-[600px] h-[600px] bg-secondary-300/20 rounded-full blur-[120px] mix-blend-multiply animate-blob animation-delay-2000" />
-        <div className="absolute -bottom-40 left-20 w-[600px] h-[600px] bg-pink-300/20 rounded-full blur-[120px] mix-blend-multiply animate-blob animation-delay-4000" />
+        {/* Subtle Heritage Gradients */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[800px] bg-[radial-gradient(circle_at_top,_var(--tw-gradient-from)_0%,_transparent_70%)] from-primary-100/40 to-transparent pointer-events-none" />
+        <div className="absolute -top-40 -left-40 w-[800px] h-[800px] bg-secondary-100/10 rounded-full blur-[120px] mix-blend-multiply flex-shrink-0" />
+        <div className="absolute top-20 -right-40 w-[600px] h-[600px] bg-primary-200/10 rounded-full blur-[120px] mix-blend-multiply flex-shrink-0" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center max-w-4xl mx-auto space-y-10">
+          <div className="text-center max-w-4xl mx-auto space-y-12">
             <div className="space-y-6">
-              <div className="inline-flex items-center gap-2 rounded-full border border-primary-100 bg-white/60 backdrop-blur-sm px-4 py-1.5 text-sm font-medium text-primary-800 shadow-sm animate-fade-in-up">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-primary-500"></span>
-                </span>
-                AI-Powered Personal Timeline
+              <div className="inline-flex items-center gap-2 rounded-full border border-primary-200 bg-white shadow-sm px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-primary-800 animate-fade-in-up">
+                <Sparkle className="w-5 h-5 mr-3 text-secondary-400/30" />
+                The Future of Heritage
               </div>
-              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-display font-extrabold text-neutral-900 leading-[1.1] tracking-tight animate-fade-in-up animation-delay-100">
-                Your personal history,
+              <h1 className="text-6xl sm:text-7xl lg:text-8xl font-display font-bold text-neutral-900 leading-[0.95] tracking-tight animate-fade-in-up animation-delay-100">
+                Preserve your
                 <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 via-secondary-500 to-secondary-600">
-                  beautifully preserved.
+                <span className="italic font-serif text-transparent bg-clip-text bg-gradient-to-r from-primary-800 to-primary-600">
+                  Legacy.
                 </span>
               </h1>
-              <p className="text-xl sm:text-2xl text-neutral-600 max-w-2xl mx-auto leading-relaxed animate-fade-in-up animation-delay-200">
-                Capture, organize, and rediscover your most precious memories
-                with AI-powered insights. Transform your life into stories that last forever.
+              <p className="text-xl sm:text-2xl text-neutral-600 max-w-2xl mx-auto leading-relaxed font-light animate-fade-in-up animation-delay-200">
+                A sophisticated sanctuary for your most precious moments. 
+                Experience your memories through the lens of AI-crafted narratives.
               </p>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up animation-delay-300">
-              <Link href={"/auth/register"}>
+              <Link href={"/register"}>
                 <Button
                   size="lg"
-                  className="text-lg px-8 py-5 rounded-full bg-gradient-to-r from-primary-600 to-secondary-600 text-white hover:from-primary-700 hover:to-secondary-700 hover:scale-105 transition-all duration-300 shadow-xl shadow-primary-500/20 group"
+                  className="text-lg px-10 py-6 rounded-full bg-primary-900 text-white hover:bg-black hover:scale-105 transition-all duration-500 shadow-2xl shadow-primary-900/30 group"
                 >
-                  Start Your Journey
-                  <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                  Get Started
+                  <ArrowRight className="w-5 h-5 ml-3 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
+
               <Link href="https://github.com/iampraiez/memo">
                 <Button
                   size="lg"
                   variant="secondary"
                   className="text-lg px-8 py-5 rounded-full hover:scale-105 transition-all duration-300"
                 >
-                  <Github className="w-5 h-5 mr-2" />
+                  <GithubLogo className="w-5 h-5 mr-2" />
                   View on GitHub
                 </Button>
               </Link>
@@ -167,31 +198,30 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* Features Section */}
-      <section className="py-24 bg-white relative">
+      <section className="py-32 bg-white relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center space-y-4 mb-20">
-            <h2 className="text-3xl sm:text-5xl font-display font-bold text-neutral-900 tracking-tight">
-              Everything you need to preserve your story
+          <div className="text-center space-y-4 mb-24">
+            <h2 className="text-4xl sm:text-6xl font-display font-bold text-neutral-900 tracking-tight">
+              A sanctuary for your story.
             </h2>
-            <p className="text-xl text-neutral-500 max-w-2xl mx-auto">
-              Powerful features designed to make capturing and exploring your
-              memories effortless and meaningful.
+            <p className="text-xl text-neutral-500 max-w-2xl mx-auto font-light">
+              Sophisticated tools designed to help you capture, organize, and rediscover your life's most meaningful moments.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 text-left">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
             {features.map((feature, index) => (
               <div
                 key={index}
-                className="group p-8 rounded-3xl bg-gradient-to-br from-neutral-50 to-white hover:from-primary-50 hover:to-secondary-50 hover:shadow-xl hover:shadow-primary-200/50 transition-all duration-300 border border-transparent hover:border-primary-100"
+                className="group p-8 rounded-3xl bg-neutral-50/50 hover:bg-white hover:shadow-2xl hover:shadow-primary-900/5 transition-all duration-500 border border-transparent hover:border-primary-100"
               >
-                <div className="w-14 h-14 bg-gradient-to-br from-primary-600 to-secondary-600 rounded-2xl flex items-center justify-center shadow-sm mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <feature.icon className="w-7 h-7 text-white" />
+                <div className="w-12 h-12 bg-primary-900 rounded-xl flex items-center justify-center mb-6 shadow-lg shadow-black/20 group-hover:scale-110 transition-transform">
+                  <Sparkle weight="fill" className="w-6 h-6 text-secondary-400/30" />
                 </div>
-                <h3 className="text-xl font-bold text-neutral-900 mb-3">
+                <h3 className="text-2xl font-display font-bold text-neutral-900 mb-4">
                   {feature.title}
                 </h3>
-                <p className="text-neutral-500 leading-relaxed text-base">
+                <p className="text-neutral-600 leading-relaxed font-light">
                   {feature.description}
                 </p>
               </div>
@@ -201,38 +231,39 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* Testimonials */}
-      <section className="py-20 bg-gradient-to-br from-primary-50 to-secondary-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-5xl font-display font-bold text-neutral-900 tracking-tight mb-4">
-              Loved by memory keepers
+      <section className="py-32 bg-neutral-50 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary-100/30 rounded-full blur-[120px] -mr-40" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="text-center mb-24">
+            <h2 className="text-4xl sm:text-6xl font-display font-bold text-neutral-900 tracking-tight mb-6">
+              Loved by the keepers.
             </h2>
-            <p className="text-xl text-neutral-600">
-              Join thousands who are preserving their stories
+            <p className="text-xl text-neutral-600 font-light">
+              Join those who have chosen a more meaningful way to preserve their legacy.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
             {testimonials.map((testimonial, index) => (
               <div
                 key={index}
-                className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow"
+                className="bg-white rounded-3xl p-10 shadow-sm border border-neutral-100 hover:shadow-xl hover:-translate-y-2 transition-all duration-500"
               >
-                <div className="flex items-center mb-4">
+                <div className="flex items-center mb-6 space-x-1">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-5 h-5 text-yellow-400 fill-yellow-400" />
+                    <Star key={i} className="w-4 h-4 text-secondary-500 fill-secondary-500" />
                   ))}
                 </div>
-                <p className="text-neutral-700 mb-6 leading-relaxed">
+                <p className="text-lg text-neutral-700 mb-10 leading-relaxed font-light italic">
                   "{testimonial.content}"
                 </p>
                 <div className="flex items-center">
-                  <div className="w-12 h-12 bg-gradient-to-br from-primary-600 to-secondary-600 rounded-full flex items-center justify-center text-white font-bold mr-3">
-                    {testimonial.avatar}
+                  <div className="w-12 h-12 bg-primary-900 rounded-full flex items-center justify-center text-secondary-400 font-serif font-bold text-lg mr-4 shadow-inner">
+                    {testimonial.avatar[0]}
                   </div>
                   <div>
                     <p className="font-bold text-neutral-900">{testimonial.name}</p>
-                    <p className="text-sm text-neutral-500">{testimonial.role}</p>
+                    <p className="text-sm text-neutral-500 uppercase tracking-widest">{testimonial.role}</p>
                   </div>
                 </div>
               </div>
@@ -242,48 +273,49 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* Stats */}
-      <section className="py-20 border-y border-neutral-100 bg-white">
+      <section className="py-24 border-y border-neutral-100 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-12 text-center">
             <div>
-              <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-secondary-600">10k+</div>
-              <div className="text-sm text-neutral-500 mt-1 font-medium">Active Users</div>
+              <div className="text-5xl font-display font-bold text-primary-900 tracking-tight">10k+</div>
+              <div className="text-xs uppercase tracking-[0.2em] text-neutral-400 mt-3 font-semibold">Active Sanctuary</div>
             </div>
             <div>
-              <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-secondary-600">1M+</div>
-              <div className="text-sm text-neutral-500 mt-1 font-medium">Memories Saved</div>
+              <div className="text-5xl font-display font-bold text-primary-900 tracking-tight">1M+</div>
+              <div className="text-xs uppercase tracking-[0.2em] text-neutral-400 mt-3 font-semibold">Memories Saved</div>
             </div>
             <div>
-              <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-secondary-600">50k+</div>
-              <div className="text-sm text-neutral-500 mt-1 font-medium">Stories Generated</div>
+              <div className="text-5xl font-display font-bold text-primary-900 tracking-tight">50k+</div>
+              <div className="text-xs uppercase tracking-[0.2em] text-neutral-400 mt-3 font-semibold">Stories Crafted</div>
             </div>
             <div>
-              <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-secondary-600">4.9/5</div>
-              <div className="text-sm text-neutral-500 mt-1 font-medium">User Rating</div>
+              <div className="text-5xl font-display font-bold text-primary-900 tracking-tight">4.9/5</div>
+              <div className="text-xs uppercase tracking-[0.2em] text-neutral-400 mt-3 font-semibold">Legacy Rating</div>
             </div>
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="relative py-32 bg-gradient-to-br from-primary-600 via-primary-700 to-secondary-600 overflow-hidden">
-        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-white/10 rounded-full blur-[120px]" />
+      <section className="relative py-40 bg-primary-950 overflow-hidden">
+        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[1000px] bg-primary-900/50 rounded-full blur-[160px] pointer-events-none" />
+        <div className="absolute -bottom-40 -left-40 w-[600px] h-[600px] bg-secondary-900/10 rounded-full blur-[120px] pointer-events-none" />
         
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-          <h2 className="text-4xl sm:text-5xl font-display font-bold text-white mb-8 tracking-tight">
-            Ready to start your legacy?
+          <h2 className="text-5xl sm:text-7xl font-display font-bold text-white mb-8 tracking-tight">
+            Begin your <span className="italic font-serif text-secondary-400">Archive.</span>
           </h2>
-          <p className="text-xl text-primary-100 mb-10 max-w-2xl mx-auto">
-            Join thousands of others who are already capturing their most precious moments with Memory Lane.
+          <p className="text-xl text-primary-200/80 mb-12 max-w-2xl mx-auto font-light leading-relaxed">
+            Every moment counts. Don't let your history fade into the digital noise. Join the sanctuary today.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href={"/auth/register"}>
+          <div className="flex flex-col sm:flex-row gap-6 justify-center">
+            <Link href={"/register"}>
               <Button
                 size="lg"
-                className="text-lg px-10 py-5 rounded-full bg-white text-primary-700 hover:bg-neutral-50 hover:scale-105 transition-all duration-300 font-semibold shadow-xl"
+                className="text-lg px-12 py-7 rounded-full bg-secondary-500 text-primary-950 hover:bg-secondary-400 hover:scale-105 transition-all duration-500 font-bold shadow-[0_0_40px_rgba(245,158,11,0.2)]"
               >
-                Create Free Account
+                Sign Up Free
               </Button>
             </Link>
           </div>
@@ -291,61 +323,51 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gradient-to-br from-neutral-50 to-neutral-100 border-t border-neutral-200 py-16">
+      <footer className="bg-white border-t border-neutral-100 py-16 text-neutral-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
-            <div className="col-span-1 md:col-span-1 space-y-4">
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-gradient-to-br from-primary-600 to-secondary-600 rounded-full flex items-center justify-center shadow-md">
-                  <span className="text-white font-bold text-xs">ML</span>
-                </div>
-                <span className="text-lg font-display font-bold text-neutral-900">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 md:gap-16">
+            {/* Brand Section */}
+            <div className="space-y-6">
+              <div className="flex items-center space-x-3">
+                <span className="text-2xl font-display font-bold text-[#8B5CF6] tracking-tight">
                   Memory Lane
                 </span>
               </div>
-              <p className="text-sm leading-relaxed text-neutral-600">
-                Preserving life's precious moments with the power of AI and beautiful design.
+              <p className="text-base font-light leading-relaxed text-neutral-500 max-w-sm">
+                AI-powered legacy preservation and memory tracking for thoughtful individuals.
               </p>
+              <div className="flex items-center space-x-5 text-neutral-400">
+                <a href="https://x.com/iampraiez" className="hover:text-neutral-900 transition-colors"><TwitterLogo size={20} /></a>
+                <a href="https://www.linkedin.com/in/thepraiseolaoye" className="hover:text-neutral-900 transition-colors"><LinkedinLogo size={20} /></a>
+                <a href="https://www.instagram.com/iampraiez_?igsh=enI4OWcxOHN1Yml3" className="hover:text-neutral-900 transition-colors"><InstagramLogo size={20} /></a>
+                <a href="https://github.com/iampraiez/memo" className="hover:text-neutral-900 transition-colors"><GithubLogo size={20} /></a>
+              </div>
             </div>
 
+            {/* Product Section */}
             <div>
-              <h4 className="font-semibold text-neutral-900 mb-4 text-sm uppercase tracking-wider">Product</h4>
-              <ul className="space-y-3 text-sm text-neutral-600">
-                <li><Link href="/auth/register" className="hover:text-primary-600 transition-colors">Features</Link></li>
-                <li><a href="https://github.com/iampraiez/memo" target="_blank" rel="noopener noreferrer" className="hover:text-primary-600 transition-colors">GitHub</a></li>
-                <li><a href="https://github.com/iampraiez/memo#readme" target="_blank" rel="noopener noreferrer" className="hover:text-primary-600 transition-colors">Documentation</a></li>
+              <h4 className="font-bold text-neutral-950 mb-6 text-lg">Product</h4>
+              <ul className="space-y-3 text-base text-neutral-500 font-medium">
+                <li><Link href="#features" className="hover:text-neutral-900 transition-colors">Features</Link></li>
+                <li><a href="mailto:himpraise571@gmail.com" className="hover:text-neutral-900 transition-colors">Contact</a></li>
+                <li><a href="https://github.com/iampraiez/memo" target="_blank" rel="noopener noreferrer" className="hover:text-neutral-900 transition-colors">Documentation</a></li>
+                <li><a href="https://iampraiez.vercel.app" target="_blank" rel="noopener noreferrer" className="hover:text-neutral-900 transition-colors">About Me</a></li>
               </ul>
             </div>
 
+            {/* Legal Section */}
             <div>
-              <h4 className="font-semibold text-neutral-900 mb-4 text-sm uppercase tracking-wider">Developer</h4>
-              <ul className="space-y-3 text-sm text-neutral-600">
-                <li><a href="https://iampraiez.vercel.app" target="_blank" rel="noopener noreferrer" className="hover:text-primary-600 transition-colors">Portfolio</a></li>
-                <li><a href="https://iampraiez.vercel.app/#contact" target="_blank" rel="noopener noreferrer" className="hover:text-primary-600 transition-colors">Contact</a></li>
-                <li><a href="https://github.com/iampraiez" target="_blank" rel="noopener noreferrer" className="hover:text-primary-600 transition-colors">GitHub Profile</a></li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-semibold text-neutral-900 mb-4 text-sm uppercase tracking-wider">Resources</h4>
-              <ul className="space-y-3 text-sm text-neutral-600">
-                <li><a href="https://github.com/iampraiez/memo/blob/main/README.md" target="_blank" rel="noopener noreferrer" className="hover:text-primary-600 transition-colors">Getting Started</a></li>
-                <li><a href="https://github.com/iampraiez/memo/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener noreferrer" className="hover:text-primary-600 transition-colors">Contributing</a></li>
-                <li><a href="https://github.com/iampraiez/memo/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" className="hover:text-primary-600 transition-colors">License</a></li>
+              <h4 className="font-bold text-neutral-950 mb-6 text-lg">Legal</h4>
+              <ul className="space-y-3 text-base text-neutral-500 font-medium">
+                <li><Link href="/privacy" className="hover:text-neutral-900 transition-colors">Privacy Policy</Link></li>
+                <li><Link href="/terms" className="hover:text-neutral-900 transition-colors">Terms of Service</Link></li>
               </ul>
             </div>
           </div>
 
-          <div className="border-t border-neutral-200 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center text-sm text-neutral-500">
-            <p>&copy; 2025 Memory Lane. All rights reserved.</p>
-            <div className="flex space-x-6 mt-4 md:mt-0">
-              <a href="https://github.com/iampraiez/memo" target="_blank" rel="noopener noreferrer" className="hover:text-primary-600 transition-colors">
-                <Github className="w-5 h-5" />
-              </a>
-              <a href="https://iampraiez.vercel.app/#contact" target="_blank" rel="noopener noreferrer" className="hover:text-primary-600 transition-colors">
-                <Mail className="w-5 h-5" />
-              </a>
-            </div>
+          <div className="border-t border-neutral-100 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center text-xs text-neutral-400 font-medium uppercase tracking-widest">
+            <p>&copy; {new Date().getFullYear()} Memory Lane. All rights reserved.</p>
+            <p className="mt-4 md:mt-0">Built by Praiez</p>
           </div>
         </div>
       </footer>

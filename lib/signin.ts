@@ -38,7 +38,7 @@ export async function handleSignIn(
       provider,
       options || {
         email: emailFromForm,
-        callbackUrl: "/dashboard",
+        callbackUrl: "/timeline",
       }
     );
   } catch (error) {

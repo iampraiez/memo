@@ -1,6 +1,4 @@
-"use client";
-import React from "react";
-import { Plus, Cloud, CloudOff, Menu, Bell, User } from "lucide-react";
+import { Plus, Cloud, CloudSlash, List, Bell, User } from "@phosphor-icons/react";
 import Button from "./ui/Button";
 import { cn } from "@/lib/utils";
 
@@ -25,7 +23,7 @@ const Header: React.FC<HeaderProps> = ({
 }) => {
   const syncIcons = {
     online: Cloud,
-    offline: CloudOff,
+    offline: CloudSlash,
     syncing: Cloud,
   };
 
@@ -49,13 +47,13 @@ const Header: React.FC<HeaderProps> = ({
               onClick={onToggleSidebar}
               className="lg:hidden"
             >
-              <Menu className="w-5 h-5" />
+              <List className="w-5 h-5" />
             </Button>
 
             {/* Logo */}
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-primary-600 to-secondary-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">ML</span>
+              <div className="w-8 h-8 bg-primary-900 rounded-lg flex items-center justify-center shadow-lg">
+                <span className="text-secondary-400/40 font-serif font-bold text-sm">M</span>
               </div>
               <h1 className="text-xl font-display font-bold text-neutral-900 hidden sm:block">
                 Memory Lane

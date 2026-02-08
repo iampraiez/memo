@@ -7,13 +7,16 @@ export const authConfig = {
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
-      
       const isAuthPage = nextUrl.pathname.startsWith("/auth");
-      const isPublicPage = nextUrl.pathname === "/" || nextUrl.pathname.startsWith("/api");
+      const isLandingPage = nextUrl.pathname === "/";
+      const isApiRoute = nextUrl.pathname.startsWith("/api");
+      const isLegalPage = nextUrl.pathname === "/privacy" || nextUrl.pathname === "/terms";
+      const isTechnicalRequest = nextUrl.pathname.startsWith("/.well-known") || nextUrl.pathname.endsWith(".json");
+      const isPublicPage = isLandingPage || isApiRoute || isLegalPage || isTechnicalRequest;
 
       if (isAuthPage) {
         if (isLoggedIn) {
-          return Response.redirect(new URL("/mainpage", nextUrl));
+          return Response.redirect(new URL("/timeline", nextUrl));
         }
         return true;
       }

@@ -14,21 +14,31 @@ import {
 import type { Provider } from "next-auth/providers";
 import brcypt from "bcryptjs";
 import { userExists } from "./api";
-
+import { verifyGoogleToken, getOrCreateGoogleUser } from "./google-auth";
 import { env } from "@/config/env";
 
 const providers: Provider[] = [
-  Google({
-    clientId: env.AUTH_GOOGLE_ID,
-    clientSecret: env.AUTH_GOOGLE_SECRET,
-  }),
-
   Credentials({
     credentials: {
       email: { label: "Email", type: "email" },
       password: { label: "Password", type: "password" },
+      token: { label: "Token", type: "text" },
+      type: { label: "Type", type: "text" },
     },
     authorize: async (c) => {
+      // Handle Google Token Login
+      if (c.type === "google-token" && c.token) {
+        try {
+          const payload = await verifyGoogleToken(c.token as string);
+          const user = await getOrCreateGoogleUser(payload);
+          return user;
+        } catch (error) {
+          console.error("Manual Google Auth Error:", error);
+          throw new Error("GOOGLE_AUTH_FAILED");
+        }
+      }
+
+      // Handle standard Email/Password Login
       if (!c.email || !c.password) {
         throw new Error("Please enter both email and password.");
       }
@@ -53,8 +63,8 @@ const providers: Provider[] = [
 
         return user;
       } catch (error) {
-        // Re-throw the specific error for email verification
-        if (error instanceof Error && error.message === "EMAIL_NOT_VERIFIED") {
+        // Re-throw specific errors
+        if (error instanceof Error && (error.message === "EMAIL_NOT_VERIFIED" || error.message === "GOOGLE_AUTH_FAILED")) {
           throw error;
         }
         throw new Error("Invalid credentials.");
@@ -129,7 +139,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         return url;
       }
 
-      return baseUrl + "/mainpage";
+      return baseUrl + "/timeline";
     },
     async session({ session, token, user }) {
       if (token.sub && session.user) {

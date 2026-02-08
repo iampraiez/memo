@@ -40,29 +40,28 @@ const Sidebar: React.FC<SidebarProps> = ({
     { name: "Stories", icon: BookOpen, id: "stories" },
     { name: "Analytics", icon: ChartLineUp, id: "analytics" },
     { name: "Settings", icon: Gear, id: "settings" },
-    // { name: "Profile", icon: User, id: "profile" },
     ...((session?.user as any)?.role === "admin"
-      ? [{ name: "Admin", icon: Shield, id: "admin" }]
+      ? [{ name: "AdminCenter", icon: Shield, id: "admin" }]
       : []),
   ];
 
   return (
     <>
       {/* Mobile Overlay */}
-      {isOpen && <div className="lg:hidden fixed inset-0 bg-black/50" />}
+      {isOpen && <div className="lg:hidden fixed inset-0 bg-neutral-900/50 backdrop-blur-sm z-30" onClick={onClick} />}
 
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 w-64 bg-white border-r border-neutral-200 transform transition-transform duration-200 ease-in-out",
-          "h-full overflow-y-auto z-40", // z-40 for mobile overlay compatibility
-          isOpen ? "translate-x-0" : "-translate-x-full", // Mobile slide in/out
-          "lg:translate-x-0 lg:z-20 lg:pt-20 lg:pb-4" // Always visible on desktop, lower z-index, adjusted padding
+          "fixed inset-y-0 left-0 w-64 bg-white border-r border-neutral-100 transform transition-transform duration-300 ease-in-out",
+          "h-full overflow-y-auto z-40",
+          isOpen ? "translate-x-0" : "-translate-x-full",
+          "lg:translate-x-0 lg:z-20 lg:pt-20 lg:pb-4"
         )}
       >
-        <div className="flex-col h-full">
+        <div className="flex flex-col h-full bg-white">
           {/* Navigation */}
-          <nav className="flex-1 px-4 py-6 space-y-2">
+          <nav className="flex-1 px-4 py-8 space-y-1.5 focus:outline-none">
             {navigation.map((item) => {
               const Icon = item.icon;
               const isActive = currentPage === item.id;
@@ -75,13 +74,19 @@ const Sidebar: React.FC<SidebarProps> = ({
                     onClick();
                   }}
                   className={cn(
-                    "w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                    "w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 group",
                     isActive
-                      ? "bg-primary-100 text-primary-900 border border-primary-200"
-                      : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900"
+                      ? "bg-neutral-900 text-white shadow-xl shadow-neutral-900/10"
+                      : "text-neutral-500 hover:bg-neutral-50 hover:text-neutral-900"
                   )}
                 >
-                  <Icon className="w-5 h-5" />
+                  <Icon 
+                    weight={isActive ? "fill" : "regular"}
+                    className={cn(
+                      "w-5 h-5 transition-colors", 
+                      isActive ? "text-secondary-400" : "text-neutral-400 group-hover:text-neutral-600"
+                    )} 
+                  />
                   <span>{item.name}</span>
                 </button>
               );
@@ -89,20 +94,21 @@ const Sidebar: React.FC<SidebarProps> = ({
           </nav>
 
           {/* Quick Stats */}
-          <div className="px-4 py-4 border-t border-neutral-200">
-            <div className="bg-neutral-50 rounded-lg p-4 space-y-2">
-              <h3 className="text-sm font-medium text-neutral-900">
-                Your Stats
+          <div className="px-6 py-8 border-t border-neutral-100">
+            <div className="bg-neutral-50 rounded-2xl p-5 space-y-4">
+              <h3 className="text-xs font-bold uppercase tracking-widest text-neutral-400">
+                Archive Stats
               </h3>
-              <div className="space-y-1 text-sm text-neutral-600">
-                <div className="flex justify-between">
-                  <span>Total Memories</span>
-                  <span className="font-medium">{totalMemories}</span>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-neutral-500">Memories</span>
+                  <span className="font-bold text-neutral-900">{totalMemories}</span>
                 </div>
-                {/* Simplified stats for now */}
-                <div className="flex justify-between">
-                  <span>Growth</span>
-                  <span className="font-medium text-green-600">+12%</span>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-neutral-500">Growth</span>
+                  <span className="font-bold text-green-600 inline-flex items-center">
+                    +12%
+                  </span>
                 </div>
               </div>
             </div>

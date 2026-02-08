@@ -2,14 +2,14 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  ChevronRight,
-  ChevronLeft,
-  Upload,
+  CaretRight,
+  CaretLeft,
+  UploadSimple,
   Shield,
-  Sparkles,
+  Sparkle,
   Tag,
   Check,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import Button from "@/components/ui/Button";
 import { useSession } from "next-auth/react";
 import Card from "@/components/ui/Card";
@@ -27,10 +27,10 @@ const OnboardingFlow: React.FC = () => {
   });
 
   const steps = [
-    { id: "welcome", title: "Welcome", icon: Sparkles },
-    { id: "import", title: "Import Data", icon: Upload },
+    { id: "welcome", title: "Welcome", icon: Sparkle },
+    { id: "import", title: "Import Data", icon: UploadSimple },
     { id: "privacy", title: "Privacy Settings", icon: Shield },
-    { id: "ai", title: "AI Features", icon: Sparkles },
+    { id: "ai", title: "AI Features", icon: Sparkle },
     { id: "tags", title: "Choose Tags", icon: Tag },
   ];
 
@@ -62,9 +62,8 @@ const OnboardingFlow: React.FC = () => {
       setCurrentStep(currentStep + 1);
     } else {
       localStorage.removeItem("route");
-      // call function that calls route to save prefrences
       console.log(preferences);
-      router.push("/mainpage");
+      router.push("/timeline");
     }
   };
 
@@ -92,8 +91,8 @@ const OnboardingFlow: React.FC = () => {
       case "welcome":
         return (
           <div className="text-center space-y-6">
-            <div className="w-20 h-20 bg-gradient-to-br from-primary-600 to-secondary-600 rounded-2xl flex items-center justify-center mx-auto">
-              <Sparkles className="w-10 h-10 text-white" />
+            <div className="w-20 h-20 bg-primary-900 rounded-2xl flex items-center justify-center mx-auto shadow-xl">
+              <Sparkle weight="fill" className="w-10 h-10 text-secondary-400" />
             </div>
             <div className="space-y-3">
               <h1 className="text-3xl font-display font-bold text-neutral-900">
@@ -141,12 +140,12 @@ const OnboardingFlow: React.FC = () => {
                 </p>
               </Card>
 
-              <Card className="p-4 text-center space-y-3 hover:border-primary-300 cursor-pointer transition-colors">
-                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto">
-                  <Upload className="w-6 h-6 text-purple-600" />
+              <Card className="p-4 text-center space-y-3 hover:border-neutral-900 cursor-pointer transition-colors group">
+                <div className="w-12 h-12 bg-neutral-100 rounded-lg flex items-center justify-center mx-auto transition-colors group-hover:bg-neutral-200">
+                  <UploadSimple className="w-6 h-6 text-neutral-600" />
                 </div>
-                <h3 className="font-medium">Upload Files</h3>
-                <p className="text-sm text-neutral-500">
+                <h3 className="font-bold text-sm">Upload Files</h3>
+                <p className="text-xs text-neutral-500">
                   Import from your device
                 </p>
               </Card>
@@ -412,13 +411,13 @@ const OnboardingFlow: React.FC = () => {
               disabled={currentStep === 0}
               className="flex items-center"
             >
-              <ChevronLeft className="w-4 h-4 mr-2" />
+              <CaretLeft className="w-4 h-4 mr-2" />
               Back
             </Button>
 
             <Button onClick={nextStep} className="flex items-center">
               {currentStep === steps.length - 1 ? "Complete Setup" : "Continue"}
-              <ChevronRight className="w-4 h-4 ml-2" />
+              <CaretRight className="w-4 h-4 ml-2" />
             </Button>
           </div>
         </Card>
