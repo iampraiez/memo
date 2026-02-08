@@ -60,6 +60,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       <aside
         className={cn(
           "fixed inset-y-0 left-0 w-[280px] sm:w-[320px] lg:w-72 bg-white border-r border-neutral-200/50 shadow-2xl lg:shadow-none transform transition-all duration-500 ease-in-out z-[50]",
+          isOpen ? "translate-x-0" : "-translate-x-full",
           "lg:translate-x-0",
           "lg:pb-8"
         )}
