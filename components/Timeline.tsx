@@ -11,7 +11,6 @@ interface TimelineProps {
   onEditMemory: (memory: Memory) => void;
   onDeleteMemory: (memoryId: string) => void;
   onShareMemory: (memory: Memory) => void;
-  onAddMemory: () => void;
 }
 
 const Timeline: React.FC<TimelineProps> = ({
@@ -20,7 +19,6 @@ const Timeline: React.FC<TimelineProps> = ({
   onEditMemory,
   onDeleteMemory,
   onShareMemory,
-  onAddMemory,
 }) => {
   const [expandedYears, setExpandedYears] = useState<Set<number>>(
     new Set([new Date().getFullYear()])
@@ -203,10 +201,8 @@ const Timeline: React.FC<TimelineProps> = ({
             ))
         ) : (
           <EmptyState
-            title="No memories yet"
-            description="Your personal timeline is empty. Start capturing your life's precious moments today!"
-            actionLabel="Create First Memory"
-            onAction={onAddMemory}
+            title="Your Story Begins Here"
+            description="Your personal timeline is a sanctuary for memories. Begin by capturing your first precious moment using the memory button above."
           />
         )}
       </div>

@@ -30,6 +30,7 @@ export default function AdminPage() {
   const stats = data?.stats || { totalUsers: 0, activeUsers: 0, totalMemories: 0, storageUsed: "0 TB" };
   const jobQueue = data?.jobQueue || [];
   const logs = data?.logs || [];
+  const health = data?.health || { responseTime: "---", databaseLoad: "---" };
 
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-8">
@@ -73,11 +74,11 @@ export default function AdminPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="flex justify-between items-center p-4 bg-neutral-50 rounded-2xl">
                     <span className="text-neutral-600 font-medium">API Response Time</span>
-                    <span className="text-primary-900 font-bold">142ms</span>
+                    <span className="text-primary-900 font-bold">{health.responseTime}</span>
                 </div>
                 <div className="flex justify-between items-center p-4 bg-neutral-50 rounded-2xl">
                     <span className="text-neutral-600 font-medium">Database Load</span>
-                    <span className="text-primary-900 font-bold">8/20</span>
+                    <span className="text-primary-900 font-bold">{health.databaseLoad}</span>
                 </div>
             </div>
           </Card>

@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { storyService, StorySettings } from "@/services/story.service";
 
 export interface Story {
   id: string;
@@ -26,15 +27,7 @@ export const useCreateStory = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: { title: string; tone: string; length: string; dateRange: { start: string; end: string } }) => {
-      const response = await fetch("/api/stories", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      if (!response.ok) throw new Error("Failed to create story");
-      return response.json();
-    },
+    mutationFn: (data: StorySettings) => storyService.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["stories"] });
     },

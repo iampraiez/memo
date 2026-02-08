@@ -7,6 +7,7 @@ import Select from "@/components/ui/Select";
 import DatePicker from "@/components/ui/DatePicker";
 import { useNetworkStatus } from "@/lib/utils";
 import Input from "@/components/ui/Input";
+import EmptyState from "@/components/ui/EmptyState";
 import { jsPDF } from "jspdf";
 import { Document, Paragraph, Packer, TextRun } from "docx";
 import { useCreateStory } from "@/hooks/useStories";
@@ -63,6 +64,7 @@ export default function StoriesPage() {
         tone: settings.tone,
         length: settings.length,
         dateRange: settings.dateRange,
+        includeimages: settings.includeimages,
       });
 
       clearInterval(interval);
@@ -190,11 +192,12 @@ export default function StoriesPage() {
         <div className="lg:col-span-2">
           <Card className="min-h-96">
             {!generatedStory && !createStoryMutation.isPending && (
-              <div className="flex flex-col items-center justify-center py-20 text-center">
-                <BookOpen className="w-16 h-16 text-neutral-300 mb-4" />
-                <h3 className="text-lg font-semibold text-neutral-900 mb-2">Ready to Create Your Story</h3>
-                <p className="text-neutral-600 max-w-md">Configure your settings and click "Generate Story" to create a narrative.</p>
-              </div>
+              <EmptyState
+                icon={<BookOpen className="w-12 h-12 text-secondary-400" weight="duotone" />}
+                title="Your Story Awaits"
+                description="Configure your settings and let our AI weave your memories into a beautiful narrative sanctuary."
+                className="py-12"
+              />
             )}
             {createStoryMutation.isPending && (
               <div className="flex flex-col items-center justify-center py-20">

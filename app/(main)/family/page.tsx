@@ -6,6 +6,7 @@ import Button from "@/components/ui/Button";
 import { useTimelineMemories } from "@/hooks/useSocial";
 import { useFamilyMembers } from "@/hooks/useFamily";
 import Image from "next/image";
+import EmptyState from "@/components/ui/EmptyState";
 
 export default function FamilyTimelinePage() {
   const { data: timelineData, isLoading: isLoadingTimeline } = useTimelineMemories();
@@ -46,11 +47,11 @@ export default function FamilyTimelinePage() {
                    <div className="flex items-center space-x-4 text-neutral-400">
                        <div className="flex items-center space-x-1">
                            <Heart size={18} />
-                           <span className="text-sm font-bold">2</span>
+                           <span className="text-sm font-bold">{memory.reactions?.length || 0}</span>
                        </div>
                        <div className="flex items-center space-x-1">
                            <ChatCircle size={18} />
-                           <span className="text-sm font-bold">1</span>
+                           <span className="text-sm font-bold">{memory.comments?.length || 0}</span>
                        </div>
                    </div>
                </div>
@@ -69,11 +70,13 @@ export default function FamilyTimelinePage() {
             </Card>
           ))
         ) : (
-          <Card className="p-20 text-center space-y-4">
-            <Users size={64} className="text-neutral-200 mx-auto" />
-            <p className="text-neutral-500 font-medium">Your family archive is currently empty.</p>
-            <Button className="rounded-full">Invite Family Members</Button>
-          </Card>
+          <EmptyState
+            icon={<Users className="w-12 h-12 text-secondary-400" weight="duotone" />}
+            title="Shared Heritage"
+            description="Invite your family members to start building a collective archive of your shared journey."
+            actionLabel="Invite Family"
+            onAction={() => {/* TODO: Implement invite logic */}}
+          />
         )}
       </div>
     </div>

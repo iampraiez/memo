@@ -1,26 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-
-interface UserSettings {
-  id: string;
-  userId: string;
-  name: string;
-  email: string;
-  avatar?: string;
-  preferences: {
-    theme: "light" | "dark" | "system";
-  };
-}
+import { userService, UserSettings } from "@/services/user.service";
 
 export const useUserSettings = () => {
   return useQuery<UserSettings>({
     queryKey: ["userSettings"],
-    queryFn: async () => {
-      const response = await fetch("/api/settings");
-      if (!response.ok) {
-        throw new Error("Failed to fetch user settings");
-      }
-      return response.json();
-    },
+    queryFn: () => userService.getSettings(),
   });
 };
 
@@ -28,21 +12,7 @@ export const useUpdateUserSettings = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (settings: Partial<UserSettings>) => {
-      const response = await fetch("/api/settings", {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(settings),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to update settings");
-      }
-
-      return response.json();
-    },
+    mutationFn: (settings: Partial<UserSettings>) => userService.updateSettings(settings),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["userSettings"] });
     },

@@ -5,6 +5,7 @@ import MemoryCard from "@/components/MemoryCard";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
+import EmptyState from "@/components/ui/EmptyState";
 import { Memory } from "@/types/types";
 import { useTags } from "@/hooks/useTags";
 import { useMemories } from "@/hooks/useMemories";
@@ -74,20 +75,28 @@ export default function TagsPage() {
              </Card>
           </div>
 
-          <Card className="p-8">
-            <h2 className="text-xl font-semibold text-neutral-900 mb-6">Tag Cloud</h2>
-            <div className="flex flex-wrap gap-4 justify-center">
-              {filteredTags.map((tag) => (
-                <button
-                  key={tag.id}
-                  onClick={() => setSelectedTag(tag.name)}
-                  className="text-lg font-medium text-primary-600 hover:text-primary-700 transition-colors"
-                >
-                  {tag.name}
-                </button>
-              ))}
-            </div>
-          </Card>
+          {filteredTags.length > 0 ? (
+            <Card className="p-8">
+              <h2 className="text-xl font-semibold text-neutral-900 mb-6">Tag Cloud</h2>
+              <div className="flex flex-wrap gap-4 justify-center">
+                {filteredTags.map((tag) => (
+                  <button
+                    key={tag.id}
+                    onClick={() => setSelectedTag(tag.name)}
+                    className="text-lg font-medium text-primary-600 hover:text-primary-700 transition-colors"
+                  >
+                    {tag.name}
+                  </button>
+                ))}
+              </div>
+            </Card>
+          ) : (
+            <EmptyState 
+              icon={<TagIcon className="w-12 h-12 text-secondary-400" weight="duotone" />}
+              title="No Categories Yet"
+              description="Tags will appear here once you start categorizing your memories. Use them to organize your story by themes, people, or places."
+            />
+          )}
         </React.Fragment>
       ) : (
         <div className="space-y-6">

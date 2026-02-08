@@ -32,94 +32,86 @@ const Header: React.FC<HeaderProps> = ({
   return (
     <header
       className={cn(
-        "bg-white border-b border-neutral-200 sticky top-2 z-40",
+        "bg-white/80 backdrop-blur-xl border-b border-neutral-200/50 sticky top-0 z-40 transition-all duration-300",
         className
       )}
     >
       <div className="px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-16 sm:h-18">
           {/* Left Section */}
-          <div className="flex items-center space-x-4">
-            {/* Mobile Menu Button */}
+          <div className="flex items-center space-x-3">
+            {/* Mobile Menu Button - Refined */}
             <Button
               variant="ghost"
               size="icon"
               onClick={onToggleSidebar}
-              className="lg:hidden"
+              className="lg:hidden w-10 h-10 hover:bg-neutral-100 rounded-xl transition-all"
             >
-              <List className="w-5 h-5" />
+              <List weight="bold" className="w-5 h-5 text-neutral-900" />
             </Button>
-
-            {/* Logo */}
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-primary-900 rounded-lg flex items-center justify-center shadow-lg">
-                <span className="text-secondary-400/40 font-serif font-bold text-sm">M</span>
-              </div>
-              <h1 className="text-xl font-display font-bold text-neutral-900 hidden sm:block">
-                Memory Lane
-              </h1>
-            </div>
+...
           </div>
 
           {/* Right Section */}
-          <div className="flex items-center space-x-2">
-            {/* Sync Status */}
+          <div className="flex items-center space-x-2 sm:space-x-3">
+            {/* Sync Status - Refined Pill */}
             <div
               className={cn(
-                "flex items-center space-x-2 px-2 py-1 rounded-lg text-sm",
-                syncStatus === "online" && "text-success-700 bg-success-50",
-                syncStatus === "offline" && "text-neutral-500 bg-neutral-50",
-                syncStatus === "syncing" && "text-primary-700 bg-primary-50"
+                "hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all",
+                syncStatus === "online" && "text-emerald-700 bg-emerald-50 border border-emerald-100/50",
+                syncStatus === "offline" && "text-neutral-500 bg-neutral-100 border border-neutral-200/50",
+                syncStatus === "syncing" && "text-primary-700 bg-primary-50 border border-primary-100/50"
               )}
             >
               <SyncIcon
                 className={cn(
-                  "w-4 h-4",
-                  syncStatus === "syncing" && "animate-pulse"
+                  "w-3 h-3",
+                  syncStatus === "syncing" && "animate-spin"
                 )}
               />
-              <span className="hidden sm:inline">
+              <span className="hidden lg:inline">
                 {syncStatus === "online"
-                  ? "Synced"
+                  ? "Cloud Active"
                   : syncStatus === "offline"
-                  ? "Offline"
-                  : "Syncing..."}
+                  ? "Local Mode"
+                  : "Syncing"}
               </span>
             </div>
 
-            {/* Quick Add */}
-            <Button
-              variant="primary"
-              size="icon"
-              onClick={onCreateMemory}
-              className="relative"
-            >
-              <Plus className="w-5 h-5" />
-            </Button>
-
-            {/* Notifications */}
+            {/* Notifications - Refined Icon Button */}
             <Button
               variant="ghost"
               size="icon"
-              className="relative"
+              className="relative w-10 h-10 hover:bg-neutral-100 rounded-xl transition-all"
               onClick={onShowNotifications}
             >
-              <Bell className="w-5 h-5" />
+              <Bell weight="bold" className="w-5 h-5 text-neutral-700" />
               {notificationCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-destructive-500 text-white text-xs rounded-full flex items-center justify-center">
-                  {notificationCount > 99 ? "99+" : notificationCount}
-                </span>
+                <span className="absolute top-2 right-2 w-2 h-2 bg-destructive-500 rounded-full ring-2 ring-white" />
               )}
             </Button>
 
-            {/* Profile */}
+            {/* Quick Add Button - Master Action Cleaned */}
             <Button
-              onClick={() => onNavigate("settings")} // Use onNavigate directly
-              variant="ghost"
-              size="icon"
+              variant="primary"
+              onClick={onCreateMemory}
+              className="h-10 px-4 sm:px-5 rounded-xl bg-primary-900 shadow-md shadow-primary-900/10 hover:shadow-lg hover:shadow-primary-900/20 active:scale-95 transition-all group"
             >
-              <User className="w-5 h-5" />
+              <Plus weight="bold" className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline font-bold text-xs tracking-tight">New Memory</span>
             </Button>
+
+            {/* Profile - Integrated Separator */}
+            <div className="pl-1 sm:pl-2 ml-1 sm:ml-2 border-l border-neutral-200/50">
+              <Button
+                onClick={() => onNavigate("settings")}
+                variant="ghost"
+                size="icon"
+                className="w-10 h-10 bg-neutral-50/50 hover:bg-neutral-100 rounded-xl border border-neutral-200/20 transition-all"
+              >
+                <User weight="bold" className="w-4 h-4 text-neutral-600" />
+              </Button>
+            </div>
           </div>
         </div>
       </div>

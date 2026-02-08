@@ -48,20 +48,36 @@ const Sidebar: React.FC<SidebarProps> = ({
   return (
     <>
       {/* Mobile Overlay */}
-      {isOpen && <div className="lg:hidden fixed inset-0 bg-neutral-900/50 backdrop-blur-sm z-30" onClick={onClick} />}
+      <div 
+        className={cn(
+          "fixed inset-0 bg-neutral-950/40 backdrop-blur-md z-[45] transition-all duration-500 lg:hidden",
+          isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        )} 
+        onClick={onClick} 
+      />
 
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 w-64 bg-white border-r border-neutral-100 transform transition-transform duration-300 ease-in-out",
-          "h-full overflow-y-auto z-40",
-          isOpen ? "translate-x-0" : "-translate-x-full",
-          "lg:translate-x-0 lg:z-20 lg:pt-20 lg:pb-4"
+          "fixed inset-y-0 left-0 w-[280px] sm:w-[320px] lg:w-72 bg-white border-r border-neutral-200/50 shadow-2xl lg:shadow-none transform transition-all duration-500 ease-in-out z-[50]",
+          isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
+          "lg:pt-24 lg:pb-8"
         )}
       >
-        <div className="flex flex-col h-full bg-white">
+        <div className="flex flex-col h-full">
+          {/* Mobile Sidebar Logo - Refined */}
+          <div className="lg:hidden p-6 flex items-center space-x-3 border-b border-neutral-100 mb-2">
+            <div className="w-10 h-10 bg-primary-900 rounded-xl flex items-center justify-center shadow-lg transform rotate-3">
+              <span className="text-secondary-400/40 font-serif font-bold text-lg">M</span>
+            </div>
+            <span className="text-xl font-display font-bold text-neutral-900 tracking-tight">Memory Lane</span>
+          </div>
+
           {/* Navigation */}
-          <nav className="flex-1 px-4 py-8 space-y-1.5 focus:outline-none">
+          <nav className="flex-1 px-4 py-4 lg:py-0 space-y-1 overflow-y-auto">
+            <div className="px-3 mb-4 hidden lg:block">
+              <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-400">Navigation</h3>
+            </div>
             {navigation.map((item) => {
               const Icon = item.icon;
               const isActive = currentPage === item.id;
@@ -74,41 +90,49 @@ const Sidebar: React.FC<SidebarProps> = ({
                     onClick();
                   }}
                   className={cn(
-                    "w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 group",
+                    "w-full flex items-center space-x-4 px-4 py-3.5 rounded-2xl text-[13px] font-bold transition-all duration-300 group relative",
                     isActive
-                      ? "bg-neutral-900 text-white shadow-xl shadow-neutral-900/10"
+                      ? "bg-primary-50 text-primary-900 shadow-sm border border-primary-100"
                       : "text-neutral-500 hover:bg-neutral-50 hover:text-neutral-900"
                   )}
                 >
                   <Icon 
-                    weight={isActive ? "fill" : "regular"}
+                    weight={isActive ? "fill" : "bold"}
                     className={cn(
-                      "w-5 h-5 transition-colors", 
-                      isActive ? "text-secondary-400" : "text-neutral-400 group-hover:text-neutral-600"
+                      "w-5 h-5 transition-all duration-300", 
+                      isActive ? "text-primary-700 scale-110" : "text-neutral-400 group-hover:text-neutral-900"
                     )} 
                   />
                   <span>{item.name}</span>
+                  {isActive && (
+                    <div className="absolute right-4 w-1.5 h-1.5 rounded-full bg-primary-600 shadow-[0_0_10px_rgba(37,99,235,0.3)]" />
+                  )}
                 </button>
               );
             })}
           </nav>
 
-          {/* Quick Stats */}
-          <div className="px-6 py-8 border-t border-neutral-100">
-            <div className="bg-neutral-50 rounded-2xl p-5 space-y-4">
-              <h3 className="text-xs font-bold uppercase tracking-widest text-neutral-400">
-                Archive Stats
-              </h3>
-              <div className="space-y-3">
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-neutral-500">Memories</span>
-                  <span className="font-bold text-neutral-900">{totalMemories}</span>
-                </div>
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-neutral-500">Growth</span>
-                  <span className="font-bold text-green-600 inline-flex items-center">
-                    +12%
+          {/* Quick Stats - Enhanced aesthetic */}
+          <div className="p-6">
+            <div className="bg-gradient-to-br from-neutral-50 to-neutral-100 rounded-[2rem] p-6 space-y-5 border border-white shadow-inner">
+              <div className="flex items-center justify-between">
+                <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-400">
+                  Your Archive
+                </h3>
+              </div>
+              <div className="grid grid-cols-1 gap-4">
+                <div className="flex flex-col">
+                  <span className="text-[28px] font-display font-bold text-neutral-900 leading-none">
+                    {totalMemories}
                   </span>
+                  <span className="text-xs font-medium text-neutral-500 mt-1">Total Memories Captured</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="px-2.5 py-1 bg-emerald-50 text-emerald-700 text-[10px] font-bold rounded-full border border-emerald-100 inline-flex items-center">
+                    <ChartLineUp weight="bold" className="w-3 h-3 mr-1" />
+                    +12.5%
+                  </div>
+                  <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">Growth</span>
                 </div>
               </div>
             </div>

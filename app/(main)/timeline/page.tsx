@@ -76,7 +76,6 @@ export default function TimelinePage() {
             onEditMemory={handleEditMemory}
             onDeleteMemory={handleDeleteMemory}
             onShareMemory={handleShareMemory}
-            onAddMemory={() => {}} // Handle via dashboard layout
           />
         )}
       </div>

@@ -1,8 +1,9 @@
 "use client";
 
 import React from 'react';
-import { Calendar, Plus, Sparkle } from '@phosphor-icons/react';
+import { Sparkle } from '@phosphor-icons/react';
 import Button from './Button';
+import { cn } from '@/lib/utils';
 
 interface EmptyStateProps {
   icon?: React.ReactNode;
@@ -10,8 +11,7 @@ interface EmptyStateProps {
   description: string;
   actionLabel?: string;
   onAction?: () => void;
-  secondaryActionLabel?: string;
-  onSecondaryAction?: () => void;
+  className?: string;
 }
 
 export default function EmptyState({
@@ -20,49 +20,44 @@ export default function EmptyState({
   description,
   actionLabel,
   onAction,
-  secondaryActionLabel,
-  onSecondaryAction,
+  className,
 }: EmptyStateProps) {
   return (
-    <div className="flex items-center justify-center min-h-[400px] p-8">
-      <div className="text-center max-w-md space-y-6">
-        <div className="w-20 h-20 bg-gradient-to-br from-primary-100 to-secondary-100 rounded-2xl flex items-center justify-center mx-auto shadow-sm">
-          {icon || <Calendar className="w-10 h-10 text-primary-600" weight="duotone" />}
+    <div className={cn(
+      "flex flex-col items-center justify-center min-h-[460px] p-8 text-center animate-fade-in",
+      className
+    )}>
+      {/* Premium Graphic Element */}
+      <div className="relative mb-10">
+        <div className="absolute inset-0 bg-primary-100/50 rounded-full blur-3xl scale-150 animate-pulse" />
+        <div className="relative w-24 h-24 bg-gradient-to-br from-primary-900 to-primary-700 rounded-3xl flex items-center justify-center shadow-2xl rotate-3">
+          {icon || <Sparkle className="w-12 h-12 text-secondary-400/40" weight="duotone" />}
         </div>
-        
-        <div className="space-y-2">
-          <h3 className="text-xl font-bold text-neutral-900">
-            {title}
-          </h3>
-          <p className="text-neutral-600 leading-relaxed">
-            {description}
-          </p>
+        <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-secondary-400 rounded-xl flex items-center justify-center shadow-lg -rotate-12">
+          <Sparkle className="w-5 h-5 text-primary-900" weight="fill" />
         </div>
-
-        {(actionLabel || secondaryActionLabel) && (
-          <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
-            {actionLabel && onAction && (
-              <Button
-                onClick={onAction}
-                className="inline-flex items-center"
-              >
-                <Plus className="w-4 h-4 mr-2" weight="bold" />
-                {actionLabel}
-              </Button>
-            )}
-            {secondaryActionLabel && onSecondaryAction && (
-              <Button
-                variant="secondary"
-                onClick={onSecondaryAction}
-                className="inline-flex items-center"
-              >
-                <Sparkle className="w-4 h-4 mr-2" weight="duotone" />
-                {secondaryActionLabel}
-              </Button>
-            )}
-          </div>
-        )}
       </div>
+      
+      <div className="max-w-md space-y-4">
+        <h3 className="text-3xl font-display font-bold text-neutral-900 tracking-tight">
+          {title}
+        </h3>
+        <p className="text-lg text-neutral-500 font-light leading-relaxed">
+          {description}
+        </p>
+      </div>
+
+      {actionLabel && onAction && (
+        <div className="pt-8">
+          <Button
+            size="lg"
+            onClick={onAction}
+            className="rounded-full px-8 py-6 shadow-xl shadow-primary-900/10 hover:scale-105 transition-all duration-300"
+          >
+            {actionLabel}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

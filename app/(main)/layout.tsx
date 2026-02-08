@@ -52,7 +52,7 @@ export default function DashboardLayout({
   const currentPage = pathname.split("/").pop() || "timeline";
 
   return (
-    <div className="min-h-screen bg-neutral-50">
+    <div className="min-h-screen bg-neutral-50 selection:bg-primary-100 selection:text-primary-900">
       <Header
         onCreateMemory={() => setCreateModalOpen(true)}
         onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
@@ -74,8 +74,10 @@ export default function DashboardLayout({
           onClick={() => setSidebarOpen(false)}
         />
 
-        <main className="flex-1 lg:ml-64 pt-4">
-          {children}
+        <main className="flex-1 lg:ml-64 transition-all duration-300">
+          <div className="max-w-[1600px] mx-auto min-h-[calc(100vh-80px)]">
+            {children}
+          </div>
         </main>
       </div>
 
@@ -92,13 +94,6 @@ export default function DashboardLayout({
         onClose={() => setShowNotifications(false)}
         isOpen={showNotifications}
       />
-      
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-30 bg-black opacity-50 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
     </div>
   );
 }

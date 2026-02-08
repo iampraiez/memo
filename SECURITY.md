@@ -19,7 +19,7 @@ Please **do not** create a public GitHub issue for security vulnerabilities.
 
 ### 2. Email Us Directly
 
-Send details to: **security@memorylane.app**
+Send details to: **himpraise571@gmail.com**
 
 Include:
 - Description of the vulnerability

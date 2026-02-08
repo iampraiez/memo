@@ -59,14 +59,20 @@ export default function AnalyticsPage() {
         <Card className="p-8 space-y-6">
           <h2 className="text-xl font-display font-bold text-neutral-900">Activity Patterns</h2>
           <div className="space-y-4">
-              {analytics.monthlyActivity.map(m => (
-                  <div key={m.month} className="flex items-center space-x-4">
-                      <span className="w-12 text-sm font-bold text-neutral-400">{m.month}</span>
-                      <div className="flex-1 bg-neutral-100 rounded-full h-2 overflow-hidden">
-                          <div className="bg-primary-900 h-full transition-all duration-700" style={{ width: `${(m.memories / 35) * 100}%` }} />
-                      </div>
-                  </div>
-              ))}
+              {analytics.monthlyActivity.map(m => {
+                  const maxMemories = Math.max(...analytics.monthlyActivity.map(ma => ma.memories), 1);
+                  return (
+                    <div key={m.month} className="flex items-center space-x-4">
+                        <span className="w-12 text-sm font-bold text-neutral-400">{m.month}</span>
+                        <div className="flex-1 bg-neutral-100 rounded-full h-2 overflow-hidden">
+                            <div 
+                                className="bg-primary-900 h-full transition-all duration-700" 
+                                style={{ width: `${(m.memories / maxMemories) * 100}%` }} 
+                            />
+                        </div>
+                    </div>
+                  );
+              })}
           </div>
         </Card>
 

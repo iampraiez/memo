@@ -78,7 +78,7 @@ export default function SearchPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {(searchQuery ? searchResults : allMemories).map((memory) => (
+        {(searchQuery ? searchResults : []).map((memory) => (
           <MemoryCard
             key={memory.id}
             memory={memory}
@@ -86,6 +86,14 @@ export default function SearchPage() {
           />
         ))}
       </div>
+
+      {!searchQuery && (
+        <EmptyState
+          icon={<MagnifyingGlass size={48} className="text-secondary-400" weight="duotone" />}
+          title="Search Sanctuary"
+          description="Rediscover your journey by searching through your thoughts, locations, and milestones."
+        />
+      )}
 
       {searchQuery && searchResults.length === 0 && (
         <EmptyState
