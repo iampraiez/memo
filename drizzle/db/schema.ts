@@ -16,6 +16,7 @@ export const users = pgTable("users", {
   password: text("password"),
   image: text("image"),
   bio: text("bio"),
+  username: text("username").unique(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
   emailVerified: timestamp("email_verified"),

@@ -157,9 +157,13 @@ const Timeline: React.FC<TimelineProps> = ({
                                       <div className="absolute -left-[21px] sm:-left-[29px] top-2 w-2 h-2 rounded-full bg-primary-400 ring-4 ring-white" />
                                       
                                       {/* Day Header */}
-                                      <h4 className="text-sm font-bold text-neutral-500 uppercase tracking-wider">
-                                        {monthNames[month]} {day}
-                                      </h4>
+                                      <div className="flex items-center space-x-4 mb-4">
+                                        <h4 className="text-sm font-bold text-neutral-900 bg-neutral-100 px-3 py-1 rounded-full uppercase tracking-widest flex items-center">
+                                          <span className="w-1.5 h-1.5 rounded-full bg-primary-500 mr-2" />
+                                          {monthNames[month]} {day}
+                                        </h4>
+                                        <div className="flex-1 h-px bg-neutral-100" />
+                                      </div>
 
                                       {/* Day Memories */}
                                       <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-4">

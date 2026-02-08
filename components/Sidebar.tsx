@@ -34,7 +34,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   
   const navigation = [
     { name: "Timeline", icon: House, id: "timeline" },
-    { name: "Friends", icon: Users, id: "family" },
+    { name: "Friends", icon: Users, id: "friends" },
     { name: "Search", icon: MagnifyingGlass, id: "search" },
     { name: "Tags", icon: Tag, id: "tags" },
     { name: "Stories", icon: BookOpen, id: "stories" },

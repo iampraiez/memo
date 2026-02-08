@@ -1,35 +1,108 @@
 "use client";
 import React, { useState } from "react";
-import { Users, ArrowsClockwise, Heart, ChatCircle } from "@phosphor-icons/react";
+import { Users, Heart, ChatCircle, MagnifyingGlass, UserPlus, UserMinus } from "@phosphor-icons/react";
 import Loading from "@/components/ui/Loading";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
-import { useTimelineMemories } from "@/hooks/useSocial";
+import { useTimelineMemories, useSearchUsers, useFollowUser, useUnfollowUser } from "@/hooks/useSocial";
 import { useFamilyMembers } from "@/hooks/useFamily";
 import Image from "next/image";
 import EmptyState from "@/components/ui/EmptyState";
 
 export default function FamilyTimelinePage() {
+  const [friendSearch, setFriendSearch] = useState("");
+  const [discoverySearch, setDiscoverySearch] = useState("");
+  
   const { data: timelineData, isLoading: isLoadingTimeline } = useTimelineMemories();
-  const { data: familyData, isLoading: isLoadingFamily } = useFamilyMembers();
+  const { data: discoveryData, isLoading: isLoadingDiscovery } = useSearchUsers(discoverySearch);
+  
+  const followMutation = useFollowUser();
+  const unfollowMutation = useUnfollowUser();
 
   const memories = timelineData?.memories || [];
-  const family = familyData?.members || [];
+  
+  const filteredMemories = memories.filter(m => 
+    m.user?.name.toLowerCase().includes(friendSearch.toLowerCase()) ||
+    m.title.toLowerCase().includes(friendSearch.toLowerCase())
+  );
 
-  if (isLoadingTimeline || isLoadingFamily) {
-    return <Loading fullPage text="Curating your feed..." />;
+  if (isLoadingTimeline) {
+    return <Loading fullPage text="Curating your sanctuary circle..." />;
   }
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-12">
-      <header>
-        <h1 className="text-4xl font-display font-bold text-neutral-900 tracking-tight">Friends Feed</h1>
-        <p className="text-neutral-600 mt-2">Connect and share memories with your sanctuary circle</p>
+      <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div>
+            <h1 className="text-4xl font-display font-bold text-neutral-900 tracking-tight">Sanctuary Circle</h1>
+            <p className="text-neutral-600 mt-2">Discover and connect with the keepers of shared heritage</p>
+        </div>
       </header>
 
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="relative">
+              <MagnifyingGlass className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400 w-5 h-5" />
+              <input 
+                type="text" 
+                placeholder="Search within friends..."
+                value={friendSearch}
+                onChange={(e) => setFriendSearch(e.target.value)}
+                className="w-full pl-12 pr-4 py-4 rounded-2xl border border-neutral-100 bg-white shadow-soft focus:ring-2 focus:ring-primary-500 transition-all font-medium"
+              />
+          </div>
+          <div className="relative">
+              <Users className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400 w-5 h-5" />
+              <input 
+                type="text" 
+                placeholder="Find new people by @username..."
+                value={discoverySearch}
+                onChange={(e) => setDiscoverySearch(e.target.value)}
+                className="w-full pl-12 pr-4 py-4 rounded-2xl border border-neutral-100 bg-white shadow-soft focus:ring-2 focus:ring-secondary-500 transition-all font-medium"
+              />
+          </div>
+      </div>
+
+      {discoverySearch.length >= 2 && (
+          <div className="space-y-4">
+              <h2 className="text-sm font-bold uppercase tracking-widest text-neutral-400 px-2">Discovery Results</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {isLoadingDiscovery ? (
+                      <div className="p-8 text-center text-neutral-400 animate-pulse">Searching the sanctuary...</div>
+                  ) : discoveryData?.users && discoveryData.users.length > 0 ? (
+                      discoveryData.users.map((user: any) => (
+                          <Card key={user.id} className="p-4 flex items-center justify-between hover:bg-neutral-50 border-neutral-100 transition-colors">
+                              <div className="flex items-center space-x-3">
+                                  <div className="w-12 h-12 bg-primary-900 rounded-full flex items-center justify-center text-secondary-400 font-bold overflow-hidden">
+                                      {user.image ? <Image src={user.image} alt={user.name} width={48} height={48} /> : user.name[0]}
+                                  </div>
+                                  <div>
+                                      <p className="font-bold text-neutral-900">{user.name}</p>
+                                      <p className="text-xs text-neutral-500">@{user.username || user.id.slice(0, 8)}</p>
+                                  </div>
+                              </div>
+                              <Button 
+                                variant={user.isFollowing ? "secondary" : "primary"} 
+                                size="sm" 
+                                className="rounded-xl px-4"
+                                onClick={() => user.isFollowing ? unfollowMutation.mutate(user.id) : followMutation.mutate(user.id)}
+                              >
+                                {user.isFollowing ? <UserMinus weight="bold" /> : <UserPlus weight="bold" />}
+                                <span className="ml-2 font-bold text-xs">{user.isFollowing ? "Unfollow" : "Follow"}</span>
+                              </Button>
+                          </Card>
+                      ))
+                  ) : (
+                      <div className="p-8 text-center text-neutral-400">No keepers found matching that username.</div>
+                  )
+                  }
+              </div>
+          </div>
+      )}
+
       <div className="space-y-8">
-        {memories.length > 0 ? (
-          memories.map((memory: any) => (
+        <h2 className="text-sm font-bold uppercase tracking-widest text-neutral-400 px-2">Friends Feed</h2>
+        {filteredMemories.length > 0 ? (
+          filteredMemories.map((memory: any) => (
             <Card key={memory.id} className="p-8 space-y-6 hover:shadow-2xl transition-all duration-500 border-neutral-100">
                <div className="flex items-center justify-between border-b border-neutral-100 pb-4">
                    <div className="flex items-center space-x-3">
@@ -69,10 +142,10 @@ export default function FamilyTimelinePage() {
         ) : (
           <EmptyState
             icon={<Users className="w-12 h-12 text-secondary-400" weight="duotone" />}
-            title="Shared Heritage"
-            description="Invite your inner circle to start building a collective archive of your shared journey."
-            actionLabel="Invite Friends"
-            onAction={() => {/* TODO: Implement invite logic */}}
+            title="A Quiet Circle"
+            description={friendSearch ? "No memories match your filter." : "Start following other sanctuary keepers to see their shared heritage here."}
+            actionLabel={friendSearch ? "Clear Search" : "Discover Keepers"}
+            onAction={() => friendSearch ? setFriendSearch("") : setDiscoverySearch("a")}
           />
         )}
       </div>

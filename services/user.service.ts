@@ -7,6 +7,7 @@ export interface UserSettings {
   email: string;
   avatar?: string;
   bio?: string;
+  username?: string;
   createdAt: string;
   preferences: {
     theme: "light" | "dark" | "system";

@@ -59,25 +59,15 @@ export async function GET(req: Request) {
         memoryTags: {
             with: { tag: true }
         },
-        memoryMedia: true, // Assuming relation exists or will be added, if not this might fail. Wait.
-        // If memoryMedia relation is not defined in schema (I didn't add it), this will fail.
-        // I only added relations for memories/tags/users.
-        // memoryMedia relation is MISSING in schema.ts.
-        // But for now, let's just fetch basic memory info or fix schema. 
-        // Actually, fetching with relations is better. 
-        // Let's assume memoryMedia relation is missing and skip it for now in GET to avoid error?
-        // Or better, add it to schema. But I want to fix build first.
-        // Removing `with` for now to be safe, or just fetching tags if I added that relation.
-        // I ADDED memoryTags relation. So filtering tags is fine.
+        memoryMedia: true,
       }
     });
     
-    // Transform result to include flattened tags and images if needed
-    // The frontend expects `tags: string[]` and `images: string[]`.
+    // Transform result to include flattened tags and images
     const formattedMemories = userMemories.map(mem => ({
         ...mem,
         tags: mem.memoryTags ? mem.memoryTags.map(mt => mt.tag.name) : [],
-        images: [], // Placeholder until media relation is added and fetched
+        images: mem.memoryMedia ? mem.memoryMedia.map(mm => mm.url) : [],
     }));
 
     logger.info(`Fetched ${formattedMemories.length} memories for user ${user.id}`);

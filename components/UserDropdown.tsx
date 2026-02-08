@@ -1,0 +1,81 @@
+"use client";
+import React, { useState, useRef, useEffect } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { useSession, signOut } from "next-auth/react";
+import { User, Gear, SignOut, CaretDown } from "@phosphor-icons/react";
+import { cn } from "@/lib/utils";
+
+export default function UserDropdown() {
+  const { data: session } = useSession();
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  if (!session?.user) return null;
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center space-x-2 p-1.5 rounded-2xl hover:bg-neutral-50 transition-all border border-transparent hover:border-neutral-100"
+      >
+        <div className="w-8 h-8 rounded-full bg-primary-900 flex items-center justify-center text-secondary-400 font-bold overflow-hidden border border-white shadow-sm">
+          {session.user.image ? (
+            <Image src={session.user.image} alt={session.user.name || ""} width={32} height={32} />
+          ) : (
+            <span>{session.user.name?.[0] || "U"}</span>
+          )}
+        </div>
+        <CaretDown className={cn("w-3 h-3 text-neutral-400 transition-transform duration-300", isOpen && "rotate-180")} weight="bold" />
+      </button>
+
+      {isOpen && (
+        <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-soft-xl border border-neutral-100 py-2 z-50 animate-in fade-in zoom-in duration-200">
+          <div className="px-4 py-3 border-b border-neutral-50">
+            <p className="text-sm font-bold text-neutral-900 truncate">{session.user.name}</p>
+            <p className="text-xs text-neutral-500 truncate">{session.user.email}</p>
+          </div>
+          
+          <div className="py-1">
+            <Link
+              href={`/profile/${session.user.id}`}
+              className="flex items-center space-x-3 px-4 py-2 text-sm text-neutral-600 hover:bg-neutral-50 hover:text-primary-900 transition-colors"
+              onClick={() => setIsOpen(false)}
+            >
+              <User className="w-4 h-4" />
+              <span>Your Profile</span>
+            </Link>
+            <Link
+              href="/settings"
+              className="flex items-center space-x-3 px-4 py-2 text-sm text-neutral-600 hover:bg-neutral-50 hover:text-primary-900 transition-colors"
+              onClick={() => setIsOpen(false)}
+            >
+              <Gear className="w-4 h-4" />
+              <span>Settings</span>
+            </Link>
+          </div>
+
+          <div className="pt-1 mt-1 border-t border-neutral-50">
+            <button
+              onClick={() => signOut()}
+              className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-destructive-600 hover:bg-destructive-50 transition-colors text-left"
+            >
+              <SignOut className="w-4 h-4" />
+              <span>Sign Out</span>
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

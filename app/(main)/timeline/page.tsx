@@ -12,7 +12,7 @@ import CreateMemoryModal from "@/components/CreateMemoryModal";
 export default function TimelinePage() {
   const { data: memoriesData, isLoading: isLoadingMemories } = useMemories();
   const deleteMemoryMutation = useDeleteMemory();
-  const updateMemoryMutation = useUpdateMemory("");
+  const updateMemoryMutation = useUpdateMemory();
   const [viewingMemoryDetail, setViewingMemoryDetail] = useState<string | null>(null);
   const [selectedMemory, setSelectedMemory] = useState<Memory | null>(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -43,9 +43,22 @@ export default function TimelinePage() {
         body: JSON.stringify({ isPublic: !memory.isPublic })
        });
        if(!response.ok) throw new Error("Failed");
-       toast.success(memory.isPublic ? "Memory is now private" : "Memory shared with family");
+       toast.success(memory.isPublic ? "Memory is now private" : "Memory shared with sanctuary circle");
     } catch (error) {
       toast.error("Failed to update share status");
+    }
+  };
+
+  const handleSaveMemory = async (memory: Memory) => {
+    try {
+      const { title, content, date, mood, tags, location, images, isPublic } = memory;
+      await updateMemoryMutation.mutateAsync({ 
+        id: memory.id, 
+        data: { title, content, date, mood, tags, location, images, isPublic } 
+      });
+      toast.success("Memory saved");
+    } catch (error) {
+      toast.error("Failed to save memory");
     }
   };
 
@@ -86,9 +99,12 @@ export default function TimelinePage() {
           setSelectedMemory(null);
         }}
         onSave={async (val) => {
-            // Re-using create mutation logic or fix hook
-            toast.error("Update logic refinement needed");
+            if (selectedMemory) {
+               await updateMemoryMutation.mutateAsync({ id: selectedMemory.id, data: val });
+               toast.success("Memory updated");
+            }
             setEditModalOpen(false);
+            setSelectedMemory(null);
         }}
         editingMemory={selectedMemory || undefined}
       />

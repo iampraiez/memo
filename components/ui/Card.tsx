@@ -27,7 +27,7 @@ const Card: React.FC<CardProps> = ({
   return (
     <div
       className={cn(
-        "bg-white rounded-xl border border-neutral-200 shadow-soft",
+        "bg-white rounded-xl border border-neutral-200 shadow-soft relative",
         hover && "hover:shadow-soft-lg transition-shadow duration-200",
         paddingStyles[padding],
         className,

@@ -1,6 +1,7 @@
-import { Plus, Cloud, CloudSlash, List, Bell, User } from "@phosphor-icons/react";
+import { Plus, Cloud, CloudSlash, List, Bell } from "@phosphor-icons/react";
 import Button from "./ui/Button";
 import { cn } from "@/lib/utils";
+import UserDropdown from "./UserDropdown";
 
 interface HeaderProps {
   onCreateMemory: () => void;
@@ -103,14 +104,7 @@ const Header: React.FC<HeaderProps> = ({
 
             {/* Profile - Integrated Separator */}
             <div className="pl-1 sm:pl-2 ml-1 sm:ml-2 border-l border-neutral-200/50">
-              <Button
-                onClick={() => onNavigate("settings")}
-                variant="ghost"
-                size="icon"
-                className="w-10 h-10 bg-neutral-50/50 hover:bg-neutral-100 rounded-xl border border-neutral-200/20 transition-all"
-              >
-                <User weight="bold" className="w-4 h-4 text-neutral-600" />
-              </Button>
+              <UserDropdown />
             </div>
           </div>
         </div>

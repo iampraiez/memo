@@ -23,6 +23,14 @@ export interface Analytics {
     day: string;
     memories: number;
   }>;
+  heatmap?: Record<string, number>;
+  tagClusters?: Array<{
+    tag: string;
+    related: Array<{
+      name: string;
+      count: number;
+    }>;
+  }>;
 }
 
 export const analyticsService = {

@@ -43,6 +43,12 @@ export interface Memory {
   createdAt: string;
   updatedAt: string;
   isPublic: boolean;
+  user?: {
+    id: string;
+    name: string;
+    image?: string;
+    username?: string;
+  };
 }
 
 export interface User {
@@ -60,7 +66,19 @@ export interface Tag {
   id: string;
   name: string;
   color: string;
-  count: number;
+}
+
+export interface Analytics {
+  totalMemories: number;
+  memoriesThisMonth: number;
+  averagePerWeek: number;
+  longestStreak: number;
+  topMoods: { mood: string; count: number; percentage: number }[];
+  topTags: { tag: string; count: number; percentage: number }[];
+  monthlyActivity: { month: string; memories: number }[];
+  weeklyPattern: { day: string; memories: number }[];
+  heatmap?: Record<string, number>;
+  tagClusters?: { tag: string; related: { name: string; count: number }[] }[];
 }
 
 export interface Story {

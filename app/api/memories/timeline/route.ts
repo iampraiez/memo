@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import db from "@/drizzle/index";
-import { memories, familyMembers } from "@/drizzle/db/schema";
+import { memories, follows } from "@/drizzle/db/schema";
 import { and, eq, or, inArray, desc } from "drizzle-orm";
 
 export async function GET() {
@@ -14,30 +14,18 @@ export async function GET() {
   try {
     const userId = session.user.id;
 
-    // 1. Get my own memories that I've shared
-    // (Actually the UI "Family Timeline" usually shows memories shared WITH me + my public ones)
-    
-    // 2. Find people who have me in their family
-    const familyRelations = await db.query.familyMembers.findMany({
-      where: or(
-        eq(familyMembers.ownerId, userId),
-        eq(familyMembers.memberId, userId)
-      ),
+    // 1. Get IDs of users I'm following
+    const following = await db.query.follows.findMany({
+        where: eq(follows.followerId, userId)
     });
-
-    const relatedUserIds = familyRelations.map((rel: any) => 
-      rel.ownerId === userId ? rel.memberId : rel.ownerId
-    ).filter((id): id is string => !!id);
-
-    // 3. Find memories shared with me OR by people in my family that are marked as public
-    // For this app, we'll assume "public" in the context of memories means "shared with family"
-    // Since there's no global public feed.
     
-    // Fetch memories from myself and family members
+    const followingIds = following.map(f => f.followingId);
+
+    // 2. Fetch memories from myself and people I follow
     const allRelevantMemories = await db.query.memories.findMany({
       where: or(
         eq(memories.userId, userId),
-        relatedUserIds.length > 0 ? inArray(memories.userId, relatedUserIds) : undefined
+        followingIds.length > 0 ? inArray(memories.userId, followingIds) : undefined
       ),
       orderBy: [desc(memories.date)],
       with: {

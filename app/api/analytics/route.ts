@@ -196,6 +196,38 @@ export async function GET(req: Request) {
     });
     longestStreak = Math.max(longestStreak, currentStreak);
 
+    // Calculate Heatmap Data (last 365 days)
+    const heatmap: Record<string, number> = {};
+    const oneYearAgo = new Date();
+    oneYearAgo.setFullYear(now.getFullYear() - 1);
+    
+    userMemories.forEach(memory => {
+        const dateKey = new Date(memory.date).toISOString().split('T')[0];
+        heatmap[dateKey] = (heatmap[dateKey] || 0) + 1;
+    });
+
+    // Calculate Tag Relationship Clusters (Co-occurrence)
+    const tagCooccurrence: Record<string, Record<string, number>> = {};
+    userMemories.forEach(memory => {
+        const tags = memory.memoryTags.map(t => t.tag.name);
+        tags.forEach(t1 => {
+            if (!tagCooccurrence[t1]) tagCooccurrence[t1] = {};
+            tags.forEach(t2 => {
+              if (t1 !== t2) {
+                tagCooccurrence[t1][t2] = (tagCooccurrence[t1][t2] || 0) + 1;
+              }
+            });
+        });
+    });
+
+    const tagClusters = Object.entries(tagCooccurrence).map(([tag, relations]) => ({
+        tag,
+        related: Object.entries(relations)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 3)
+            .map(([name, count]) => ({ name, count }))
+    })).sort((a, b) => b.related.length - a.related.length).slice(0, 10);
+
     const analytics = {
       totalMemories,
       memoriesThisMonth,
@@ -205,6 +237,8 @@ export async function GET(req: Request) {
       topTags,
       monthlyActivity,
       weeklyPattern,
+      heatmap,
+      tagClusters
     };
 
     logger.info(`Analytics fetched for user ${user.id}`);

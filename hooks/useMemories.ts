@@ -29,13 +29,14 @@ export const useCreateMemory = () => {
   });
 };
 
-export const useUpdateMemory = (id: string) => {
+export const useUpdateMemory = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: UpdateMemoryData) => memoryService.update(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["memory", id] });
+    mutationFn: ({ id, data }: { id: string; data: UpdateMemoryData }) => 
+      memoryService.update(id, data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["memory", variables.id] });
       queryClient.invalidateQueries({ queryKey: ["memories"] });
       queryClient.invalidateQueries({ queryKey: ["analytics"] });
     },

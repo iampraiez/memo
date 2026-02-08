@@ -99,3 +99,10 @@ export const useFollowing = (userId: string) => {
         enabled: !!userId,
     });
 };
+export const useSearchUsers = (query: string) => {
+    return useQuery({
+        queryKey: ["users", "search", query],
+        queryFn: () => socialService.searchUsers(query),
+        enabled: query.length >= 2,
+    });
+};

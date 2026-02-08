@@ -5,9 +5,9 @@ export interface CreateMemoryData {
   title: string;
   content: string;
   date: string;
-  mood?: string;
+  mood?: string | null;
   tags?: string[];
-  location?: string;
+  location?: string | null;
   images?: string[];
   isPublic?: boolean;
 }

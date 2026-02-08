@@ -52,13 +52,17 @@ export default function ProfilePage() {
         <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-r from-primary-900 via-primary-800 to-secondary-900 opacity-5" />
         
         <div className="relative flex flex-col md:flex-row items-center md:items-end space-y-4 md:space-y-0 md:space-x-6 pt-12">
-          <div className="relative w-32 h-32 rounded-3xl overflow-hidden border-4 border-white shadow-2xl">
-            <Image 
-              src={profile.avatar || "/default-avatar.png"} 
-              alt={profile.name} 
-              fill 
-              className="object-cover"
-            />
+          <div className="relative w-32 h-32 rounded-3xl overflow-hidden border-4 border-white shadow-2xl bg-primary-900 flex items-center justify-center">
+            {profile.avatar ? (
+              <Image 
+                src={profile.avatar} 
+                alt={profile.name} 
+                fill 
+                className="object-cover"
+              />
+            ) : (
+              <span className="text-4xl font-bold text-secondary-400">{profile.name[0]}</span>
+            )}
           </div>
           
           <div className="flex-1 text-center md:text-left space-y-2">

@@ -64,4 +64,8 @@ export const socialService = {
   getFollowing: (userId: string) => {
     return apiService.get<{ following: any[] }>(`/api/user/following/${userId}`);
   },
+  
+  searchUsers: (query: string) => {
+    return apiService.get<{ users: any[] }>(`/api/user/search?q=${encodeURIComponent(query)}`);
+  },
 };

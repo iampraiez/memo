@@ -1,7 +1,7 @@
 import React from "react";
 import type { Metadata } from "next";
 import { auth } from "@/lib/auth";
-import { Inter } from "next/font/google";
+import { Inter, Playfair_Display } from "next/font/google";
 import "./global.css";
 import { Providers } from "./providers";
 import ErrorBoundary from "@/components/ErrorBoundary";
@@ -10,7 +10,13 @@ import { Toaster } from "sonner";
 const inter = Inter({ 
   subsets: ["latin"],
   display: 'swap',
-  preload: true,
+  variable: '--font-sans',
+});
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  display: 'swap',
+  variable: '--font-display',
 });
 
 export const metadata: Metadata = {
@@ -34,7 +40,7 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={`${inter.variable} ${playfair.variable} ${inter.className} antialiased selection:bg-primary-100 selection:text-primary-900`}>
         <ErrorBoundary>
           <Providers session={session}>
             {children}

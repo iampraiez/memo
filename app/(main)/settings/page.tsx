@@ -19,15 +19,14 @@ import { signOut } from "next-auth/react";
 import { useUserSettings, useUpdateUserSettings } from "@/hooks/useUserSettings";
 import Loading from "@/components/ui/Loading";
 
-const themeOptions = [
-  { value: "light", label: "Light" },
-  { value: "dark", label: "Dark" },
-  { value: "system", label: "System" },
-];
-
 export default function SettingsPage() {
+  const [mounted, setMounted] = useState(false);
   const [activeSection, setActiveSection] = useState("account");
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
   
   const { data: settings, isLoading, error } = useUserSettings();
   const updateSettings = useUpdateUserSettings();
@@ -35,12 +34,14 @@ export default function SettingsPage() {
   const [localName, setLocalName] = useState("");
   const [localAvatar, setLocalAvatar] = useState("");
   const [localBio, setLocalBio] = useState("");
+  const [localUsername, setLocalUsername] = useState("");
 
   React.useEffect(() => {
     if (settings) {
       setLocalName(settings.name);
       setLocalAvatar(settings.avatar || "");
       setLocalBio(settings.bio || "");
+      setLocalUsername(settings.username || "");
     }
   }, [settings]);
 
@@ -49,10 +50,11 @@ export default function SettingsPage() {
       name: localName,
       avatar: localAvatar,
       bio: localBio,
+      username: localUsername,
     });
   };
 
-  if (isLoading) {
+  if (!mounted || isLoading) {
     return <Loading fullPage text="Applying your preferences..." />;
   }
 
@@ -70,7 +72,6 @@ export default function SettingsPage() {
 
   const sections = [
     { id: "account", label: "Account", icon: UserIcon },
-    { id: "appearance", label: "Appearance", icon: Palette },
     { id: "data", label: "Data & Privacy", icon: Cloud },
   ];
 
@@ -96,8 +97,8 @@ export default function SettingsPage() {
                   onClick={() => setActiveSection(section.id)}
                   className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all whitespace-nowrap lg:w-full font-bold text-sm ${
                     activeSection === section.id
-                      ? "bg-neutral-900 text-white shadow-xl shadow-neutral-900/10"
-                      : "text-neutral-500 hover:bg-neutral-50 hover:text-neutral-900"
+                      ? "bg-primary-900 text-white shadow-xl shadow-primary-900/10"
+                      : "text-neutral-500 hover:bg-primary-50 hover:text-primary-900"
                   }`}
                 >
                   <section.icon className="w-5 h-5 flex-shrink-0" />
@@ -125,13 +126,17 @@ export default function SettingsPage() {
                       Profile Picture
                     </label>
                     <div className="flex items-center space-x-4">
-                      <div className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-neutral-100 shadow-sm">
-                        <Image
-                          src={localAvatar || "/default-avatar.png"}
-                          alt="Profile"
-                          fill
-                          className="object-cover"
-                        />
+                      <div className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-neutral-100 shadow-sm bg-primary-900 flex items-center justify-center">
+                        {localAvatar ? (
+                          <Image
+                            src={localAvatar}
+                            alt="Profile"
+                            fill
+                            className="object-cover"
+                          />
+                        ) : (
+                          <span className="text-2xl font-bold text-secondary-400">{localName ? localName[0] : 'U'}</span>
+                        )}
                       </div>
                       <input
                         type="file"
@@ -152,6 +157,16 @@ export default function SettingsPage() {
                         </span>
                       </label>
                     </div>
+                  </div>
+
+                  <div>
+                    <Input
+                      label="Username"
+                      value={localUsername}
+                      onChange={(e) => setLocalUsername(e.target.value)}
+                      placeholder="Choose a unique username"
+                      prefix="@"
+                    />
                   </div>
 
                   <div>
@@ -215,31 +230,6 @@ export default function SettingsPage() {
             </div>
           )}
 
-          {activeSection === "appearance" && (
-            <Card>
-              <div className="p-6 border-b border-neutral-200">
-                <h2 className="text-xl font-semibold text-neutral-900">
-                  Appearance
-                </h2>
-              </div>
-              <div className="p-6 space-y-6">
-                <Select
-                  label="Theme"
-                  options={themeOptions}
-                  value={settings.preferences.theme}
-                  onChange={(value) => {
-                    const theme = value as "light" | "dark" | "system";
-                    updateSettings.mutate({
-                      preferences: {
-                        ...settings.preferences,
-                        theme,
-                      },
-                    });
-                  }}
-                />
-              </div>
-            </Card>
-          )}
 
           {activeSection === "data" && (
             <div className="space-y-6">
