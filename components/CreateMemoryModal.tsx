@@ -49,6 +49,7 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
     location?: string; // Add location to formErrors
   }>({});
   const [aiLoading, setAiLoading] = useState(false); // New state for AI loading
+  const [isSaving, setIsSaving] = useState(false);
   const [aiGeneratedContent, setAiGeneratedContent] = useState(""); // New state for AI generated content
   const [showAiButtons, setShowAiButtons] = useState(false); // New state to control visibility of AI buttons
 
@@ -182,48 +183,56 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
       return;
     }
 
-    setFormErrors({}); // Clear any previous errors
+    setIsSaving(true);
+    try {
+      setFormErrors({}); // Clear any previous errors
 
-    const newMemory = {
-      ...formData,
-      images: formData.images.map((file) => file.url), // Convert UploadedFile[] to string[] for Memory type
-      id: editingMemory?.id || `memory-${Date.now()}`,
-      createdAt: editingMemory?.createdAt || new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      syncStatus: "pending",
-      isPublic: editingMemory?.isPublic ?? false, // Set isPublic based on existing memory or false by default
-    } as Memory;
-    console.log("newMemory", newMemory);
-    setFormData({
-      title: "",
-      content: "",
-      date: new Date().toISOString().split("T")[0],
-      location: "",
-      mood: "",
-      tags: [],
-      images: [],
-    });
-
-    if (isOnline) {
-      // Assume successful save to backend for now
-      console.log("Attempting to save memory to backend:", newMemory);
-      // In a real app, you'd make an API call here, e.g., await saveMemoryToBackend(newMemory);
-      newMemory.syncStatus = "synced";
-    } else {
-      // Save to IndexedDB and mark as offline/pending
-      console.log("Saving memory to IndexedDB (offline):", newMemory);
-      newMemory.syncStatus = "offline";
-      await db.offline_changes.add({
-        type: editingMemory ? "update" : "add",
-        collection: "memories",
-        data: newMemory,
-        timestamp: Date.now(),
+      const newMemory = {
+        ...formData,
+        images: formData.images.map((file) => file.url), // Convert UploadedFile[] to string[] for Memory type
+        id: editingMemory?.id || `memory-${Date.now()}`,
+        createdAt: editingMemory?.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        syncStatus: "pending",
+        isPublic: editingMemory?.isPublic ?? false, // Set isPublic based on existing memory or false by default
+      } as Memory;
+      console.log("newMemory", newMemory);
+      setFormData({
+        title: "",
+        content: "",
+        date: new Date().toISOString().split("T")[0],
+        location: "",
+        mood: "",
+        tags: [],
+        images: [],
       });
-    }
 
-    await db.memories.put(newMemory); // Save to local Dexie store for immediate UI update onSave(newMemory); // This `onSave` prop is now primarily for updating the UI with the new/updated memory
-    onSave(newMemory);
-    onClose();
+      if (isOnline) {
+        // Assume successful save to backend for now
+        console.log("Attempting to save memory to backend:", newMemory);
+        // In a real app, you'd make an API call here, e.g., await saveMemoryToBackend(newMemory);
+        newMemory.syncStatus = "synced";
+      } else {
+        // Save to IndexedDB and mark as offline/pending
+        console.log("Saving memory to IndexedDB (offline):", newMemory);
+        newMemory.syncStatus = "offline";
+        await db.offline_changes.add({
+          type: editingMemory ? "update" : "add",
+          collection: "memories",
+          data: newMemory,
+          timestamp: Date.now(),
+        });
+      }
+
+      await db.memories.put(newMemory); // Save to local Dexie store for immediate UI update
+      await onSave(newMemory); // This `onSave` prop is now primarily for updating the UI with the new/updated memory
+      onClose();
+    } catch (error) {
+      console.error("Save failed:", error);
+      // toast.error("Failed to save memory"); // Assuming toast is available
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const addTag = () => {
@@ -502,8 +511,8 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
             >
               Clear
             </Button>
-            <Button onClick={handleSave}>
-              {editingMemory ? "Save Changes" : "Create Memory"}
+            <Button onClick={handleSave} loading={isSaving}>
+              {editingMemory ? (isSaving ? "Saving..." : "Save Changes") : (isSaving ? "Creating..." : "Create Memory")}
             </Button>
           </div>
         </div>

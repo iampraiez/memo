@@ -2,10 +2,11 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Memory } from "@/types/types";
 import { memoryService, CreateMemoryData, UpdateMemoryData } from "@/services/memory.service";
 
-export const useMemories = (isPublic?: boolean, limit = 100, offset = 0) => {
+export const useMemories = (isPublic?: boolean, limit = 100, offset = 0, initialData?: Memory[]) => {
   return useQuery<{ memories: Memory[] }>({
     queryKey: ["memories", { isPublic, limit, offset }],
     queryFn: () => memoryService.getAll(isPublic, limit, offset),
+    initialData: initialData ? { memories: initialData } : undefined,
   });
 };
 

@@ -7,15 +7,15 @@ import Loading from "@/components/ui/Loading";
 import { toast } from "sonner";
 import MemoryDetail from "@/components/MemoryDetail";
 import CreateMemoryModal from "@/components/CreateMemoryModal";
+import { memoryService } from "@/services/memory.service";
 
 interface TimelineClientProps {
   initialMemories: Memory[];
 }
 
 export default function TimelineClient({ initialMemories }: TimelineClientProps) {
-  const { data: memoriesData, isLoading: isLoadingMemories } = useMemories(undefined, 100, 0);
-  // We use initialData in the hook call if we want, but here we'll just use it as a fallback
-  // Or better, pass it to useMemories as initialData.
+  const { data: memoriesData, isLoading: isLoadingMemories } =
+    useMemories(undefined, 100, 0, initialMemories);
   
   const deleteMemoryMutation = useDeleteMemory();
   const updateMemoryMutation = useUpdateMemory();

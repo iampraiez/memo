@@ -3,12 +3,13 @@ import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
-import { User, Gear, SignOut, CaretDown } from "@phosphor-icons/react";
+import { User, Gear, SignOut, CaretDown, Spinner } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 
 export default function UserDropdown() {
   const { data: session } = useSession();
   const [isOpen, setIsOpen] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -67,11 +68,19 @@ export default function UserDropdown() {
 
           <div className="pt-1 mt-1 border-t border-neutral-50">
             <button
-              onClick={() => signOut()}
-              className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-destructive-600 hover:bg-destructive-50 transition-colors text-left"
+              onClick={async () => {
+                setIsSigningOut(true);
+                await signOut({ callbackUrl: "/" });
+              }}
+              disabled={isSigningOut}
+              className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-destructive-600 hover:bg-destructive-50 transition-colors text-left disabled:opacity-50"
             >
-              <SignOut className="w-4 h-4" />
-              <span>Sign Out</span>
+              {isSigningOut ? (
+                <Spinner className="w-4 h-4 animate-spin" />
+              ) : (
+                <SignOut className="w-4 h-4" />
+              )}
+              <span>{isSigningOut ? "Signing Out..." : "Sign Out"}</span>
             </button>
           </div>
         </div>

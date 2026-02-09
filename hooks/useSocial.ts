@@ -2,12 +2,18 @@ import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from "@tansta
 import { Memory } from "@/types/types";
 import { socialService, Comment, Reaction } from "@/services/social.service";
 
-export const useTimelineMemories = (sort: string = "date") => {
+export const useTimelineMemories = (sort: string = "date", initialData?: Memory[]) => {
   return useInfiniteQuery({
     queryKey: ["memories", "timeline", sort],
     queryFn: ({ pageParam }) => socialService.getTimeline({ cursor: pageParam as string | undefined, sort }),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => lastPage.nextCursor || undefined,
+    initialData: initialData 
+      ? { 
+          pages: [{ memories: initialData, nextCursor: undefined }], 
+          pageParams: [undefined] 
+        } 
+      : undefined,
   });
 };
 

@@ -1,11 +1,16 @@
-"use client";
-import React from "react";
-import { useParams } from "next/navigation";
+import React, { Suspense } from "react";
 import MemoryDetail from "@/components/MemoryDetail";
+import Loading from "@/app/loading";
 
-export default function MemoryDetailPage() {
-  const params = useParams();
-  const memoryId = params.id as string;
+async function MemoryDetailWrapper({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  return <MemoryDetail memoryId={id} />;
+}
 
-  return <MemoryDetail memoryId={memoryId} />;
+export default function MemoryDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  return (
+    <Suspense fallback={<Loading />}>
+      <MemoryDetailWrapper params={params} />
+    </Suspense>
+  );
 }

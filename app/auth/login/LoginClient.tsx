@@ -1,36 +1,64 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { EnvelopeSimple, Lock, GoogleLogo, ArrowRight } from "@phosphor-icons/react";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
-import { registerUser } from "@/lib/api";
 import { toast } from "sonner";
 
-export default function RegisterPage() {
+export default function LoginClient() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingGoogle, setLoadingGoogle] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const googleToken = searchParams.get("google_token");
+    if (googleToken) {
+      handleFinalizeGoogleLogin(googleToken);
+    }
+  }, [searchParams]);
+
+  const handleFinalizeGoogleLogin = async (token: string) => {
+    setLoadingGoogle(true);
+    try {
+      const res = await signIn("credentials", {
+        redirect: false,
+        token,
+        type: "google-token",
+      });
+
+      if (res?.error) {
+        toast.error("Google authentication failed.");
+        router.replace("/auth/login");
+      } else {
+        router.push("/timeline");
+      }
+    } catch (err) {
+      toast.error("An error occurred during Google Sign-In.");
+    } finally {
+      setLoadingGoogle(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password !== confirmPassword) {
-      toast.error("Passwords do not match");
-      return;
-    }
     setLoading(true);
     try {
-      const res = await registerUser({ email, password });
-      if (res?.data.success || res?.data.requiresVerification) {
-        toast.success("Account created successfully!");
-        router.push(`/auth/verify?email=${encodeURIComponent(email)}`);
+      const res = await signIn("credentials", {
+        redirect: false,
+        email,
+        password,
+      });
+
+      if (res?.error) {
+        toast.error("Invalid credentials. Please try again.");
       } else {
-        toast.error(res?.data.error || "Registration failed");
+        router.push("/timeline");
       }
     } catch (err) {
       toast.error("An unexpected error occurred.");
@@ -54,11 +82,9 @@ export default function RegisterPage() {
             </div>
           </Link>
           <h1 className="text-3xl font-display font-bold text-neutral-900">
-            Create Account
+            Welcome Back
           </h1>
-          <p className="text-neutral-600">
-            Start preserving your memories today
-          </p>
+          <p className="text-neutral-600">Sign in to continue your journey</p>
         </div>
 
         <Card className="p-8 space-y-6">
@@ -84,9 +110,17 @@ export default function RegisterPage() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-neutral-700">
-                Password
-              </label>
+              <div className="flex justify-between items-center">
+                <label className="text-sm font-medium text-neutral-700">
+                  Password
+                </label>
+                <Link
+                  href="/auth/forgot-password"
+                  className="text-sm text-primary-600 hover:text-primary-700 font-medium"
+                >
+                  Forgot?
+                </Link>
+              </div>
               <div className="relative">
                 <div className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400">
                   <Lock size={20} />
@@ -96,28 +130,8 @@ export default function RegisterPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Minimum 8 characters"
-                  autoComplete="new-password"
-                  className="w-full pl-10 pr-4 py-3 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-neutral-700">
-                Confirm Password
-              </label>
-              <div className="relative">
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400">
-                  <Lock size={20} />
-                </div>
-                <input
-                  type="password"
-                  required
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Confirm your password"
-                  autoComplete="new-password"
+                  placeholder="••••••••"
+                  autoComplete="current-password"
                   className="w-full pl-10 pr-4 py-3 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                 />
               </div>
@@ -129,7 +143,7 @@ export default function RegisterPage() {
               loading={loading}
               className="w-full mt-6 bg-primary-800 text-white hover:bg-primary-900"
             >
-              Create Account
+              Sign In
               <ArrowRight size={20} className="ml-2" />
             </Button>
           </form>
@@ -157,12 +171,12 @@ export default function RegisterPage() {
         </Card>
 
         <p className="text-center text-sm text-neutral-600">
-          Already have an account?{" "}
+          Don't have an account?{" "}
           <Link
-            href="/auth/login"
+            href="/auth/register"
             className="text-primary-600 hover:text-primary-700 font-medium"
           >
-            Sign in
+            Sign up
           </Link>
         </p>
       </div>

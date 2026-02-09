@@ -1,7 +1,5 @@
 import { z } from "zod";
 
-// Next.js automatically loads .env files, so manual dotenv.config() is redundant here.
-
 const envSchema = z.object({
   DATABASE_URL: z.string().url(),
   AUTH_SECRET: z.string().min(1),

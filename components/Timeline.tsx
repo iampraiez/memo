@@ -137,11 +137,8 @@ const Timeline: React.FC<TimelineProps> = ({
                               <span>{monthNames[month]}</span>
                               <span className="text-xs font-normal text-neutral-400 ml-1 bg-neutral-50 px-2 py-0.5 rounded-full">
                                 {Object.values(
-                                  groupedMemories[year][month]
-                                ).reduce(
-                                  (acc, day) => acc + day.length,
-                                  0
-                                )}
+                                  groupedMemories[year][month],
+                                ).reduce((acc, day) => acc + day.length, 0)}
                               </span>
                             </button>
 
@@ -152,10 +149,13 @@ const Timeline: React.FC<TimelineProps> = ({
                                   .map(Number)
                                   .sort((a, b) => b - a)
                                   .map((day) => (
-                                    <div key={day} className="space-y-4 relative">
+                                    <div
+                                      key={day}
+                                      className="space-y-4 relative"
+                                    >
                                       {/* Day Bullet */}
-                                      <div className="absolute -left-[21px] sm:-left-[29px] top-2 w-2 h-2 rounded-full bg-primary-400 ring-4 ring-white" />
-                                      
+                                      <div className="absolute -left-5.25 sm:-left-7.25 top-2 w-2 h-2 rounded-full bg-primary-400 ring-4 ring-white" />
+
                                       {/* Day Header */}
                                       <div className="flex items-center space-x-4 mb-4">
                                         <h4 className="text-sm font-bold text-neutral-900 bg-neutral-100 px-3 py-1 rounded-full uppercase tracking-widest flex items-center">
@@ -171,7 +171,7 @@ const Timeline: React.FC<TimelineProps> = ({
                                           .sort(
                                             (a, b) =>
                                               new Date(b.createdAt).getTime() -
-                                              new Date(a.createdAt).getTime()
+                                              new Date(a.createdAt).getTime(),
                                           )
                                           .map((memory) => (
                                             <MemoryCard
