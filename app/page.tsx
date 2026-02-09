@@ -190,6 +190,7 @@ const LandingPage: React.FC = () => {
                 width={1200}
                 height={800}
                 priority
+                unoptimized
                 className="w-full max-w-5xl mx-auto rounded-3xl shadow-2xl border-4 border-white/50 backdrop-blur-xl ring-1 ring-black/5"
               />
             </div>
@@ -216,7 +217,7 @@ const LandingPage: React.FC = () => {
                 className="group p-8 rounded-3xl bg-neutral-50/50 hover:bg-white hover:shadow-2xl hover:shadow-primary-900/5 transition-all duration-500 border border-transparent hover:border-primary-100"
               >
                 <div className="w-12 h-12 bg-primary-900 rounded-xl flex items-center justify-center mb-6 shadow-lg shadow-black/20 group-hover:scale-110 transition-transform">
-                  <feature.icon weight="duotone" className="w-6 h-6 text-secondary-400 white-inner-icon" />
+                  <feature.icon weight="duotone" className="w-6 h-6 text-white white-inner-icon" />
                 </div>
                 <h3 className="text-2xl font-display font-bold text-neutral-900 mb-4">
                   {feature.title}
@@ -258,7 +259,7 @@ const LandingPage: React.FC = () => {
                   "{testimonial.content}"
                 </p>
                 <div className="flex items-center">
-                  <div className="w-12 h-12 bg-primary-900 rounded-full flex items-center justify-center text-secondary-400 font-serif font-bold text-lg mr-4 shadow-inner">
+                  <div className="w-12 h-12 bg-primary-900 rounded-full flex items-center justify-center text-white font-serif font-bold text-lg mr-4 shadow-inner">
                     {testimonial.avatar[0]}
                   </div>
                   <div>
@@ -304,7 +305,7 @@ const LandingPage: React.FC = () => {
         
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
           <h2 className="text-5xl sm:text-7xl font-display font-bold text-white mb-8 tracking-tight">
-            Begin your <span className="italic font-serif text-secondary-400">Archive.</span>
+            Begin your <span className="italic font-serif text-transparent bg-clip-text bg-gradient-to-r from-white to-primary-200">Archive.</span>
           </h2>
           <p className="text-xl text-primary-200/80 mb-12 max-w-2xl mx-auto font-light leading-relaxed">
             Every moment counts. Don't let your history fade into the digital noise. Join the sanctuary today.
@@ -313,12 +314,12 @@ const LandingPage: React.FC = () => {
             <Link href={"/register"}>
               <Button
                 size="lg"
-                className="text-lg px-12 py-7 rounded-full bg-secondary-500 text-primary-950 hover:bg-secondary-400 hover:scale-105 transition-all duration-500 font-bold shadow-[0_0_40px_rgba(245,158,11,0.2)]"
+                className="text-lg px-12 py-7 rounded-full bg-white text-primary-950 hover:bg-neutral-100 hover:scale-105 transition-all duration-500 font-bold shadow-xl shadow-black/20"
               >
                 Sign Up Free
               </Button>
             </Link>
-          </div>
+          </div>  
         </div>
       </section>
 
