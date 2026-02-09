@@ -107,7 +107,7 @@ const LandingPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
           <div className="flex items-center space-x-3 group cursor-pointer">
             <div className="w-10 h-10 bg-gradient-to-br from-primary-700 to-primary-900 rounded-xl flex items-center justify-center shadow-lg shadow-primary-900/20 transform transition-transform group-hover:scale-110 group-hover:rotate-3">
-              <span className="text-secondary-400/40 font-serif font-bold text-lg tracking-tight">M</span>
+              <Sparkle weight="duotone" className="w-6 h-6 text-secondary-400 white-inner-icon" />
             </div>
             <span className="text-xl font-display font-bold text-neutral-900 tracking-tight">
               Memory Lane
@@ -143,7 +143,7 @@ const LandingPage: React.FC = () => {
           <div className="text-center max-w-4xl mx-auto space-y-12">
             <div className="space-y-6">
               <div className="inline-flex items-center gap-2 rounded-full border border-primary-200 bg-white shadow-sm px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-primary-800 animate-fade-in-up">
-                <Sparkle className="w-5 h-5 mr-3 text-secondary-400/30" />
+                <Sparkle weight="duotone" className="w-5 h-5 mr-3 text-secondary-400 white-inner-icon" />
                 The Future of Heritage
               </div>
               <h1 className="text-6xl sm:text-7xl lg:text-8xl font-display font-bold text-neutral-900 leading-[0.95] tracking-tight animate-fade-in-up animation-delay-100">
@@ -166,7 +166,7 @@ const LandingPage: React.FC = () => {
                   className="text-lg px-10 py-6 rounded-full bg-primary-900 text-white hover:bg-black hover:scale-105 transition-all duration-500 shadow-2xl shadow-primary-900/30 group"
                 >
                   Get Started
-                  <ArrowRight className="w-5 h-5 ml-3 group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight weight="duotone" className="w-5 h-5 ml-3 group-hover:translate-x-1 transition-transform white-inner-icon" />
                 </Button>
               </Link>
 
@@ -176,7 +176,7 @@ const LandingPage: React.FC = () => {
                   variant="secondary"
                   className="text-lg px-8 py-5 rounded-full hover:scale-105 transition-all duration-300"
                 >
-                  <GithubLogo className="w-5 h-5 mr-2" />
+                  <GithubLogo weight="duotone" className="w-5 h-5 mr-2 text-primary-900 white-inner-icon" />
                   View on GitHub
                 </Button>
               </Link>
@@ -216,7 +216,7 @@ const LandingPage: React.FC = () => {
                 className="group p-8 rounded-3xl bg-neutral-50/50 hover:bg-white hover:shadow-2xl hover:shadow-primary-900/5 transition-all duration-500 border border-transparent hover:border-primary-100"
               >
                 <div className="w-12 h-12 bg-primary-900 rounded-xl flex items-center justify-center mb-6 shadow-lg shadow-black/20 group-hover:scale-110 transition-transform">
-                  <Sparkle weight="fill" className="w-6 h-6 text-secondary-400/30" />
+                  <feature.icon weight="duotone" className="w-6 h-6 text-secondary-400 white-inner-icon" />
                 </div>
                 <h3 className="text-2xl font-display font-bold text-neutral-900 mb-4">
                   {feature.title}
@@ -251,7 +251,7 @@ const LandingPage: React.FC = () => {
               >
                 <div className="flex items-center mb-6 space-x-1">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 text-secondary-500 fill-secondary-500" />
+                    <Star key={i} weight="duotone" className="w-4 h-4 text-secondary-500 white-inner-icon" />
                   ))}
                 </div>
                 <p className="text-lg text-neutral-700 mb-10 leading-relaxed font-light italic">
@@ -337,10 +337,10 @@ const LandingPage: React.FC = () => {
                 AI-powered legacy preservation and memory tracking for thoughtful individuals.
               </p>
               <div className="flex items-center space-x-5 text-neutral-400">
-                <a href="https://x.com/iampraiez" className="hover:text-neutral-900 transition-colors"><TwitterLogo size={20} /></a>
-                <a href="https://www.linkedin.com/in/thepraiseolaoye" className="hover:text-neutral-900 transition-colors"><LinkedinLogo size={20} /></a>
-                <a href="https://www.instagram.com/iampraiez_?igsh=enI4OWcxOHN1Yml3" className="hover:text-neutral-900 transition-colors"><InstagramLogo size={20} /></a>
-                <a href="https://github.com/iampraiez/memo" className="hover:text-neutral-900 transition-colors"><GithubLogo size={20} /></a>
+                <a href="https://x.com/iampraiez" className="hover:text-primary-900 transition-colors"><TwitterLogo weight="duotone" className="white-inner-icon" size={20} /></a>
+                <a href="https://www.linkedin.com/in/thepraiseolaoye" className="hover:text-primary-900 transition-colors"><LinkedinLogo weight="duotone" className="white-inner-icon" size={20} /></a>
+                <a href="https://www.instagram.com/iampraiez_?igsh=enI4OWcxOHN1Yml3" className="hover:text-primary-900 transition-colors"><InstagramLogo weight="duotone" className="white-inner-icon" size={20} /></a>
+                <a href="https://github.com/iampraiez/memo" className="hover:text-primary-900 transition-colors"><GithubLogo weight="duotone" className="white-inner-icon" size={20} /></a>
               </div>
             </div>
 
