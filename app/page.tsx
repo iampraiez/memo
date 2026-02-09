@@ -107,7 +107,7 @@ const LandingPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
           <div className="flex items-center space-x-3 group cursor-pointer">
             <div className="w-10 h-10 bg-gradient-to-br from-primary-700 to-primary-900 rounded-xl flex items-center justify-center shadow-lg shadow-primary-900/20 transform transition-transform group-hover:scale-110 group-hover:rotate-3">
-              <Sparkle weight="duotone" className="w-6 h-6 text-secondary-400 white-inner-icon" />
+             <span className="text-white font-serif font-bold text-lg tracking-tight">M</span>
             </div>
             <span className="text-xl font-display font-bold text-neutral-900 tracking-tight">
               Memory Lane
