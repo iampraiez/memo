@@ -38,4 +38,8 @@ export const memoryService = {
   delete: (id: string) => {
     return apiService.delete<{ success: boolean }>(`/api/memories/${id}`);
   },
+
+  search: (query: string, scope: 'mine' | 'circle' = 'mine') => {
+    return apiService.get<{ memories: Memory[] }>(`/api/memories/search?q=${encodeURIComponent(query)}&scope=${scope}`);
+  },
 };

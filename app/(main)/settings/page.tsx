@@ -8,21 +8,34 @@ import {
   Palette,
   SignOut,
   ArrowsClockwise,
+  PencilSimple,
+  Check,
+  X,
+  Spinner,
 } from "@phosphor-icons/react";
 import Image from "next/image";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
-import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import DeleteAccountModal from "@/components/DeleteAccountModal"; // Import the new modal
 import { signOut } from "next-auth/react";
 import { useUserSettings, useUpdateUserSettings } from "@/hooks/useUserSettings";
 import Loading from "@/components/ui/Loading";
+import { toast } from "sonner";
 
 export default function SettingsPage() {
   const [mounted, setMounted] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
   const [activeSection, setActiveSection] = useState("account");
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleSignOut = async () => {
+    setIsSigningOut(true);
+    await signOut({ callbackUrl: "/" });
+  };
 
   React.useEffect(() => {
     setMounted(true);
@@ -46,12 +59,41 @@ export default function SettingsPage() {
   }, [settings]);
 
   const handleSaveProfile = async () => {
-    await updateSettings.mutateAsync({
-      name: localName,
-      avatar: localAvatar,
-      bio: localBio,
-      username: localUsername,
-    });
+    try {
+      await updateSettings.mutateAsync({
+        name: localName,
+        avatar: localAvatar,
+        bio: localBio,
+        username: localUsername,
+      });
+      setIsEditing(false);
+      toast.success("Profile updated successfully");
+    } catch (err) {
+      toast.error("Failed to update profile");
+    }
+  };
+
+  const handleCancelEdit = () => {
+    if (settings) {
+      setLocalName(settings.name);
+      setLocalAvatar(settings.avatar || "");
+      setLocalBio(settings.bio || "");
+      setLocalUsername(settings.username || "");
+    }
+    setIsEditing(false);
+  };
+
+  const handleExportData = async () => {
+    setIsExporting(true);
+    try {
+      const res = await fetch("/api/user/export", { method: "POST" });
+      if (!res.ok) throw new Error("Failed to start export");
+      toast.success("Data export started. You will be notified when it's ready.");
+    } catch (error) {
+      toast.error("Failed to start data export");
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   if (!mounted || isLoading) {
@@ -115,10 +157,37 @@ export default function SettingsPage() {
             <div className="space-y-6">
               {/* Profile */}
               <Card>
-                <div className="p-6 border-b border-neutral-200">
+                <div className="p-6 border-b border-neutral-200 flex justify-between items-center">
                   <h2 className="text-xl font-semibold text-neutral-900">
                     Profile Information
                   </h2>
+                  {!isEditing ? (
+                    <button
+                      onClick={() => setIsEditing(true)}
+                      className="p-2 text-neutral-500 hover:text-primary-900 hover:bg-primary-50 rounded-lg transition-colors"
+                      title="Edit Profile"
+                    >
+                      <PencilSimple className="w-5 h-5" />
+                    </button>
+                  ) : (
+                    <div className="flex items-center space-x-2">
+                       <button
+                        onClick={handleCancelEdit}
+                        className="p-2 text-neutral-500 hover:text-destructive-900 hover:bg-destructive-50 rounded-lg transition-colors"
+                        title="Cancel"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                      <button
+                        onClick={handleSaveProfile}
+                        disabled={updateSettings.isPending}
+                        className="p-2 text-neutral-500 hover:text-green-700 hover:bg-green-50 rounded-lg transition-colors"
+                        title="Save"
+                      >
+                        {updateSettings.isPending ? <Spinner className="w-5 h-5 animate-spin" /> : <Check className="w-5 h-5" />}
+                      </button>
+                    </div>
+                  )}
                 </div>
                 <div className="p-6 space-y-6">
                   <div>
@@ -138,24 +207,28 @@ export default function SettingsPage() {
                           <span className="text-2xl font-bold text-secondary-400">{localName ? localName[0] : 'U'}</span>
                         )}
                       </div>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={async (e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            const url = URL.createObjectURL(file);
-                            setLocalAvatar(url);
-                          }
-                        }}
-                        className="hidden"
-                        id="avatar-upload"
-                      />
-                      <label htmlFor="avatar-upload" className="cursor-pointer">
-                        <span className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-md bg-neutral-100 text-neutral-900 hover:bg-neutral-200 transition-colors">
-                          Change Photo
-                        </span>
-                      </label>
+                      {isEditing && (
+                        <>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={async (e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                const url = URL.createObjectURL(file);
+                                setLocalAvatar(url);
+                              }
+                            }}
+                            className="hidden"
+                            id="avatar-upload"
+                          />
+                          <label htmlFor="avatar-upload" className="cursor-pointer">
+                            <span className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-md bg-neutral-100 text-neutral-900 hover:bg-neutral-200 transition-colors">
+                              Change Photo
+                            </span>
+                          </label>
+                        </>
+                      )}
                     </div>
                   </div>
 
@@ -166,6 +239,7 @@ export default function SettingsPage() {
                       onChange={(e) => setLocalUsername(e.target.value)}
                       placeholder="Choose a unique username"
                       prefix="@"
+                      disabled={!isEditing}
                     />
                   </div>
 
@@ -175,6 +249,7 @@ export default function SettingsPage() {
                       value={localName}
                       onChange={(e) => setLocalName(e.target.value)}
                       placeholder="Your name"
+                      disabled={!isEditing}
                     />
                   </div>
 
@@ -184,7 +259,8 @@ export default function SettingsPage() {
                       value={localBio}
                       onChange={(e) => setLocalBio(e.target.value)}
                       placeholder="Tell us a bit about yourself..."
-                      className="w-full px-4 py-3 rounded-xl border border-neutral-200 focus:ring-2 focus:ring-primary-500 min-h-[100px] resize-none"
+                      className="w-full px-4 py-3 rounded-xl border border-neutral-200 focus:ring-2 focus:ring-primary-500 min-h-[100px] resize-none disabled:bg-neutral-50 disabled:text-neutral-500"
+                      disabled={!isEditing}
                     />
                   </div>
 
@@ -196,15 +272,6 @@ export default function SettingsPage() {
                       disabled
                     />
                     <p className="mt-1 text-sm text-neutral-500">Email cannot be changed</p>
-                  </div>
-
-                  <div className="flex justify-end">
-                    <Button
-                      onClick={handleSaveProfile}
-                      disabled={updateSettings.isPending}
-                    >
-                      {updateSettings.isPending ? "Saving..." : "Save Changes"}
-                    </Button>
                   </div>
                 </div>
               </Card>
@@ -219,11 +286,12 @@ export default function SettingsPage() {
                 <div className="p-6">
                   <Button
                     variant="secondary"
-                    onClick={() => signOut()}
+                    onClick={handleSignOut}
+                    disabled={isSigningOut}
                     className="flex items-center space-x-2"
                   >
-                    <SignOut className="w-4 h-4" />
-                    <span>Sign Out</span>
+                    {isSigningOut ? <Spinner className="w-4 h-4 mr-2 animate-spin" /> : <SignOut className="w-4 h-4" />}
+                    <span>{isSigningOut ? "Signing Out..." : "Sign Out"}</span>
                   </Button>
                 </div>
               </Card>
@@ -242,11 +310,15 @@ export default function SettingsPage() {
                 </div>
                 <div className="p-6">
                   <p className="text-neutral-600 mb-4">
-                    Download all your memories and data in JSON format
+                    Download all your memories and data in JSON format. This process happens in the background.
                   </p>
-                  <Button variant="secondary">
-                    <Download className="w-4 h-4 mr-2" />
-                    Export All Data
+                  <Button 
+                    variant="secondary" 
+                    onClick={handleExportData} 
+                    disabled={isExporting}
+                  >
+                    {isExporting ? <Spinner className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />}
+                    {isExporting ? "Starting Export..." : "Export All Data"}
                   </Button>
                 </div>
               </Card>
@@ -265,7 +337,7 @@ export default function SettingsPage() {
                   </p>
                   <Button
                     variant="destructive"
-                    onClick={() => setShowDeleteDialog(true)}
+                    onClick={() => setShowDeleteModal(true)}
                   >
                     <Trash className="w-4 h-4 mr-2" />
                     Delete Account
@@ -277,19 +349,10 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      {/* Delete Confirmation Dialog */}
-      <ConfirmDialog
-        isOpen={showDeleteDialog}
-        onClose={() => setShowDeleteDialog(false)}
-        onConfirm={() => {
-          // Handle account deletion
-          setShowDeleteDialog(false);
-        }}
-        title="Delete Account"
-        message="Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently lost."
-        confirmLabel="Delete Account"
-        cancelLabel="Cancel"
-        variant="destructive"
+      <DeleteAccountModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        userEmail={settings.email}
       />
     </div>
   );

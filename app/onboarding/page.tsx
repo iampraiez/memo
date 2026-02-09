@@ -9,16 +9,27 @@ import {
   Sparkle,
   Tag,
   Check,
+  User,
+  Spinner,
 } from "@phosphor-icons/react";
 import Button from "@/components/ui/Button";
+import Input from "@/components/ui/Input";
 import { useSession } from "next-auth/react";
 import Card from "@/components/ui/Card";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 const OnboardingFlow: React.FC = () => {
   const router = useRouter();
-  const { data: session } = useSession();
+  const { data: session, update } = useSession();
   const [currentStep, setCurrentStep] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const [profileData, setProfileData] = useState({
+    username: "",
+    bio: "",
+  });
+  
   const [preferences, setPreferences] = useState({
     importData: false,
     privacyMode: "private",
@@ -28,6 +39,7 @@ const OnboardingFlow: React.FC = () => {
 
   const steps = [
     { id: "welcome", title: "Welcome", icon: Sparkle },
+    { id: "profile", title: "Profile Setup", icon: User },
     { id: "import", title: "Import Data", icon: UploadSimple },
     { id: "privacy", title: "Privacy Settings", icon: Shield },
     { id: "ai", title: "AI Features", icon: Sparkle },
@@ -35,35 +47,70 @@ const OnboardingFlow: React.FC = () => {
   ];
 
   const suggestedTags = [
-    "family",
-    "friends",
-    "travel",
-    "work",
-    "hobbies",
-    "food",
-    "pets",
-    "sports",
-    "music",
-    "books",
-    "movies",
-    "celebrations",
-    "holidays",
-    "achievements",
-    "learning",
-    "health",
-    "nature",
-    "photography",
-    "art",
-    "technology",
+    "family", "friends", "travel", "work", "hobbies",
+    "food", "pets", "sports", "music", "books",
+    "movies", "celebrations", "holidays", "achievements",
+    "learning", "health", "nature", "photography", "art", "technology",
   ];
 
-  const nextStep = () => {
+  const nextStep = async () => {
+    if (steps[currentStep].id === "profile") {
+      if (!profileData.username.trim()) {
+        toast.error("Please choose a username");
+        return;
+      }
+      // Basic validation
+      if (profileData.username.length < 3) {
+        toast.error("Username must be at least 3 characters");
+        return;
+      }
+    }
+
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
+      await completeOnboarding();
+    }
+  };
+
+  const completeOnboarding = async () => {
+    setIsSubmitting(true);
+    try {
+      // 1. Update Profile (Username & Bio)
+      const profileResponse = await fetch("/api/user/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: profileData.username,
+          bio: profileData.bio,
+        }),
+      });
+
+      if (!profileResponse.ok) {
+        throw new Error("Failed to update profile");
+      }
+
+      // 2. Save Preferences (Simulated for clear scope, or implement a preferences endpoint)
+      // For now, we'll assume preferences are just local state or could be sent to another endpoint
+      // console.log("Preferences:", preferences);
+
+      // 3. Update Session to reflect new username
+      await update({
+        ...session,
+        user: {
+          ...session?.user,
+          username: profileData.username,
+        }
+      });
+
       localStorage.removeItem("route");
-      console.log(preferences);
       router.push("/timeline");
+      toast.success("Welcome to your Sanctuary!");
+    } catch (error) {
+      console.error("Onboarding error:", error);
+      toast.error("Failed to complete setup. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -81,9 +128,10 @@ const OnboardingFlow: React.FC = () => {
         : [...prev.selectedTags, tag],
     }));
   };
+
   if (!session) {
-    router.push("/");
-    return null; // Explicitly return null after initiating the redirect
+    // router.push("/"); // Don't redirect immediately to avoid flash if session is loading
+    return null; 
   }
 
   const renderStep = () => {
@@ -106,7 +154,49 @@ const OnboardingFlow: React.FC = () => {
           </div>
         );
 
+      case "profile":
+        return (
+          <div className="space-y-6">
+            <div className="text-center space-y-3">
+              <h2 className="text-2xl font-display font-bold text-neutral-900">
+                Create Your Profile
+              </h2>
+              <p className="text-neutral-600">
+                How should we identify you in the Sanctuary?
+              </p>
+            </div>
+
+            <div className="space-y-4 max-w-md mx-auto">
+              <div>
+                <Input
+                  label="Username"
+                  value={profileData.username}
+                  onChange={(e) => setProfileData({ ...profileData, username: e.target.value })}
+                  placeholder="e.g. memorykeeper"
+                  require // Visual indicator
+                />
+                <p className="text-xs text-neutral-500 mt-1">Unique identifier for social discovery.</p>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 mb-1">
+                  Bio
+                </label>
+                <textarea
+                  value={profileData.bio}
+                  onChange={(e) => setProfileData({ ...profileData, bio: e.target.value })}
+                  placeholder="Tell us a bit about yourself..."
+                  rows={4}
+                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                />
+                <p className="text-xs text-neutral-500 mt-1">Optional. Visible on your profile.</p>
+              </div>
+            </div>
+          </div>
+        );
+
       case "import":
+        // ... (Import Step Content - Unchanged)
         return (
           <div className="space-y-6">
             <div className="text-center space-y-3">
@@ -164,6 +254,7 @@ const OnboardingFlow: React.FC = () => {
         );
 
       case "privacy":
+        // ... (Privacy Step Content - Unchanged)
         return (
           <div className="space-y-6">
             <div className="text-center space-y-3">
@@ -268,6 +359,7 @@ const OnboardingFlow: React.FC = () => {
         );
 
       case "ai":
+        // ... (AI Step Content - Unchanged)
         return (
           <div className="space-y-6">
             <div className="text-center space-y-3">
@@ -340,6 +432,7 @@ const OnboardingFlow: React.FC = () => {
         );
 
       case "tags":
+        // ... (Tags Step Content - Unchanged)
         return (
           <div className="space-y-6">
             <div className="text-center space-y-3">
@@ -408,16 +501,25 @@ const OnboardingFlow: React.FC = () => {
             <Button
               variant="secondary"
               onClick={prevStep}
-              disabled={currentStep === 0}
+              disabled={currentStep === 0 || isSubmitting}
               className="flex items-center"
             >
               <CaretLeft className="w-4 h-4 mr-2" />
               Back
             </Button>
 
-            <Button onClick={nextStep} className="flex items-center">
-              {currentStep === steps.length - 1 ? "Complete Setup" : "Continue"}
-              <CaretRight className="w-4 h-4 ml-2" />
+            <Button onClick={nextStep} className="flex items-center" disabled={isSubmitting}>
+              {isSubmitting ? (
+                <>
+                  <Spinner className="w-4 h-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  {currentStep === steps.length - 1 ? "Complete Setup" : "Continue"}
+                  <CaretRight className="w-4 h-4 ml-2" />
+                </>
+              )}
             </Button>
           </div>
         </Card>

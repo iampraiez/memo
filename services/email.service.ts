@@ -13,9 +13,10 @@ interface SendEmailParams {
   to: string;
   subject: string;
   html: string;
+  attachments?: any[];
 }
 
-export const sendEmail = async ({ to, subject, html }: SendEmailParams, retries = 3) => {
+export const sendEmail = async ({ to, subject, html, attachments }: SendEmailParams, retries = 3) => {
   for (let i = 0; i < retries; i++) {
     try {
       const info = await transporter.sendMail({
@@ -23,6 +24,7 @@ export const sendEmail = async ({ to, subject, html }: SendEmailParams, retries 
         to,
         subject,
         html,
+        attachments,
       });
       logger.info(`Email sent to ${to}: ${info.messageId}`);
       return { success: true, messageId: info.messageId };
@@ -50,6 +52,28 @@ export const sendVerificationEmail = async (email: string, code: string) => {
       <hr style="border: none; border-top: 1px solid #E5E7EB; margin: 30px 0;" />
       <p style="font-size: 12px; color: #6B7280; text-align: center;">
         &copy; ${new Date().getFullYear()} Memory Lane. All rights reserved.
+      </p>
+    </div>
+  `;
+
+  return sendEmail({ to: email, subject, html });
+};
+
+export const sendDeletionOTP = async (email: string, code: string) => {
+  const subject = "Confirm Account Deletion";
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333;">
+      <h1 style="color: #DC2626;">Account Deletion Request</h1>
+      <p>We received a request to permanently delete your Memory Lane account. If this was you, please use the code below to confirm:</p>
+      <div style="background-color: #FEF2F2; padding: 20px; border-radius: 8px; text-align: center; margin: 20px 0; border: 1px solid #FECACA;">
+        <span style="font-size: 32px; font-weight: bold; letter-spacing: 5px; color: #991B1B;">${code}</span>
+      </div>
+      <p style="color: #DC2626; font-weight: bold;">Warning: This action cannot be undone. All your memories and data will be permanently lost.</p>
+      <p>This code will expire in 5 minutes.</p>
+      <p>If you didn't request this, please change your password immediately.</p>
+      <hr style="border: none; border-top: 1px solid #E5E7EB; margin: 30px 0;" />
+      <p style="font-size: 12px; color: #6B7280; text-align: center;">
+        &copy; ${new Date().getFullYear()} Memory Lane.
       </p>
     </div>
   `;

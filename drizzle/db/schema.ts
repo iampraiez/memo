@@ -304,6 +304,16 @@ export const exportJobs = pgTable("export_jobs", {
   completedAt: timestamp("completed_at"),
 });
 
+export const pushSubscriptions = pgTable("push_subscriptions", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  endpoint: text("endpoint").notNull().unique(),
+  keys: json("keys").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 export const sessions = pgTable("sessions", {
   sessionToken: text("session_token").notNull().primaryKey(),
   userId: text("user_id")
@@ -323,6 +333,8 @@ export const memoriesRelations = relations(memories, ({ one, many }) => ({
   }),
   memoryTags: many(memoryTags),
   memoryMedia: many(memoryMedia),
+  comments: many(comments),
+  reactions: many(reactions),
 }));
 
 export const tagsRelations = relations(tags, ({ many }) => ({
@@ -344,6 +356,28 @@ export const memoryMediaRelations = relations(memoryMedia, ({ one }) => ({
   memory: one(memories, {
     fields: [memoryMedia.memoryId],
     references: [memories.id],
+  }),
+}));
+
+export const commentsRelations = relations(comments, ({ one }) => ({
+  memory: one(memories, {
+    fields: [comments.memoryId],
+    references: [memories.id],
+  }),
+  user: one(users, {
+    fields: [comments.userId],
+    references: [users.id],
+  }),
+}));
+
+export const reactionsRelations = relations(reactions, ({ one }) => ({
+  memory: one(memories, {
+    fields: [reactions.memoryId],
+    references: [memories.id],
+  }),
+  user: one(users, {
+    fields: [reactions.userId],
+    references: [users.id],
   }),
 }));
 

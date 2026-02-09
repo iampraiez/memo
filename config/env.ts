@@ -14,6 +14,8 @@ const envSchema = z.object({
   DROPBOX_APP_KEY: z.string().optional(),
   DROPBOX_APP_SECRET: z.string().optional(),
   DROPBOX_REFRESH_TOKEN: z.string().optional(),
+  NEXT_PUBLIC_VAPID_PUBLIC_KEY: z.string().min(1),
+  VAPID_PRIVATE_KEY: z.string().min(1),
   GEMINI_API_KEY: z.string().min(1),
   NODE_ENV: z
     .enum(["development", "production", "test"])

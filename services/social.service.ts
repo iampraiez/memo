@@ -25,8 +25,16 @@ export interface Reaction {
 }
 
 export const socialService = {
-  getTimeline: () => {
-    return apiService.get<{ memories: Memory[] }>("/api/memories/timeline");
+  getTimeline: (params?: { cursor?: string; limit?: number; sort?: string }) => {
+    const searchParams = new URLSearchParams();
+    if (params?.cursor) searchParams.append("cursor", params.cursor);
+    if (params?.limit) searchParams.append("limit", params.limit.toString());
+    if (params?.sort) searchParams.append("sort", params.sort);
+    
+    const queryString = searchParams.toString();
+    const url = `/api/memories/timeline${queryString ? `?${queryString}` : ""}`;
+    
+    return apiService.get<{ memories: Memory[], nextCursor?: string }>(url);
   },
 
   getComments: (memoryId: string) => {

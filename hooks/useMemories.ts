@@ -17,6 +17,14 @@ export const useMemory = (id: string) => {
   });
 };
 
+export const useSearchMemories = (query: string, scope: 'mine' | 'circle' = 'mine') => {
+  return useQuery<{ memories: Memory[] }>({
+    queryKey: ["memories", "search", query, scope],
+    queryFn: () => memoryService.search(query, scope),
+    enabled: query.length >= 2,
+  });
+};
+
 export const useCreateMemory = () => {
   const queryClient = useQueryClient();
 

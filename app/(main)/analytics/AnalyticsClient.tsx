@@ -14,6 +14,9 @@ import Select from "@/components/ui/Select";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import Loading from "@/components/ui/Loading";
 import { Analytics } from "@/types/types";
+import ActivityChart from "@/components/analytics/ActivityChart";
+import MoodChart from "@/components/analytics/MoodChart";
+import WeeklyPatternChart from "@/components/analytics/WeeklyPatternChart";
 
 const timeRangeOptions = [
   { value: "week", label: "Last Week" },
@@ -68,43 +71,36 @@ export default function AnalyticsClient({ initialAnalytics }: AnalyticsClientPro
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <Card className="p-8 space-y-6">
           <h2 className="text-xl font-display font-bold text-neutral-900">Activity Patterns</h2>
-          <div className="space-y-4">
-              {analytics.monthlyActivity.map(m => {
-                  const maxMemories = Math.max(...analytics.monthlyActivity.map(ma => ma.memories), 1);
-                  return (
-                    <div key={m.month} className="flex items-center space-x-4">
-                        <span className="w-12 text-sm font-bold text-neutral-400">{m.month}</span>
-                        <div className="flex-1 bg-neutral-100 rounded-full h-2 overflow-hidden">
-                            <div 
-                                className="bg-primary-900 h-full transition-all duration-700" 
-                                style={{ width: `${(m.memories / maxMemories) * 100}%` }} 
-                            />
-                        </div>
-                    </div>
-                  );
-              })}
+          <div className="w-full">
+              <ActivityChart data={analytics.monthlyActivity} />
           </div>
         </Card>
 
         <Card className="p-8 space-y-6">
           <h2 className="text-xl font-display font-bold text-neutral-900">Emotional Balance</h2>
-           <div className="space-y-4">
-              {analytics.topMoods.map(m => (
-                  <div key={m.mood} className="space-y-1">
-                      <div className="flex justify-between text-sm font-bold uppercase tracking-widest">
-                          <span className="text-neutral-600">{m.mood}</span>
-                          <span className="text-primary-900">{m.percentage}%</span>
-                      </div>
-                      <div className="w-full bg-neutral-100 rounded-full h-1">
-                          <div className="bg-secondary-400 h-full" style={{ width: `${m.percentage}%` }} />
-                      </div>
-                  </div>
-              ))}
+           <div className="w-full flex justify-center">
+              <MoodChart 
+                data={analytics.topMoods.map(m => ({
+                    mood: m.mood,
+                    percentage: m.percentage,
+                    count: m.count
+                }))} 
+              />
           </div>
         </Card>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <Card className="p-8 space-y-6">
+              <h2 className="text-xl font-display font-bold text-neutral-900 flex items-center">
+                  <Clock className="w-5 h-5 mr-2 text-primary-900" />
+                  Weekly Rhythm
+              </h2>
+              <div className="w-full">
+                  <WeeklyPatternChart data={analytics.weeklyPattern} />
+              </div>
+          </Card>
+
           <Card className="p-8 space-y-6">
               <h2 className="text-xl font-display font-bold text-neutral-900 flex items-center">
                   <TagIcon className="w-5 h-5 mr-2 text-primary-900" />
@@ -126,7 +122,9 @@ export default function AnalyticsClient({ initialAnalytics }: AnalyticsClientPro
                   ))}
               </div>
           </Card>
+      </div>
 
+      <div className="grid grid-cols-1 gap-8">
           <Card className="p-8 space-y-6 flex flex-col justify-center bg-gradient-to-br from-white to-neutral-50">
               <div className="text-center space-y-4">
                   <div className="w-16 h-16 bg-primary-900 rounded-full flex items-center justify-center mx-auto shadow-lg">

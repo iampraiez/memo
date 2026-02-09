@@ -1,11 +1,13 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
 import { Memory } from "@/types/types";
 import { socialService, Comment, Reaction } from "@/services/social.service";
 
-export const useTimelineMemories = () => {
-  return useQuery<{ memories: Memory[] }>({
-    queryKey: ["memories", "timeline"],
-    queryFn: () => socialService.getTimeline(),
+export const useTimelineMemories = (sort: string = "date") => {
+  return useInfiniteQuery({
+    queryKey: ["memories", "timeline", sort],
+    queryFn: ({ pageParam }) => socialService.getTimeline({ cursor: pageParam as string | undefined, sort }),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage) => lastPage.nextCursor || undefined,
   });
 };
 
