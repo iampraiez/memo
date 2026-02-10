@@ -198,7 +198,7 @@ const LandingPage: React.FC = () => {
               <div className="absolute inset-0 bg-linear-to-t from-white via-transparent to-transparent z-10 h-20 bottom-0 pointer-events-none" />
               <Image
                 src="/memory.png"
-                alt="Memory Lane App Interface"
+                alt="Memory Lane"
                 width={1200}
                 height={800}
                 priority

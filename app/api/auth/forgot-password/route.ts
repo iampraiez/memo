@@ -4,8 +4,6 @@ import { users } from "@/drizzle/db/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { logger } from "@/libs/logger";
-import nodemailer from "nodemailer";
-import { env } from "@/config/env";
 
 const forgotPasswordSchema = z.object({
   email: z.string().email(),

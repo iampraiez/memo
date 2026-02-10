@@ -13,7 +13,7 @@ import {
 } from "@/drizzle/db/schema";
 import type { Provider } from "next-auth/providers";
 import brcypt from "bcryptjs";
-import { userExists } from "./api";
+import { userExists } from "./query";
 import { verifyGoogleToken, getOrCreateGoogleUser } from "./google-auth";
 import { env } from "@/config/env";
 
@@ -26,7 +26,6 @@ const providers: Provider[] = [
       type: { label: "Type", type: "text" },
     },
     authorize: async (c) => {
-      // Handle Google Token Login
       if (c.type === "google-token" && c.token) {
         try {
           const payload = await verifyGoogleToken(c.token as string);
@@ -64,7 +63,11 @@ const providers: Provider[] = [
         return user;
       } catch (error) {
         // Re-throw specific errors
-        if (error instanceof Error && (error.message === "EMAIL_NOT_VERIFIED" || error.message === "GOOGLE_AUTH_FAILED")) {
+        if (
+          error instanceof Error &&
+          (error.message === "EMAIL_NOT_VERIFIED" ||
+            error.message === "GOOGLE_AUTH_FAILED")
+        ) {
           throw error;
         }
         throw new Error("Invalid credentials.");

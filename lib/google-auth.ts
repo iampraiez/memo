@@ -10,7 +10,6 @@ const client = new OAuth2Client({
   clientSecret: env.AUTH_GOOGLE_SECRET,
 });
 
-// Configure the transporter with a long timeout for slow networks
 client.transporter.defaults = {
   ...client.transporter.defaults,
   timeout: 60000,
@@ -64,17 +63,32 @@ export async function verifyGoogleToken(token: string) {
 export async function getOrCreateGoogleUser(payload: any) {
   const { email, sub: googleId, name, picture } = payload;
 
-  // 1. Check if user exists by email
   const [user] = await db
     .select()
     .from(users)
     .where(eq(users.email, email))
     .limit(1);
 
-  let finalUser = user;
+  if (user) {
+    const [existingAccount] = await db
+      .select()
+      .from(accounts)
+      .where(
+        and(
+          eq(accounts.provider, "google"),
+          eq(accounts.providerAccountId, googleId),
+        ),
+      )
+      .limit(1);
+    if (existingAccount.provider === "google") {
+      return user;
+    } else {
+      throw new Error(
+        "User with this email already exists but is not linked to Google. Please use the original sign-in method.",
+      );
+    }
+  }
 
-  if (!user) {
-    // Create new user
     const userId = uuidv4();
     const [newUser] = await db
       .insert(users)
@@ -86,30 +100,14 @@ export async function getOrCreateGoogleUser(payload: any) {
         emailVerified: new Date(),
       })
       .returning();
-    finalUser = newUser;
-  }
 
-  // 2. Check if account is linked
-  const [existingAccount] = await db
-    .select()
-    .from(accounts)
-    .where(
-      and(
-        eq(accounts.provider, "google"),
-        eq(accounts.providerAccountId, googleId)
-      )
-    )
-    .limit(1);
-
-  if (!existingAccount) {
     // Link account
     await db.insert(accounts).values({
-      userId: finalUser.id,
+      userId: newUser.id,
       type: "oauth",
       provider: "google",
       providerAccountId: googleId,
     });
-  }
 
-  return finalUser;
+  return newUser;
 }

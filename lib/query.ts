@@ -4,10 +4,10 @@ import { eq } from "drizzle-orm";
 
 export async function userExists(email: string) {
   try {
-    const user = await db.select().from(users).where(eq(users.email, email));
-    if (!user) return false;
-    return user;
+    const results = await db.select().from(users).where(eq(users.email, email)).limit(1);
+    return results[0] || null;
   } catch (err) {
     console.log(err);
+    return null;
   }
 }

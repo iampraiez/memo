@@ -29,7 +29,7 @@ export async function POST(req: Request) {
 
     if (existingUser) {
       return NextResponse.json(
-        { message: "User with this email already exists" },
+        { message: "Invalid credentials" },
         { status: 409 },
       );
     }

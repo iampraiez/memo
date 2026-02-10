@@ -1,6 +1,5 @@
-/**
- * Base API service for handling fetch requests with consistent error handling.
- */
+import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
+import { env } from "@/config/env";
 
 export class ApiError extends Error {
   constructor(public message: string, public status: number, public data?: any) {
@@ -9,44 +8,105 @@ export class ApiError extends Error {
   }
 }
 
-async function request<T>(url: string, options: RequestInit = {}): Promise<T> {
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...options.headers,
-    },
-  });
+class ApiService {
+  private client: AxiosInstance;
 
-  if (!response.ok) {
-    let errorData;
-    try {
-      errorData = await response.json();
-    } catch {
-      errorData = null;
-    }
-    throw new ApiError(
-      errorData?.error || response.statusText || "An error occurred",
-      response.status,
-      errorData
+  constructor() {
+    this.client = axios.create({
+      baseURL: `${env.NEXT_PUBLIC_URL}/api`,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    this.setupInterceptors();
+  }
+
+  private setupInterceptors() {
+    // Response Interceptor for centralized error handling
+    this.client.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        const status = error.response?.status || 500;
+        const message = error.response?.data?.message || error.response?.data?.error || error.message || "An unexpected error occurred";
+        
+        // Log important codes for debugging
+        if (status === 401) {
+          console.warn("[API] Unauthorized - 401");
+        } else if (status === 403) {
+          console.error("[API] Forbidden - 403");
+        } else if (status >= 500) {
+          console.error(`[API] Server Error - ${status}: ${message}`);
+        }
+
+        return Promise.reject(new ApiError(message, status, error.response?.data));
+      }
     );
   }
 
-  // Handle empty responses
-  if (response.status === 204) {
-    return {} as T;
+  /**
+   * Universal request handler
+   */
+  private async request<T>(config: AxiosRequestConfig): Promise<T> {
+    const response = await this.client.request<T>(config);
+    return response.data;
   }
 
-  return response.json();
+  public get<T>(url: string, config?: AxiosRequestConfig) {
+    return this.request<T>({ ...config, url, method: "GET" });
+  }
+
+  public post<T>(url: string, data?: any, config?: AxiosRequestConfig) {
+    return this.request<T>({ ...config, url, data, method: "POST" });
+  }
+
+  public patch<T>(url: string, data?: any, config?: AxiosRequestConfig) {
+    return this.request<T>({ ...config, url, data, method: "PATCH" });
+  }
+
+  public put<T>(url: string, data?: any, config?: AxiosRequestConfig) {
+    return this.request<T>({ ...config, url, data, method: "PUT" });
+  }
+
+  public delete<T>(url: string, config?: AxiosRequestConfig) {
+    return this.request<T>({ ...config, url, method: "DELETE" });
+  }
+
+  // Specialized methods migrated for "Single File of Truth"
+  public async userExists(user: string) {
+    try {
+      const res = await this.post<any>("/auth/sign_in", { user });
+      return res.user?.[0];
+    } catch (err) {
+      console.error("[API] userExists error:", err);
+      return null;
+    }
+  }
+
+  public async registerUser(userData: { email: string; password: string; name?: string }) {
+    try {
+      const response = await this.client.post("/auth/register", {
+        ...userData,
+        name: userData.name || userData.email.split("@")[0],
+      });
+      
+      return { 
+        data: { 
+          success: response.status === 201,
+          requiresVerification: response.data.requiresVerification,
+          error: null 
+        } 
+      };
+    } catch (err: any) {
+      const apiError = err as ApiError;
+      return { 
+        data: { 
+          success: false, 
+          error: apiError.message || "Registration failed" 
+        } 
+      };
+    }
+  }
 }
 
-export const apiService = {
-  get: <T>(url: string, options?: RequestInit) => request<T>(url, { ...options, method: "GET" }),
-  post: <T>(url: string, data?: any, options?: RequestInit) =>
-    request<T>(url, { ...options, method: "POST", body: JSON.stringify(data) }),
-  patch: <T>(url: string, data?: any, options?: RequestInit) =>
-    request<T>(url, { ...options, method: "PATCH", body: JSON.stringify(data) }),
-  put: <T>(url: string, data?: any, options?: RequestInit) =>
-    request<T>(url, { ...options, method: "PUT", body: JSON.stringify(data) }),
-  delete: <T>(url: string, options?: RequestInit) => request<T>(url, { ...options, method: "DELETE" }),
-};
+export const apiService = new ApiService();
