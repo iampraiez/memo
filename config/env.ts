@@ -1,7 +1,7 @@
 import { z } from "zod";
 
-const envSchema = z.object({
-  DATABASE_URL: z.string().url(),
+const serverSchema = z.object({
+  DATABASE_URL: z.string().min(1),
   AUTH_SECRET: z.string().min(1),
   AUTH_URL: z.string().url().optional(),
   AUTH_GOOGLE_ID: z.string(),
@@ -12,20 +12,37 @@ const envSchema = z.object({
   DROPBOX_APP_KEY: z.string().optional(),
   DROPBOX_APP_SECRET: z.string().optional(),
   DROPBOX_REFRESH_TOKEN: z.string().optional(),
-  NEXT_PUBLIC_VAPID_PUBLIC_KEY: z.string().min(1),
   VAPID_PRIVATE_KEY: z.string().min(1),
   GEMINI_API_KEY: z.string().min(1),
-  NODE_ENV: z
-    .enum(["development", "production", "test"])
-    .default("development"),
+  NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
+});
+
+const clientSchema = z.object({
+  NEXT_PUBLIC_VAPID_PUBLIC_KEY: z.string().min(1),
   NEXT_PUBLIC_URL: z.string().url().default("http://localhost:3000"),
 });
 
-const _env = envSchema.safeParse(process.env);
+const isServer = typeof window === "undefined";
 
-if (!_env.success) {
-  console.error("Invalid environment variables:", _env.error.format());
-  throw new Error("Invalid environment variables");
+function validateEnv() {
+  const clientResult = clientSchema.safeParse({
+    NEXT_PUBLIC_VAPID_PUBLIC_KEY: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+    NEXT_PUBLIC_URL: process.env.NEXT_PUBLIC_URL,
+  });
+
+  if (!clientResult.success) {
+    throw new Error("Invalid client environment variables");
+  }
+
+  if (isServer) {
+    const serverResult = serverSchema.safeParse(process.env);
+    if (!serverResult.success) {
+      throw new Error("Invalid server environment variables");
+    }
+    return { ...serverResult.data, ...clientResult.data };
+  }
+
+  return clientResult.data as any;
 }
 
-export const env = _env.data;
+export const env = validateEnv() as z.infer<typeof serverSchema> & z.infer<typeof clientSchema>;

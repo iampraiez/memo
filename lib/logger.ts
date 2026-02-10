@@ -1,6 +1,4 @@
-import { env } from "@/config/env";
-
-const isDev = env.NODE_ENV === "development";
+const isDev = process.env.NODE_ENV === "development";
 
 type LogLevel = "info" | "warn" | "error" | "debug";
 
