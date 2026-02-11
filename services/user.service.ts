@@ -18,11 +18,11 @@ export interface UserSettings {
 
 export const userService = {
   getSettings: () => {
-    return apiService.get<UserSettings>("/api/user/settings");
+    return apiService.get<UserSettings>("/settings");
   },
 
   updateSettings: (data: Partial<UserSettings>) => {
-    return apiService.patch<UserSettings>("/api/user/settings", data);
+    return apiService.patch<UserSettings>("/settings", data);
   },
   
   getProfile: (userId: string) => {

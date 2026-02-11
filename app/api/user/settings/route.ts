@@ -57,14 +57,28 @@ export async function PATCH(req: Request) {
     }
 
     const body = await req.json();
-    const { name, avatar, bio, username } = body;
+    const { name, avatar, bio, username, image } = body;
+
+    // If username is being updated, check for uniqueness
+    if (username) {
+      const existingUser = await db.query.users.findFirst({
+        where: sql`username = ${username} AND email != ${session.user.email}`,
+      });
+
+      if (existingUser) {
+        return NextResponse.json(
+          { message: "Username already taken. Please choose another." },
+          { status: 400 }
+        );
+      }
+    }
 
     // Update user settings
     await db
       .update(users)
       .set({
         name,
-        image: avatar,
+        image: image || avatar, // Support both 'image' and 'avatar' for compatibility
         bio,
         username,
         updatedAt: new Date(),

@@ -26,13 +26,13 @@ export default function RegisterClient() {
     try {
       const res = await apiService.registerUser({ email, password });
       if (res?.data.success || res?.data.requiresVerification) {
-        toast.success("Account created successfully!");
+        toast.success("Account created successfully! Please verify your email.");
         router.push(`/auth/verify?email=${encodeURIComponent(email)}`);
       } else {
-        toast.error(res?.data.error || "Registration failed");
+        toast.error(res?.data.error || "Registration failed. This email might already be in use.");
       }
     } catch (err) {
-      toast.error("An unexpected error occurred.");
+      toast.error("An unexpected error occurred. Please try again later.");
     } finally {
       setLoading(false);
     }

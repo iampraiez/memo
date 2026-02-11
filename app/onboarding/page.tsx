@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   CaretRight,
@@ -11,6 +11,8 @@ import {
   Check,
   User,
   Spinner,
+  Camera,
+  X,
 } from "@phosphor-icons/react";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
@@ -18,17 +20,25 @@ import { useSession } from "next-auth/react";
 import Card from "@/components/ui/Card";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import Image from "next/image";
 
 const OnboardingFlow: React.FC = () => {
   const router = useRouter();
   const { data: session, update } = useSession();
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [profileData, setProfileData] = useState({
+    name: "",
     username: "",
     bio: "",
+    image: null as string | null,
   });
+
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   
   const [preferences, setPreferences] = useState({
     importData: false,
@@ -36,6 +46,20 @@ const OnboardingFlow: React.FC = () => {
     aiEnabled: true,
     selectedTags: [] as string[],
   });
+
+  // Pre-fill data for Google users
+  useEffect(() => {
+    if (session?.user) {
+      setProfileData(prev => ({
+        ...prev,
+        name: session.user.name || "",
+        image: session.user.image || null,
+      }));
+      if (session.user.image) {
+        setImagePreview(session.user.image);
+      }
+    }
+  }, [session]);
 
   const steps = [
     { id: "welcome", title: "Welcome", icon: Sparkle },
@@ -53,15 +77,64 @@ const OnboardingFlow: React.FC = () => {
     "learning", "health", "nature", "photography", "art", "technology",
   ];
 
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image must be less than 5MB");
+      return;
+    }
+
+    // Validate file type
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      toast.error("Only JPG, PNG, and WebP images are supported");
+      return;
+    }
+
+    setSelectedFile(file);
+    
+    // Create preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const removeImage = () => {
+    setSelectedFile(null);
+    setImagePreview(session?.user?.image || null);
+    setProfileData(prev => ({ ...prev, image: session?.user?.image || null }));
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
   const nextStep = async () => {
     if (steps[currentStep].id === "profile") {
+      // Validate name
+      if (!profileData.name.trim()) {
+        toast.error("Please enter your name");
+        return;
+      }
+      if (profileData.name.length < 2 || profileData.name.length > 50) {
+        toast.error("Name must be between 2 and 50 characters");
+        return;
+      }
+
+      // Validate username
       if (!profileData.username.trim()) {
         toast.error("Please choose a username");
         return;
       }
-      // Basic validation
-      if (profileData.username.length < 3) {
-        toast.error("Username must be at least 3 characters");
+      if (profileData.username.length < 3 || profileData.username.length > 20) {
+        toast.error("Username must be between 3 and 20 characters");
+        return;
+      }
+      if (!/^[a-zA-Z0-9_]+$/.test(profileData.username)) {
+        toast.error("Username can only contain letters, numbers, and underscores");
         return;
       }
     }
@@ -76,41 +149,65 @@ const OnboardingFlow: React.FC = () => {
   const completeOnboarding = async () => {
     setIsSubmitting(true);
     try {
-      // 1. Update Profile (Username & Bio)
+      let imageUrl = profileData.image;
+
+      // Upload profile picture if a new one was selected
+      if (selectedFile) {
+        setIsUploadingImage(true);
+        const formData = new FormData();
+        formData.append("file", selectedFile);
+
+        const uploadResponse = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!uploadResponse.ok) {
+          throw new Error("Failed to upload profile picture");
+        }
+
+        const uploadData = await uploadResponse.json();
+        imageUrl = uploadData.url;
+        setIsUploadingImage(false);
+      }
+
+      // Update Profile
       const profileResponse = await fetch("/api/user/settings", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          name: profileData.name,
           username: profileData.username,
           bio: profileData.bio,
+          image: imageUrl,
         }),
       });
 
       if (!profileResponse.ok) {
-        throw new Error("Failed to update profile");
+        const errorData = await profileResponse.json();
+        throw new Error(errorData.message || "Failed to update profile");
       }
 
-      // 2. Save Preferences (Simulated for clear scope, or implement a preferences endpoint)
-      // For now, we'll assume preferences are just local state or could be sent to another endpoint
-      // console.log("Preferences:", preferences);
-
-      // 3. Update Session to reflect new username
+      // Update Session
       await update({
         ...session,
         user: {
           ...session?.user,
+          name: profileData.name,
           username: profileData.username,
+          image: imageUrl,
         }
       });
 
       localStorage.removeItem("route");
       router.push("/timeline");
       toast.success("Welcome to your Sanctuary!");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Onboarding error:", error);
-      toast.error("Failed to complete setup. Please try again.");
+      toast.error(error.message || "Failed to complete setup. Please try again.");
     } finally {
       setIsSubmitting(false);
+      setIsUploadingImage(false);
     }
   };
 
@@ -130,7 +227,6 @@ const OnboardingFlow: React.FC = () => {
   };
 
   if (!session) {
-    // router.push("/"); // Don't redirect immediately to avoid flash if session is loading
     return null; 
   }
 
@@ -162,22 +258,87 @@ const OnboardingFlow: React.FC = () => {
                 Create Your Profile
               </h2>
               <p className="text-neutral-600">
-                How should we identify you in the Sanctuary?
+                Tell us about yourself
               </p>
             </div>
 
-            <div className="space-y-4 max-w-md mx-auto">
+            <div className="space-y-6 max-w-md mx-auto">
+              {/* Profile Picture Upload */}
+              <div className="flex flex-col items-center space-y-3">
+                <div className="relative">
+                  <div className="w-24 h-24 rounded-full overflow-hidden bg-neutral-100 border-2 border-neutral-200">
+                    {imagePreview ? (
+                      <Image
+                        src={imagePreview}
+                        alt="Profile preview"
+                        width={96}
+                        height={96}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <User className="w-12 h-12 text-neutral-400" />
+                      </div>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="absolute bottom-0 right-0 w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center text-white hover:bg-primary-700 transition-colors shadow-lg"
+                  >
+                    <Camera className="w-4 h-4" />
+                  </button>
+                  {imagePreview && imagePreview !== session?.user?.image && (
+                    <button
+                      type="button"
+                      onClick={removeImage}
+                      className="absolute -top-1 -right-1 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white hover:bg-red-600 transition-colors shadow-lg"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={handleImageSelect}
+                  className="hidden"
+                />
+                <p className="text-xs text-neutral-500 text-center">
+                  {session?.user?.image && !selectedFile 
+                    ? "Using your Google profile picture. Click to change." 
+                    : "Upload a profile picture (optional, max 5MB)"}
+                </p>
+              </div>
+
+              {/* Name Input */}
+              <div>
+                <Input
+                  label="Name"
+                  value={profileData.name}
+                  onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
+                  placeholder="Your full name"
+                  required
+                />
+                <p className="text-xs text-neutral-500 mt-1">
+                  {session?.user?.name ? "Pre-filled from your Google account. You can change it." : "How should we address you?"}
+                </p>
+              </div>
+
+              {/* Username Input */}
               <div>
                 <Input
                   label="Username"
                   value={profileData.username}
                   onChange={(e) => setProfileData({ ...profileData, username: e.target.value })}
                   placeholder="e.g. memorykeeper"
-                  require // Visual indicator
+                  required
                 />
                 <p className="text-xs text-neutral-500 mt-1">Unique identifier for social discovery.</p>
               </div>
               
+              {/* Bio Textarea */}
               <div>
                 <label className="block text-sm font-medium text-neutral-700 mb-1">
                   Bio
@@ -187,16 +348,18 @@ const OnboardingFlow: React.FC = () => {
                   onChange={(e) => setProfileData({ ...profileData, bio: e.target.value })}
                   placeholder="Tell us a bit about yourself..."
                   rows={4}
+                  maxLength={500}
                   className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                 />
-                <p className="text-xs text-neutral-500 mt-1">Optional. Visible on your profile.</p>
+                <p className="text-xs text-neutral-500 mt-1">
+                  Optional. Visible on your profile. ({profileData.bio.length}/500)
+                </p>
               </div>
             </div>
           </div>
         );
 
       case "import":
-        // ... (Import Step Content - Unchanged)
         return (
           <div className="space-y-6">
             <div className="text-center space-y-3">
@@ -254,7 +417,6 @@ const OnboardingFlow: React.FC = () => {
         );
 
       case "privacy":
-        // ... (Privacy Step Content - Unchanged)
         return (
           <div className="space-y-6">
             <div className="text-center space-y-3">
@@ -359,7 +521,6 @@ const OnboardingFlow: React.FC = () => {
         );
 
       case "ai":
-        // ... (AI Step Content - Unchanged)
         return (
           <div className="space-y-6">
             <div className="text-center space-y-3">
@@ -432,7 +593,6 @@ const OnboardingFlow: React.FC = () => {
         );
 
       case "tags":
-        // ... (Tags Step Content - Unchanged)
         return (
           <div className="space-y-6">
             <div className="text-center space-y-3">
@@ -472,7 +632,7 @@ const OnboardingFlow: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-2xl">
         {/* Progress Bar */}
         <div className="mb-8">
@@ -508,11 +668,11 @@ const OnboardingFlow: React.FC = () => {
               Back
             </Button>
 
-            <Button onClick={nextStep} className="flex items-center" disabled={isSubmitting}>
-              {isSubmitting ? (
+            <Button onClick={nextStep} className="flex items-center" disabled={isSubmitting || isUploadingImage}>
+              {isSubmitting || isUploadingImage ? (
                 <>
                   <Spinner className="w-4 h-4 mr-2 animate-spin" />
-                  Saving...
+                  {isUploadingImage ? "Uploading..." : "Saving..."}
                 </>
               ) : (
                 <>

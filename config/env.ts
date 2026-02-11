@@ -15,6 +15,7 @@ const serverSchema = z.object({
   VAPID_PRIVATE_KEY: z.string().min(1),
   GEMINI_API_KEY: z.string().min(1),
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
+  ADMIN_EMAIL: z.string().email().default("himpraise571@gmail.com"),
 });
 
 const clientSchema = z.object({
@@ -24,6 +25,11 @@ const clientSchema = z.object({
 
 const isServer = typeof window === "undefined";
 
+/**
+ * Validate environment variables.
+ * In the browser, we only validate NEXT_PUBLIC_ variables.
+ * On the server, we validate everything.
+ */
 function validateEnv() {
   const clientResult = clientSchema.safeParse({
     NEXT_PUBLIC_VAPID_PUBLIC_KEY: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
@@ -35,8 +41,13 @@ function validateEnv() {
   }
 
   if (isServer) {
-    const serverResult = serverSchema.safeParse(process.env);
+    const serverResult = serverSchema.safeParse({
+      ...process.env,
+      // If ADMIN_EMAIL is not in process.env, provide the default for the schema
+      ADMIN_EMAIL: process.env.ADMIN_EMAIL || "himpraise571@gmail.com",
+    });
     if (!serverResult.success) {
+      console.error("Invalid server environment variables:", serverResult.error.format());
       throw new Error("Invalid server environment variables");
     }
     return { ...serverResult.data, ...clientResult.data };

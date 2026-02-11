@@ -80,3 +80,52 @@ export const sendDeletionOTP = async (email: string, code: string) => {
 
   return sendEmail({ to: email, subject, html });
 };
+
+export const sendErrorReportEmail = async (error: any, context?: string) => {
+  const adminEmail = process.env.ADMIN_EMAIL || "himpraise571@gmail.com";
+  const subject = `🚨 CRITICAL ERROR: ${context || "System Alert"}`;
+  
+  const errorMessage = error instanceof Error ? error.message : String(error);
+  const errorStack = error instanceof Error ? error.stack : "No stack trace available";
+  
+  const html = `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 800px; margin: 0 auto; padding: 30px; color: #1f2937; border: 1px solid #e5e7eb; border-radius: 12px; background-color: #ffffff;">
+      <div style="border-bottom: 2px solid #ef4444; padding-bottom: 20px; margin-bottom: 25px;">
+        <h1 style="color: #ef4444; margin: 0; font-size: 24px;">Critical Error Detected</h1>
+        <p style="color: #6b7280; margin: 5px 0 0 0;">Automated alert from Memory Lane Sanctuary</p>
+      </div>
+
+      <div style="background-color: #fef2f2; border-left: 4px solid #ef4444; padding: 20px; margin-bottom: 25px; border-radius: 4px;">
+        <h2 style="color: #991b1b; margin: 0 0 10px 0; font-size: 18px;">Error Summary</h2>
+        <p style="margin: 0; font-weight: bold; font-size: 16px;">${errorMessage}</p>
+        ${context ? `<p style="margin: 10px 0 0 0; color: #b91c1c;"><span style="font-weight: bold;">Context:</span> ${context}</p>` : ""}
+      </div>
+
+      <div style="margin-bottom: 25px;">
+        <h3 style="color: #374151; margin: 0 0 10px 0; font-size: 16px;">Details</h3>
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr>
+            <td style="padding: 8px 0; color: #6b7280; width: 120px;">Timestamp:</td>
+            <td style="padding: 8px 0; font-family: monospace;">${new Date().toISOString()}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; color: #6b7280;">Environment:</td>
+            <td style="padding: 8px 0;">${process.env.NODE_ENV || "unknown"}</td>
+          </tr>
+        </table>
+      </div>
+
+      <div>
+        <h3 style="color: #374151; margin: 0 0 10px 0; font-size: 16px;">Stack Trace</h3>
+        <pre style="background-color: #111827; color: #fbbf24; padding: 20px; border-radius: 8px; font-size: 13px; line-height: 1.5; overflow-x: auto; white-space: pre-wrap; word-break: break-all;">${errorStack}</pre>
+      </div>
+
+      <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; text-align: center; color: #9ca3af; font-size: 12px;">
+        <p>This is an automated message from the Memory Lane system monitor.</p>
+        <p>&copy; ${new Date().getFullYear()} Memory Lane. All rights reserved.</p>
+      </div>
+    </div>
+  `;
+
+  return sendEmail({ to: adminEmail, subject, html });
+};

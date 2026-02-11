@@ -17,6 +17,15 @@ import { userExists } from "./query";
 import { verifyGoogleToken, getOrCreateGoogleUser } from "./google-auth";
 import { env } from "@/config/env";
 
+import { CredentialsSignin } from "next-auth";
+
+class AuthError extends CredentialsSignin {
+  constructor(code: string) {
+    super();
+    this.code = code;
+  }
+}
+
 const providers: Provider[] = [
   Credentials({
     credentials: {
@@ -33,44 +42,38 @@ const providers: Provider[] = [
           return user;
         } catch (error) {
           console.error("Manual Google Auth Error:", error);
-          throw new Error("GOOGLE_AUTH_FAILED");
+          throw new AuthError("GOOGLE_AUTH_FAILED");
         }
       }
 
       // Handle standard Email/Password Login
       if (!c.email || !c.password) {
-        throw new Error("Please enter both email and password.");
+        throw new AuthError("INVALID_CREDENTIALS");
       }
 
       try {
         const user = await userExists(c.email as string);
         if (!user || !user.password) {
-          throw new Error("Invalid credentials.");
+          throw new AuthError("INVALID_CREDENTIALS");
         }
         const compare = await brcypt.compare(
           c.password as string,
           user.password,
         );
         if (!compare) {
-          throw new Error("Invalid credentials.");
+          throw new AuthError("INVALID_CREDENTIALS");
         }
 
         // Check if email is verified
         if (!user.emailVerified) {
-          throw new Error("EMAIL_NOT_VERIFIED");
+          throw new AuthError("EMAIL_NOT_VERIFIED");
         }
 
         return user;
       } catch (error) {
-        // Re-throw specific errors
-        if (
-          error instanceof Error &&
-          (error.message === "EMAIL_NOT_VERIFIED" ||
-            error.message === "GOOGLE_AUTH_FAILED")
-        ) {
-          throw error;
-        }
-        throw new Error("Invalid credentials.");
+        if (error instanceof AuthError) throw error;
+        console.error("Auth Exception:", error);
+        throw new AuthError("AUTH_ERROR");
       }
     },
   }),
@@ -148,11 +151,17 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (token.sub && session.user) {
         session.user.id = token.sub;
       }
+      // Add username to session for onboarding detection
+      if (token.username) {
+        session.user.username = token.username as string;
+      }
       return session;
     },
     async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id;
+        // Store username in JWT for session access
+        token.username = user.username;
       }
       if (trigger === "update" && session) {
         return { ...token, ...session };

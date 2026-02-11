@@ -21,6 +21,12 @@ export default function LoginClient() {
     if (googleToken) {
       handleFinalizeGoogleLogin(googleToken);
     }
+
+    if (searchParams.get("verified") === "true") {
+      toast.success("Email verified successfully! You can now sign in.");
+      // Clear the session storage or URL to avoid showing the toast twice if needed
+      // router.replace("/auth/login", { scroll: false }); 
+    }
   }, [searchParams]);
 
   const handleFinalizeGoogleLogin = async (token: string) => {
@@ -55,13 +61,48 @@ export default function LoginClient() {
         password,
       });
 
-      if (res?.error) {
-        toast.error("Invalid credentials. Please try again.");
+      if (res?.error || res?.code) {
+        const errorCode = res.code || res.error;
+
+        // Handle specific error cases
+        if (errorCode === "EMAIL_NOT_VERIFIED") {
+          toast.info("Email not verified. Resending verification code...");
+          
+          try {
+            await fetch("/api/auth/resend-code", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ email }),
+            });
+            router.push(`/auth/verify?email=${encodeURIComponent(email)}`);
+          } catch (resendError) {
+            toast.error("Failed to resend code. Please try again from the verification page.");
+            router.push(`/auth/verify?email=${encodeURIComponent(email)}`);
+          }
+          return;
+        }
+
+        const errorMap: Record<string, string> = {
+          "INVALID_CREDENTIALS": "Invalid email or password. Please try again.",
+          "CredentialsSignin": "Invalid credentials. Please try again.",
+          "OAuthAccountNotLinked": "An account with this email already exists. Please sign in with your original method.",
+          "GOOGLE_AUTH_FAILED": "Google authentication failed. Please try again.",
+          "Configuration": "Invalid credentials. Please try again.",
+        };
+
+        toast.error(errorMap[errorCode as string] || "An error occurred during sign-in.");
       } else {
-        router.push("/timeline");
+        // Check if user needs onboarding
+        const { getSession } = await import("next-auth/react");
+        const currentSession = await getSession();
+        if (currentSession && !currentSession.user?.username) {
+          router.push("/onboarding");
+        } else {
+          router.push("/timeline");
+        }
       }
     } catch (err) {
-      toast.error("An unexpected error occurred.");
+      toast.error("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
