@@ -72,6 +72,20 @@ class ApiService {
     return this.request<T>({ ...config, url, method: "DELETE" });
   }
 
+  public async uploadFiles(files: File[] | File): Promise<string[]> {
+    const formData = new FormData();
+    const fileList = Array.isArray(files) ? files : [files];
+    fileList.forEach((file) => formData.append("file", file));
+
+    const response = await this.client.post<{ urls: string[] }>("/upload", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    return response.data.urls;
+  }
+
   // Specialized methods migrated for "Single File of Truth"
   public async userExists(user: string) {
     try {

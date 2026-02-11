@@ -21,6 +21,7 @@ import Card from "@/components/ui/Card";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import Image from "next/image";
+import { apiService } from "@/services/api.service";
 
 const OnboardingFlow: React.FC = () => {
   const router = useRouter();
@@ -77,7 +78,7 @@ const OnboardingFlow: React.FC = () => {
     "learning", "health", "nature", "photography", "art", "technology",
   ];
 
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -93,14 +94,37 @@ const OnboardingFlow: React.FC = () => {
       return;
     }
 
-    setSelectedFile(file);
-    
-    // Create preview
+    // Create preview immediately
     const reader = new FileReader();
     reader.onloadend = () => {
       setImagePreview(reader.result as string);
     };
     reader.readAsDataURL(file);
+
+    // Upload immediately
+    setIsUploadingImage(true);
+    try {
+      const urls = await apiService.uploadFiles(file);
+      
+      if (!urls || urls.length === 0) {
+        throw new Error("Failed to upload profile picture");
+      }
+
+      const imageUrl = urls[0];
+      
+      // Store the uploaded URL
+      setProfileData(prev => ({ ...prev, image: imageUrl }));
+      setSelectedFile(null); // Clear selected file since it's now uploaded
+      toast.success("Profile picture uploaded successfully!");
+    } catch (error: any) {
+      console.error("Upload error:", error);
+      toast.error(error.message || "Failed to upload image. Please try again.");
+      // Revert to previous image on error
+      setImagePreview(session?.user?.image || null);
+      setProfileData(prev => ({ ...prev, image: session?.user?.image || null }));
+    } finally {
+      setIsUploadingImage(false);
+    }
   };
 
   const removeImage = () => {
@@ -149,27 +173,8 @@ const OnboardingFlow: React.FC = () => {
   const completeOnboarding = async () => {
     setIsSubmitting(true);
     try {
-      let imageUrl = profileData.image;
-
-      // Upload profile picture if a new one was selected
-      if (selectedFile) {
-        setIsUploadingImage(true);
-        const formData = new FormData();
-        formData.append("file", selectedFile);
-
-        const uploadResponse = await fetch("/api/upload", {
-          method: "POST",
-          body: formData,
-        });
-
-        if (!uploadResponse.ok) {
-          throw new Error("Failed to upload profile picture");
-        }
-
-        const uploadData = await uploadResponse.json();
-        imageUrl = uploadData.url;
-        setIsUploadingImage(false);
-      }
+      // Image is already uploaded via handleImageSelect, just use the URL
+      const imageUrl = profileData.image;
 
       // Update Profile
       const profileResponse = await fetch("/api/user/settings", {
@@ -207,7 +212,6 @@ const OnboardingFlow: React.FC = () => {
       toast.error(error.message || "Failed to complete setup. Please try again.");
     } finally {
       setIsSubmitting(false);
-      setIsUploadingImage(false);
     }
   };
 
@@ -632,7 +636,7 @@ const OnboardingFlow: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 flex items-center justify-center px-4 py-8">
+    <div className="min-h-screen bg-linear-to-br from-primary-50 to-secondary-50 flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-2xl">
         {/* Progress Bar */}
         <div className="mb-8">
@@ -668,7 +672,11 @@ const OnboardingFlow: React.FC = () => {
               Back
             </Button>
 
-            <Button onClick={nextStep} className="flex items-center" disabled={isSubmitting || isUploadingImage}>
+            <Button
+              onClick={nextStep}
+              className="flex items-center"
+              disabled={isSubmitting || isUploadingImage}
+            >
               {isSubmitting || isUploadingImage ? (
                 <>
                   <Spinner className="w-4 h-4 mr-2 animate-spin" />
@@ -676,7 +684,9 @@ const OnboardingFlow: React.FC = () => {
                 </>
               ) : (
                 <>
-                  {currentStep === steps.length - 1 ? "Complete Setup" : "Continue"}
+                  {currentStep === steps.length - 1
+                    ? "Complete Setup"
+                    : "Continue"}
                   <CaretRight className="w-4 h-4 ml-2" />
                 </>
               )}

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   User as UserIcon,
   Download,
@@ -18,11 +18,12 @@ import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
-import DeleteAccountModal from "@/components/DeleteAccountModal"; // Import the new modal
-import { signOut } from "next-auth/react";
+import DeleteAccountModal from "@/components/DeleteAccountModal"; 
+import { signOut, useSession } from "next-auth/react";
 import { useUserSettings, useUpdateUserSettings } from "@/hooks/useUserSettings";
 import Loading from "@/components/ui/Loading";
 import { toast } from "sonner";
+import { apiService } from "@/services/api.service";
 
 export default function SettingsPage() {
   const [mounted, setMounted] = useState(false);
@@ -31,13 +32,14 @@ export default function SettingsPage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const { data: session, update: updateSession } = useSession();
 
   const handleSignOut = async () => {
     setIsSigningOut(true);
     await signOut({ callbackUrl: "/" });
   };
 
-  React.useEffect(() => {
+useEffect(() => {
     setMounted(true);
   }, []);
   
@@ -49,7 +51,7 @@ export default function SettingsPage() {
   const [localBio, setLocalBio] = useState("");
   const [localUsername, setLocalUsername] = useState("");
 
-  React.useEffect(() => {
+useEffect(() => {
     if (settings) {
       setLocalName(settings.name);
       setLocalAvatar(settings.avatar || "");
@@ -66,6 +68,18 @@ export default function SettingsPage() {
         bio: localBio,
         username: localUsername,
       });
+      
+      // Update session to reflect changes across the app
+      await updateSession({
+        ...session,
+        user: {
+          ...session?.user,
+          name: localName,
+          username: localUsername,
+          image: localAvatar,
+        }
+      });
+      
       setIsEditing(false);
       toast.success("Profile updated successfully");
     } catch (err) {
@@ -194,42 +208,69 @@ export default function SettingsPage() {
                     <label className="block text-sm font-medium text-neutral-700 mb-2">
                       Profile Picture
                     </label>
-                    <div className="flex items-center space-x-4">
-                      <div className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-neutral-100 shadow-sm bg-primary-900 flex items-center justify-center">
-                        {localAvatar ? (
-                          <Image
-                            src={localAvatar}
-                            alt="Profile"
-                            fill
-                            className="object-cover"
-                          />
-                        ) : (
-                          <span className="text-2xl font-bold text-secondary-400">{localName ? localName[0] : 'U'}</span>
+                      <div className="flex items-center space-x-4">
+                        <div className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-neutral-100 shadow-sm bg-primary-900 flex items-center justify-center">
+                          {localAvatar ? (
+                            <Image
+                              src={localAvatar}
+                              alt="Profile"
+                              fill
+                              className="object-cover"
+                            />
+                          ) : (
+                            <span className="text-2xl font-bold text-secondary-400">{localName ? localName[0] : 'U'}</span>
+                          )}
+                        </div>
+                        {isEditing && (
+                          <>
+                            <input
+                              type="file"
+                              accept="image/jpeg,image/png,image/webp"
+                              onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+
+                                // Validate file size (max 5MB)
+                                if (file.size > 5 * 1024 * 1024) {
+                                  toast.error("Image must be less than 5MB");
+                                  return;
+                                }
+
+                                // Validate file type
+                                if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+                                  toast.error("Only JPG, PNG, and WebP images are supported");
+                                  return;
+                                }
+
+                                // Show loading toast
+                                const uploadToast = toast.loading("Uploading profile picture...");
+
+                                try {
+                                  const urls = await apiService.uploadFiles(file);
+                                  
+                                  if (!urls || urls.length === 0) {
+                                    throw new Error("Failed to upload profile picture");
+                                  }
+
+                                  const imageUrl = urls[0];
+                                  setLocalAvatar(imageUrl);
+                                  toast.success("Profile picture uploaded successfully!", { id: uploadToast });
+                                } catch (error: any) {
+                                  console.error("Upload error:", error);
+                                  toast.error(error.message || "Failed to upload image. Please try again.", { id: uploadToast });
+                                }
+                              }}
+                              className="hidden"
+                              id="avatar-upload"
+                            />
+                            <label htmlFor="avatar-upload" className="cursor-pointer">
+                              <span className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-md bg-neutral-100 text-neutral-900 hover:bg-neutral-200 transition-colors">
+                                Change Photo
+                              </span>
+                            </label>
+                          </>
                         )}
                       </div>
-                      {isEditing && (
-                        <>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={async (e) => {
-                              const file = e.target.files?.[0];
-                              if (file) {
-                                const url = URL.createObjectURL(file);
-                                setLocalAvatar(url);
-                              }
-                            }}
-                            className="hidden"
-                            id="avatar-upload"
-                          />
-                          <label htmlFor="avatar-upload" className="cursor-pointer">
-                            <span className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-md bg-neutral-100 text-neutral-900 hover:bg-neutral-200 transition-colors">
-                              Change Photo
-                            </span>
-                          </label>
-                        </>
-                      )}
-                    </div>
                   </div>
 
                   <div>
