@@ -30,6 +30,6 @@ export interface AdminStats {
 
 export const adminService = {
   getStats: () => {
-    return apiService.get<AdminStats>("/api/admin/stats");
+    return apiService.get<AdminStats>("/admin/stats");
   },
 };

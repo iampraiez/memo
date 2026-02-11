@@ -32,45 +32,54 @@ export const socialService = {
     if (params?.sort) searchParams.append("sort", params.sort);
     
     const queryString = searchParams.toString();
-    const url = `/api/memories/timeline${queryString ? `?${queryString}` : ""}`;
+    const url = `/memories/timeline${queryString ? `?${queryString}` : ""}`;
     
     return apiService.get<{ memories: Memory[], nextCursor?: string }>(url);
   },
 
   getComments: (memoryId: string) => {
-    return apiService.get<{ comments: Comment[] }>(`/api/memories/${memoryId}/comments`);
+    return apiService.get<{ comments: Comment[] }>(
+      `/memories/${memoryId}/comments`,
+    );
   },
 
   addComment: (memoryId: string, content: string) => {
-    return apiService.post<Comment>(`/api/memories/${memoryId}/comments`, { content });
+    return apiService.post<Comment>(`/memories/${memoryId}/comments`, {
+      content,
+    });
   },
 
   deleteComment: (commentId: string) => {
-    return apiService.delete<{ success: boolean }>(`/api/comments/${commentId}`);
+    return apiService.delete<{ success: boolean }>(`/comments/${commentId}`);
   },
 
   getReactions: (memoryId: string) => {
-    return apiService.get<{ reactions: Reaction[] }>(`/api/memories/${memoryId}/reactions`);
+    return apiService.get<{ reactions: Reaction[] }>(
+      `/memories/${memoryId}/reactions`,
+    );
   },
 
   toggleReaction: (memoryId: string, type: string = "heart") => {
-    return apiService.post<{ success: boolean }>(`/api/memories/${memoryId}/reactions`, { type });
+    return apiService.post<{ success: boolean }>(
+      `/memories/${memoryId}/reactions`,
+      { type },
+    );
   },
 
   followUser: (userId: string) => {
-    return apiService.post<{ success: boolean }>(`/api/user/follow`, { userId });
+    return apiService.post<{ success: boolean }>(`/user/follow`, { userId });
   },
 
   unfollowUser: (userId: string) => {
-    return apiService.post<{ success: boolean }>(`/api/user/unfollow`, { userId });
+    return apiService.post<{ success: boolean }>(`/user/unfollow`, { userId });
   },
 
   getFollowers: (userId: string) => {
-    return apiService.get<{ followers: any[] }>(`/api/user/followers/${userId}`);
+    return apiService.get<{ followers: any[] }>(`/user/followers/${userId}`);
   },
 
   getFollowing: (userId: string) => {
-    return apiService.get<{ following: any[] }>(`/api/user/following/${userId}`);
+    return apiService.get<{ following: any[] }>(`/user/following/${userId}`);
   },
   
   searchUsers: (query: string) => {
@@ -87,6 +96,6 @@ export const socialService = {
         updatedAt: Date;
         emailVerified: Date | null;
       }[];
-    }>(`/api/user/search?q=${encodeURIComponent(query)}`);
+    }>(`/user/search?q=${encodeURIComponent(query)}`);
   },
 };

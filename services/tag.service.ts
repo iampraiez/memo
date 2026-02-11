@@ -8,6 +8,6 @@ export interface Tag {
 
 export const tagService = {
   getAll: () => {
-    return apiService.get<{ tags: Tag[] }>("/api/tags");
+    return apiService.get<{ tags: Tag[] }>("/tags");
   },
 };

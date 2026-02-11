@@ -35,6 +35,6 @@ export interface Analytics {
 
 export const analyticsService = {
   get: (timeRange: string = "year") => {
-    return apiService.get<Analytics>(`/api/analytics?timeRange=${timeRange}`);
+    return apiService.get<Analytics>(`/analytics?timeRange=${timeRange}`);
   },
 };

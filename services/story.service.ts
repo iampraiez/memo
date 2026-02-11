@@ -13,6 +13,6 @@ export interface StorySettings {
 
 export const storyService = {
   create: (data: StorySettings) => {
-    return apiService.post<{ story: { content: string } }>("/api/stories", data);
+    return apiService.post<{ story: { content: string } }>("/stories", data);
   },
 };

@@ -101,7 +101,7 @@ useEffect(() => {
       const res = await fetch("/api/user/export", { method: "POST" });
       if (!res.ok) throw new Error("Failed to start export");
       toast.success("Data export started. You will be notified when it's ready.");
-    } catch (error) {
+    } catch {
       toast.error("Failed to start data export");
     } finally {
       setIsExporting(false);

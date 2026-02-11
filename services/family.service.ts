@@ -13,10 +13,10 @@ export interface FamilyMember {
 
 export const familyService = {
   getMembers: () => {
-    return apiService.get<{ members: FamilyMember[] }>("/api/family");
+    return apiService.get<{ members: FamilyMember[] }>("/family");
   },
 
   invite: (data: { email: string; name?: string; relationship: string }) => {
-    return apiService.post<{ success: boolean }>("/api/family", data);
+    return apiService.post<{ success: boolean }>("/family", data);
   },
 };
