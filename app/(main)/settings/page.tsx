@@ -15,7 +15,6 @@ import Image from "next/image";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
-import Select from "@/components/ui/Select";
 import DeleteAccountModal from "@/components/DeleteAccountModal"; 
 import { signOut, useSession } from "next-auth/react";
 import { useUserSettings, useUpdateUserSettings } from "@/hooks/useUserSettings";
@@ -276,11 +275,10 @@ useEffect(() => {
                                   "Profile picture uploaded successfully!",
                                   { id: uploadToast },
                                 );
-                              } catch (error: any) {
+                              } catch (error) {
                                 console.error("Upload error:", error);
                                 toast.error(
-                                  error.message ||
-                                    "Failed to upload image. Please try again.",
+                                  "Failed to upload image. Please try again.",
                                   { id: uploadToast },
                                 );
                               }
@@ -330,7 +328,7 @@ useEffect(() => {
                       value={localBio}
                       onChange={(e) => setLocalBio(e.target.value)}
                       placeholder="Tell us a bit about yourself..."
-                      className="w-full px-4 py-3 rounded-xl border border-neutral-200 focus:ring-2 focus:ring-primary-500 min-h-[100px] resize-none disabled:bg-neutral-50 disabled:text-neutral-500"
+                      className="w-full px-4 py-3 rounded-xl border border-neutral-200 focus:ring-2 focus:ring-primary-500 min-h-25 resize-none disabled:bg-neutral-50 disabled:text-neutral-500"
                       disabled={!isEditing}
                     />
                   </div>

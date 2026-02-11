@@ -68,7 +68,7 @@ export default function VerifyEmailClient() {
       } else {
         toast.error("Verification failed. Please check the code.");
       }
-    } catch (err) {
+    } catch {
       toast.error("An error occurred.");
     } finally {
       setIsVerifying(false);
@@ -78,12 +78,20 @@ export default function VerifyEmailClient() {
   if (!email) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50 flex items-center justify-center px-4">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-sm">
+    <div className="min-h-screen bg-linear-to-br from-primary-50 via-white to-secondary-50 flex items-center justify-center px-4">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="w-full max-w-sm"
+      >
         <div className="text-center space-y-3 mb-8">
           <div className="w-12 h-12 bg-primary-900 rounded-xl flex items-center justify-center mx-auto shadow-lg">
             {success ? (
-              <CheckCircle size={24} weight="fill" className="text-secondary-400" />
+              <CheckCircle
+                size={24}
+                weight="fill"
+                className="text-secondary-400"
+              />
             ) : (
               <EnvelopeSimple size={24} className="text-secondary-400" />
             )}
@@ -92,7 +100,9 @@ export default function VerifyEmailClient() {
             {success ? "Email Verified!" : "Verify Your Email"}
           </h1>
           <p className="text-sm text-neutral-600">
-            {success ? "Redirecting you to login..." : `Enter the 8-digit code sent to ${email}`}
+            {success
+              ? "Redirecting you to login..."
+              : `Enter the 8-digit code sent to ${email}`}
           </p>
         </div>
 
@@ -115,16 +125,16 @@ export default function VerifyEmailClient() {
             </div>
 
             <div className="space-y-4">
-              <Button 
-                onClick={handleVerify} 
-                loading={isVerifying} 
-                disabled={code.join("").length !== 8} 
+              <Button
+                onClick={handleVerify}
+                loading={isVerifying}
+                disabled={code.join("").length !== 8}
                 className="w-full h-11 rounded-xl bg-primary-900 text-white font-bold"
               >
                 Verify Email
               </Button>
-              <Link 
-                href="/auth/login" 
+              <Link
+                href="/auth/login"
                 className="flex items-center justify-center text-[10px] text-neutral-500 hover:text-neutral-900 transition-colors font-bold uppercase tracking-widest"
               >
                 <ArrowLeft size={14} className="mr-1" />
