@@ -104,7 +104,7 @@ export default function ProfilePage() {
             <p className="text-xs text-neutral-400 uppercase tracking-widest font-bold">Following</p>
           </div>
           <div className="text-center">
-            <p className="text-xl font-bold text-neutral-900">12</p>
+            <p className="text-xl font-bold text-neutral-900">{profile.memoriesCount}</p>
             <p className="text-xs text-neutral-400 uppercase tracking-widest font-bold">Memories</p>
           </div>
         </div>

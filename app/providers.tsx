@@ -20,12 +20,13 @@ export function Providers({
       new QueryClient({
         defaultOptions: {
           queries: {
-            staleTime: 1000 * 60 * 60 * 24, // 24 hours (keep data longer for offline)
-            gcTime: 1000 * 60 * 60 * 24 * 7, // 7 days
+            staleTime: 1000 * 60, // 1 minute (more reasonable for a dynamic app)
+            gcTime: 1000 * 60 * 60 * 24, // 24 hours
             refetchOnWindowFocus: false,
+            refetchOnMount: true,
             retry: 1,
             persistOn: true,
-          } as any, // Persistence options
+          } as any,
           mutations: {
             retry: 1,
           },

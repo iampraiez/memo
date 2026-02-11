@@ -11,14 +11,24 @@ export interface UserSettings {
   createdAt: string;
   preferences: {
     theme: "light" | "dark" | "system";
-    emailNotifications?: boolean;
-    language?: string;
+    aiEnabled: boolean;
+    autoBackup: boolean;
+    privacyMode: "private" | "selective" | "family";
+    notifications: any;
   };
 }
 
 export const userService = {
-  getSettings: () => {
-    return apiService.get<UserSettings>("/user/settings");
+  getSettings: async () => {
+    console.log("[UserService] Fetching settings from database...");
+    const res = await apiService.get<UserSettings>("/user/settings");
+    console.log("[UserService] Fetched settings successfully:", {
+      username: res.username,
+      name: res.name,
+      avatar: !!res.avatar ? "Present" : "Missing",
+      theme: res.preferences?.theme
+    });
+    return res;
   },
 
   updateSettings: (data: Partial<UserSettings>) => {
@@ -30,6 +40,7 @@ export const userService = {
       UserSettings & {
         followersCount: number;
         followingCount: number;
+        memoriesCount: number;
         isFollowing: boolean;
       }
     >(`/user/profile/${userId}`);

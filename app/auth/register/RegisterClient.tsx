@@ -48,7 +48,7 @@ export default function RegisterClient() {
       <div className="w-full max-w-md space-y-8">
         <div className="text-center space-y-3">
           <Link href="/" className="inline-block">
-            <div className="w-12 h-12 bg-linear-to-br from-primary-600 to-primary-800 rounded-xl flex items-center justify-center mx-auto shadow-lg">
+            <div className="w-12 h-12 bg-primary-900 rounded-xl flex items-center justify-center mx-auto shadow-lg">
               <span className="text-white font-serif font-bold text-xl">M</span>
             </div>
           </Link>
@@ -127,10 +127,10 @@ export default function RegisterClient() {
               type="submit"
               size="lg"
               loading={loading}
-              className="w-full mt-6 bg-primary-800 text-white hover:bg-primary-900"
+              className="w-full mt-6 bg-primary-900 text-white font-bold hover:bg-black transition-all group"
             >
               Create Account
-              <ArrowRight size={20} className="ml-2" />
+              <ArrowRight weight="duotone" size={20} className="ml-2 group-hover:translate-x-1 transition-transform" />
             </Button>
           </form>
 

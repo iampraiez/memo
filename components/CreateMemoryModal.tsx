@@ -6,7 +6,7 @@ import Input from "./ui/Input";
 import Tag from "./ui/Tag";
 import MediaUploader from "./ui/MediaUploader";
 import { Memory } from "@/types/types";
-import { useNetworkStatus } from "@/lib/utils";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { db } from "@/lib/dexie";
 
 interface CreateMemoryModalProps {

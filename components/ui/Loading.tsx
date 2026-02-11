@@ -59,7 +59,11 @@ export default function Loading({
   );
 
   if (fullPage) {
-    return <div className="space-y-6">{content}</div>;
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-80px)] w-full">
+        {content}
+      </div>
+    );
   }
 
   return content;

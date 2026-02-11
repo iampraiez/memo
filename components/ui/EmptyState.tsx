@@ -31,7 +31,7 @@ export default function EmptyState({
       <div className="relative mb-10">
         <div className="absolute inset-0 bg-primary-100/50 rounded-full blur-3xl scale-150 animate-pulse" />
         <div className="relative w-24 h-24 bg-gradient-to-br from-primary-900 to-primary-700 rounded-3xl flex items-center justify-center shadow-2xl rotate-3">
-          {icon || <Sparkle className="w-12 h-12 text-secondary-400/40" weight="duotone" />}
+          {icon || <Sparkle className="w-12 h-12 text-white" weight="duotone" />}
         </div>
         <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-secondary-400 rounded-xl flex items-center justify-center shadow-lg -rotate-12">
           <Sparkle className="w-5 h-5 text-primary-900" weight="fill" />

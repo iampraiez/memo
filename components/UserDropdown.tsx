@@ -4,10 +4,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { User, Gear, SignOut, CaretDown, Spinner } from "@phosphor-icons/react";
+import { useQueryClient } from "@tanstack/react-query";
+import { userService } from "@/services/user.service";
 import { cn } from "@/lib/utils";
 
 export default function UserDropdown() {
   const { data: session } = useSession();
+  const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -52,6 +55,12 @@ export default function UserDropdown() {
               href={`/profile/${session.user.id}`}
               className="flex items-center space-x-3 px-4 py-2 text-sm text-neutral-600 hover:bg-neutral-50 hover:text-primary-900 transition-colors"
               onClick={() => setIsOpen(false)}
+              onMouseEnter={() => {
+                queryClient.prefetchQuery({
+                  queryKey: ["profile", session.user.id],
+                  queryFn: () => userService.getProfile(session.user.id),
+                });
+              }}
             >
               <User className="w-4 h-4" />
               <span>Your Profile</span>
@@ -60,6 +69,12 @@ export default function UserDropdown() {
               href="/settings"
               className="flex items-center space-x-3 px-4 py-2 text-sm text-neutral-600 hover:bg-neutral-50 hover:text-primary-900 transition-colors"
               onClick={() => setIsOpen(false)}
+              onMouseEnter={() => {
+                queryClient.prefetchQuery({
+                  queryKey: ["userSettings"],
+                  queryFn: () => userService.getSettings(),
+                });
+              }}
             >
               <Gear className="w-4 h-4" />
               <span>Settings</span>

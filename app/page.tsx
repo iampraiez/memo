@@ -1,6 +1,4 @@
-"use client";
-
-import React, { useState, useEffect } from "react";
+import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -16,23 +14,13 @@ import {
   LinkedinLogo,
   InstagramLogo,
   GithubLogo,
-  EnvelopeSimple,
-} from "@phosphor-icons/react";
+} from "@phosphor-icons/react/dist/ssr";
 import Button from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
+import NavWrapper from "@/components/landing/NavWrapper";
 import "./global.css";
 
 const LandingPage: React.FC = () => {
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
   const features = [
     {
       icon: Sparkle,
@@ -76,63 +64,30 @@ const LandingPage: React.FC = () => {
     {
       name: "Sarah Johnson",
       role: "Family Historian",
-      content: "Memory Lane has transformed how I preserve our family's legacy. The AI stories are incredible!",
+      content:
+        "Memory Lane has transformed how I preserve our family's legacy. The AI stories are incredible!",
       avatar: "SJ",
     },
     {
       name: "Michael Chen",
       role: "Travel Blogger",
-      content: "Finally, a beautiful way to organize all my travel memories. The timeline view is perfect.",
+      content:
+        "Finally, a beautiful way to organize all my travel memories. The timeline view is perfect.",
       avatar: "MC",
     },
     {
       name: "Emma Davis",
       role: "New Parent",
-      content: "Capturing my baby's first moments has never been easier. I love the family sharing feature!",
+      content:
+        "Capturing my baby's first moments has never been easier. I love the family sharing feature!",
       avatar: "ED",
     },
   ];
 
   return (
     <div className="min-h-screen bg-linear-to-br from-primary-50 via-white to-secondary-50 selection:bg-primary-100 selection:text-primary-900">
-      {/* Refined Header */}
-      <header
-        className={cn(
-          "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
-          scrolled
-            ? "bg-white/90 backdrop-blur-xl border-b border-neutral-200/50 py-4"
-            : "bg-transparent py-6",
-        )}
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-          <div className="flex items-center space-x-3 group cursor-pointer">
-            <div className="w-10 h-10 bg-linear-to-br from-primary-700 to-primary-900 rounded-xl flex items-center justify-center shadow-lg shadow-primary-900/20 transform transition-transform group-hover:scale-110 group-hover:rotate-3">
-              <span className="text-white font-serif font-bold text-lg tracking-tight">
-                M
-              </span>
-            </div>
-            <span className="text-xl font-display font-bold text-neutral-900 tracking-tight">
-              Memory Lane
-            </span>
-          </div>
-
-          <div className="flex items-center space-x-6">
-            <Link href={"/register"}>
-              <Button
-                className={cn(
-                  "rounded-full px-4 sm:px-8 py-2 sm:py-2.5 font-medium transition-all duration-300 shadow-md text-sm sm:text-base",
-                  scrolled
-                    ? "bg-primary-800 text-white hover:bg-primary-900 shadow-primary-900/10"
-                    : "bg-white text-primary-900 hover:bg-neutral-50 border border-primary-100 shadow-xl shadow-black/5",
-                )}
-              >
-                <span className="hidden sm:inline">Get Started</span>
-                <span className="sm:hidden">Start</span>
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </header>
+      {/* Optimized Sticky Header */}
+      <NavWrapper />
 
       {/* Hero Section */}
       <section className="relative pt-40 pb-20 lg:pt-52 lg:pb-32 overflow-hidden">
@@ -151,21 +106,21 @@ const LandingPage: React.FC = () => {
                 />
                 The Future of Heritage
               </div>
-              <h1 className="text-6xl sm:text-7xl lg:text-8xl font-display font-bold text-neutral-900 leading-[0.95] tracking-tight animate-fade-in-up animation-delay-100">
+              <h1 className="text-6xl sm:text-7xl lg:text-8xl font-display font-bold text-neutral-900 leading-[0.95] tracking-tight animate-fade-in-up">
                 Preserve your
                 <br />
                 <span className="italic font-serif text-transparent bg-clip-text bg-linear-to-r from-primary-800 to-primary-600">
                   Legacy.
                 </span>
               </h1>
-              <p className="text-xl sm:text-2xl text-neutral-600 max-w-2xl mx-auto leading-relaxed font-light animate-fade-in-up animation-delay-200">
+              <p className="text-xl sm:text-2xl text-neutral-600 max-w-2xl mx-auto leading-relaxed font-light animate-fade-in-up">
                 A sophisticated sanctuary for your most precious moments.
                 Experience your memories through the lens of AI-crafted
                 narratives.
               </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up animation-delay-300">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up">
               <Link href={"/register"}>
                 <Button
                   size="lg"
@@ -194,17 +149,19 @@ const LandingPage: React.FC = () => {
               </Link>
             </div>
 
-            <div className="mt-16 animate-fade-in-up animation-delay-500 relative">
+            <div className="mt-16 animate-fade-in-up relative">
               <div className="absolute inset-0 bg-linear-to-t from-white via-transparent to-transparent z-10 h-20 bottom-0 pointer-events-none" />
-              <Image
-                src="/memory.png"
-                alt="Memory Lane"
-                width={1200}
-                height={800}
-                priority
-                unoptimized
-                className="w-full max-w-5xl mx-auto rounded-3xl shadow-2xl border-4 border-white/50 backdrop-blur-xl ring-1 ring-black/5"
-              />
+              <div className="relative w-full max-w-5xl mx-auto">
+                <Image
+                  src="/memory.png"
+                  alt="Memory Lane Application Interface"
+                  width={1200}
+                  height={800}
+                  priority
+                  className="w-full h-auto rounded-3xl shadow-2xl border-4 border-white/50 backdrop-blur-xl ring-1 ring-black/5"
+                  sizes="(max-width: 1200px) 100vw, 1200px"
+                />
+              </div>
             </div>
           </div>
         </div>

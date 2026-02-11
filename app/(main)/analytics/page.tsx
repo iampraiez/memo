@@ -1,11 +1,17 @@
-import React from "react";
+import { Suspense } from "react";
+import Loading from "@/components/ui/Loading";
 import AnalyticsClient from "./AnalyticsClient";
 import { getAnalyticsData } from "@/lib/analytics-ssr";
 
-export default async function AnalyticsPage() {
+async function AnalyticsContent() {
   const initialAnalytics = await getAnalyticsData("year");
+  return <AnalyticsClient initialAnalytics={initialAnalytics} />;
+}
 
+export default function AnalyticsPage() {
   return (
-    <AnalyticsClient initialAnalytics={initialAnalytics} />
+    <Suspense fallback={<Loading fullPage text="Synthesizing sanctuary data..." />}>
+      <AnalyticsContent />
+    </Suspense>
   );
 }

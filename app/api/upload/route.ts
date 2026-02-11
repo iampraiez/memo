@@ -30,9 +30,20 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ urls });
   } catch (error: any) {
-    logger.error("Upload API Error:", error);
+    // Log the full error object for better debugging
+    logger.error("Upload API Error:", {
+      message: error.message,
+      stack: error.stack,
+      status: error.status,
+      error_details: error.error,
+    });
+    
     return NextResponse.json(
-      { message: "Internal Server Error", error: error.message },
+      { 
+        message: "Internal Server Error", 
+        error: error.message,
+        details: error.error?.error_summary || error.message
+      },
       { status: 500 }
     );
   }

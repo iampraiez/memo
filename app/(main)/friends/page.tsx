@@ -1,11 +1,17 @@
-import React from "react";
+import { Suspense } from "react";
+import Loading from "@/components/ui/Loading";
 import FriendsClient from "./FriendsClient";
 import { getSocialTimeline } from "@/lib/social-ssr";
 
-export default async function FamilyTimelinePage() {
+async function FriendsContent() {
   const initialMemories = await getSocialTimeline() || [];
+  return <FriendsClient initialMemories={initialMemories} />;
+}
 
+export default function FamilyTimelinePage() {
   return (
-    <FriendsClient initialMemories={initialMemories} />
+    <Suspense fallback={<Loading fullPage text="Connecting to your sanctuary circle..." />}>
+      <FriendsContent />
+    </Suspense>
   );
 }

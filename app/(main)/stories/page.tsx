@@ -5,7 +5,7 @@ import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import Select from "@/components/ui/Select";
 import DatePicker from "@/components/ui/DatePicker";
-import { useNetworkStatus } from "@/lib/utils";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import Input from "@/components/ui/Input";
 import EmptyState from "@/components/ui/EmptyState";
 import { jsPDF } from "jspdf";

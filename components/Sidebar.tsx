@@ -13,6 +13,11 @@ import {
 import { cn } from "@/lib/utils";
 import { useSession } from "next-auth/react";
 import { useMemories } from "@/hooks/useMemories";
+import { useQueryClient } from "@tanstack/react-query";
+import { memoryService } from "@/services/memory.service";
+import { analyticsService } from "@/services/analytics.service";
+import { userService } from "@/services/user.service";
+import { socialService } from "@/services/social.service";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -28,6 +33,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   onClick,
 }) => {
   const { data: session } = useSession();
+  const queryClient = useQueryClient();
   const { data: memoriesData } = useMemories();
   
   const totalMemories = memoriesData?.memories?.length || 0;
@@ -93,6 +99,30 @@ const Sidebar: React.FC<SidebarProps> = ({
                     onNavigate(item.id);
                     onClick();
                   }}
+                  onMouseEnter={() => {
+                    if (item.id === "timeline") {
+                      queryClient.prefetchQuery({
+                        queryKey: ["memories", { isPublic: undefined, limit: 100, offset: 0 }],
+                        queryFn: () => memoryService.getAll(),
+                      });
+                    } else if (item.id === "analytics") {
+                      queryClient.prefetchQuery({
+                        queryKey: ["analytics", "year"],
+                        queryFn: () => analyticsService.get("year"),
+                      });
+                    } else if (item.id === "settings") {
+                      queryClient.prefetchQuery({
+                        queryKey: ["userSettings"],
+                        queryFn: () => userService.getSettings(),
+                      });
+                    } else if (item.id === "friends") {
+                      queryClient.prefetchInfiniteQuery({
+                        queryKey: ["memories", "timeline", "date"],
+                        queryFn: ({ pageParam }) => socialService.getTimeline({ cursor: pageParam as string | undefined, sort: "date" }),
+                        initialPageParam: undefined,
+                      });
+                    }
+                  }}
                   className={cn(
                     "w-full flex items-center space-x-4 px-4 py-3.5 rounded-2xl text-[13px] font-bold transition-all duration-300 group relative",
                     isActive
@@ -130,13 +160,6 @@ const Sidebar: React.FC<SidebarProps> = ({
                     {totalMemories}
                   </span>
                   <span className="text-xs font-medium text-neutral-500 mt-1">Total Memories Captured</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className="px-2.5 py-1 bg-emerald-50 text-emerald-700 text-[10px] font-bold rounded-full border border-emerald-100 inline-flex items-center">
-                    <ChartLineUp weight="bold" className="w-3 h-3 mr-1" />
-                    +12.5%
-                  </div>
-                  <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">Growth</span>
                 </div>
               </div>
             </div>

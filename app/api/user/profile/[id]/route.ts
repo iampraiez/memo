@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import db from "@/drizzle/index";
-import { users, follows } from "@/drizzle/db/schema";
+import { users, follows, memories } from "@/drizzle/db/schema";
 import { and, eq, sql } from "drizzle-orm";
 
 export async function GET(
@@ -31,6 +31,12 @@ export async function GET(
       .select({ count: sql<number>`count(*)` })
       .from(follows)
       .where(eq(follows.followerId, targetUserId));
+    
+    // Count memories
+    const userMemories = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(memories)
+      .where(eq(memories.userId, targetUserId));
 
     // Check if current user is following
     let isFollowing = false;
@@ -53,6 +59,7 @@ export async function GET(
       createdAt: user.createdAt,
       followersCount: Number(followers[0]?.count || 0),
       followingCount: Number(following[0]?.count || 0),
+      memoriesCount: Number(userMemories[0]?.count || 0),
       isFollowing,
     });
   } catch (error) {

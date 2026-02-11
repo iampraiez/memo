@@ -117,11 +117,21 @@ const OnboardingFlow: React.FC = () => {
       setSelectedFile(null); // Clear selected file since it's now uploaded
       toast.success("Profile picture uploaded successfully!");
     } catch (error: any) {
-      console.error("Upload error:", error);
+      console.error("Upload error details:", {
+        message: error.message,
+        status: error.status,
+        data: error.data,
+      });
+      
       toast.error(error.message || "Failed to upload image. Please try again.");
-      // Revert to previous image on error
-      setImagePreview(session?.user?.image || null);
-      setProfileData(prev => ({ ...prev, image: session?.user?.image || null }));
+      
+      // Clear the file input so the user can try the same file again
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      
+      // Note: We deliberately DON'T revert imagePreview here so the user sees 
+      // the image they tried to upload and can attempt a retry.
     } finally {
       setIsUploadingImage(false);
     }
@@ -176,7 +186,7 @@ const OnboardingFlow: React.FC = () => {
       // Image is already uploaded via handleImageSelect, just use the URL
       const imageUrl = profileData.image;
 
-      // Update Profile
+      // Update Profile and Preferences
       const profileResponse = await fetch("/api/user/settings", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -185,6 +195,12 @@ const OnboardingFlow: React.FC = () => {
           username: profileData.username,
           bio: profileData.bio,
           image: imageUrl,
+          isOnboarded: true,
+          preferences: {
+            aiEnabled: preferences.aiEnabled,
+            privacyMode: preferences.privacyMode,
+            // selectedTags could be handled separately or added to preferences if needed
+          }
         }),
       });
 
@@ -240,7 +256,7 @@ const OnboardingFlow: React.FC = () => {
         return (
           <div className="text-center space-y-6">
             <div className="w-20 h-20 bg-primary-900 rounded-2xl flex items-center justify-center mx-auto shadow-xl">
-              <Sparkle weight="fill" className="w-10 h-10 text-secondary-400" />
+              <Sparkle weight="fill" className="w-10 h-10 text-white" />
             </div>
             <div className="space-y-3">
               <h1 className="text-3xl font-display font-bold text-neutral-900">

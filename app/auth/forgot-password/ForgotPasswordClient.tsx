@@ -81,7 +81,7 @@ export default function ForgotPasswordClient() {
         <div className="text-center space-y-3">
           <Link href="/" className="inline-block">
             <div className="w-12 h-12 bg-primary-900 rounded-xl flex items-center justify-center mx-auto shadow-lg">
-              <span className="text-secondary-400/40 font-serif font-bold text-xl">
+              <span className="text-white font-serif font-bold text-xl">
                 M
               </span>
             </div>

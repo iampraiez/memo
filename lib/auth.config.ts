@@ -11,6 +11,7 @@ export const authConfig = {
       const isLandingPage = nextUrl.pathname === "/";
       const isApiRoute = nextUrl.pathname.startsWith("/api");
       const isLegalPage = nextUrl.pathname === "/privacy" || nextUrl.pathname === "/terms";
+      const isOnboardingPage = nextUrl.pathname === "/onboarding";
         const isStaticFile =
           /\.(png|jpg|jpeg|gif|svg|ico|webp|css|js|woff|woff2|ttf)$/i.test(
             nextUrl.pathname,
@@ -30,7 +31,17 @@ export const authConfig = {
         return true;
       }
 
-      if (!isLoggedIn && !isPublicPage) {
+      // Redirect logged-in users who haven't completed onboarding
+      if (isLoggedIn && !auth.user.isOnboarded && !isOnboardingPage && !isPublicPage) {
+        return Response.redirect(new URL("/onboarding", nextUrl));
+      }
+
+      // Prevent onboarded users from accessing onboarding page
+      if (isLoggedIn && auth.user.isOnboarded && isOnboardingPage) {
+        return Response.redirect(new URL("/timeline", nextUrl));
+      }
+
+      if (!isLoggedIn && !isPublicPage && !isOnboardingPage) {
         return false;
       }
 

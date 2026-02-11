@@ -148,8 +148,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return baseUrl + "/timeline";
     },
     async session({ session, token }) {
-      if (token.sub && session.user) {
-        session.user.id = token.sub;
+      if (token.id && session.user) {
+        session.user.id = token.id as string;
+      }
+      
+      if (token.email) {
+        session.user.email = token.email as string;
       }
       
       if (token.username) {
@@ -164,14 +168,20 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.image = token.image as string;
       }
       
+      if (token.isOnboarded !== undefined) {
+        session.user.isOnboarded = token.isOnboarded as boolean;
+      }
+      
       return session;
     },
     async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id;
+        token.email = user.email;
         token.username = user.username;
         token.name = user.name;
         token.image = user.image;
+        token.isOnboarded = user.isOnboarded;
       }
       
       if (trigger === "update" && session) {
@@ -182,6 +192,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         if (userData.name !== undefined) token.name = userData.name;
         if (userData.image !== undefined) token.image = userData.image;
         if (userData.avatar !== undefined) token.image = userData.avatar;
+        if (userData.isOnboarded !== undefined) token.isOnboarded = userData.isOnboarded;
       }
       
       return token;

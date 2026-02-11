@@ -1,11 +1,17 @@
-import React from "react";
+import { Suspense } from "react";
+import Loading from "@/components/ui/Loading";
 import TimelineClient from "./TimelineClient";
 import { getTimelineMemories } from "@/lib/timeline-ssr";
 
-export default async function TimelinePage() {
+async function TimelineContent() {
   const initialMemories = await getTimelineMemories() || [];
+  return <TimelineClient initialMemories={initialMemories} />;
+}
 
+export default function TimelinePage() {
   return (
-    <TimelineClient initialMemories={initialMemories} />
+    <Suspense fallback={<Loading fullPage text="Gathering your memories..." />}>
+      <TimelineContent />
+    </Suspense>
   );
 }

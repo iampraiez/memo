@@ -17,6 +17,7 @@ export const users = pgTable("users", {
   image: text("image"),
   bio: text("bio"),
   username: text("username").unique(),
+  isOnboarded: boolean("is_onboarded").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
   emailVerified: timestamp("email_verified"),
@@ -322,8 +323,12 @@ export const sessions = pgTable("sessions", {
   expires: timestamp("expires").notNull(),
 });
 
-export const usersRelations = relations(users, ({ many }) => ({
+export const usersRelations = relations(users, ({ many, one }) => ({
   memories: many(memories),
+  preferences: one(userPreferences, {
+    fields: [users.id],
+    references: [userPreferences.userId],
+  }),
 }));
 
 export const memoriesRelations = relations(memories, ({ one, many }) => ({
@@ -391,5 +396,12 @@ export const followsRelations = relations(follows, ({ one }) => ({
     fields: [follows.followingId],
     references: [users.id],
     relationName: "following",
+  }),
+}));
+
+export const userPreferencesRelations = relations(userPreferences, ({ one }) => ({
+  user: one(users, {
+    fields: [userPreferences.userId],
+    references: [users.id],
   }),
 }));
