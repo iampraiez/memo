@@ -1,4 +1,3 @@
-import React from "react";
 import { WifiOff, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Button from "./Button";

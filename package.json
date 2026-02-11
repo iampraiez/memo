@@ -3,7 +3,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "studio": "drizzle-kit studio"
   },
   "dependencies": {
@@ -54,7 +54,10 @@
     "@types/react": "19.2.10",
     "@types/web-push": "^3.6.4",
     "drizzle-kit": "^0.31.8",
+    "eslint": "^8.57.0",
     "eslint-config-next": "16.1.6",
+    "@typescript-eslint/eslint-plugin": "^8.24.0",
+    "@typescript-eslint/parser": "^8.24.0",
     "tsx": "^4.21.0",
     "typescript": "5.9.3"
   },

@@ -147,25 +147,43 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
       return baseUrl + "/timeline";
     },
-    async session({ session, token, user }) {
+    async session({ session, token }) {
       if (token.sub && session.user) {
         session.user.id = token.sub;
       }
-      // Add username to session for onboarding detection
+      
       if (token.username) {
         session.user.username = token.username as string;
       }
+      
+      if (token.name) {
+        session.user.name = token.name as string;
+      }
+      
+      if (token.image) {
+        session.user.image = token.image as string;
+      }
+      
       return session;
     },
     async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id;
-        // Store username in JWT for session access
         token.username = user.username;
+        token.name = user.name;
+        token.image = user.image;
       }
+      
       if (trigger === "update" && session) {
-        return { ...token, ...session };
+        // Support both nested and flat update structures
+        const userData = session.user || session;
+        
+        if (userData.username !== undefined) token.username = userData.username;
+        if (userData.name !== undefined) token.name = userData.name;
+        if (userData.image !== undefined) token.image = userData.image;
+        if (userData.avatar !== undefined) token.image = userData.avatar;
       }
+      
       return token;
     },
   },

@@ -3,7 +3,6 @@ import React, { useState } from "react";
 import {
   TrendUp,
   Calendar,
-  Heart,
   Tag as TagIcon,
   Clock,
   ChartBar,
@@ -17,6 +16,7 @@ import { Analytics } from "@/types/types";
 import ActivityChart from "@/components/analytics/ActivityChart";
 import MoodChart from "@/components/analytics/MoodChart";
 import WeeklyPatternChart from "@/components/analytics/WeeklyPatternChart";
+import InsightCarousel from "@/components/analytics/InsightCarousel";
 
 const timeRangeOptions = [
   { value: "week", label: "Last Week" },
@@ -138,26 +138,28 @@ export default function AnalyticsClient({ initialAnalytics }: AnalyticsClientPro
             Discover which aspects of your life are most connected.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {analytics.tagClusters?.map((cluster: any) => (
-              <div
-                key={cluster.tag}
-                className="p-4 rounded-2xl bg-neutral-50 border border-neutral-100 space-y-3"
-              >
-                <p className="font-bold text-neutral-900 capitalize text-sm">
-                  {cluster.tag}
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {cluster.related.map((rel: any) => (
-                    <span
-                      key={rel.name}
-                      className="px-2 py-0.5 rounded-full bg-white text-[10px] font-bold text-neutral-500 border border-neutral-100"
-                    >
-                      {rel.name}
-                    </span>
-                  ))}
+            {analytics.tagClusters?.map(
+              (cluster: { tag: string; related: { name: string }[] }) => (
+                <div
+                  key={cluster.tag}
+                  className="p-4 rounded-2xl bg-neutral-50 border border-neutral-100 space-y-3"
+                >
+                  <p className="font-bold text-neutral-900 capitalize text-sm">
+                    {cluster.tag}
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {cluster.related.map((rel) => (
+                      <span
+                        key={rel.name}
+                        className="px-2 py-0.5 rounded-full bg-white text-[10px] font-bold text-neutral-500 border border-neutral-100"
+                      >
+                        {rel.name}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ),
+            )}
           </div>
         </Card>
       </div>
@@ -185,24 +187,7 @@ export default function AnalyticsClient({ initialAnalytics }: AnalyticsClientPro
         </Card>
       </div>
 
-      <Card className="bg-primary-900 rounded-4xl p-10 text-white relative overflow-hidden">
-        <div className="absolute bottom-0 right-0 w-64 h-64 bg-secondary-400/10 rounded-full blur-[100px] -mr-32 -mb-32" />
-        <div className="flex items-start space-x-6">
-          <div className="w-14 h-14 bg-secondary-400 rounded-2xl flex items-center justify-center shrink-0 shadow-lg shadow-black/20">
-            <TrendUp className="w-8 h-8 text-primary-900" />
-          </div>
-          <div className="space-y-4">
-            <h3 className="text-2xl font-display font-bold italic">
-              AI Sanctuary Insight
-            </h3>
-            <p className="text-lg text-primary-50 font-light leading-relaxed max-w-2xl">
-              "Your most vibrant memories are often captured during travel.
-              We've noticed a significant increase in grateful reflections this
-              month—keep preserving these precious highlights."
-            </p>
-          </div>
-        </div>
-      </Card>
+      <InsightCarousel />
     </div>
   );
 }

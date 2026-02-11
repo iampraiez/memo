@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import { useState } from "react";
 import { Users, Heart, ChatCircle, MagnifyingGlass, UserPlus, UserMinus, CaretDown } from "@phosphor-icons/react";
 import Loading from "@/components/ui/Loading";
 import Card from "@/components/ui/Card";

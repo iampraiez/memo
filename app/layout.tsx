@@ -1,4 +1,4 @@
-import React from "react";
+import { ReactNode} from "react";
 import type { Metadata } from "next";
 import { auth } from "@/lib/auth";
 import { Inter, Playfair_Display } from "next/font/google";
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
 export default async function RootLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   const session = await auth();
 

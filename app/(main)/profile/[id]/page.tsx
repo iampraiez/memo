@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import { useEffect, useState} from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { userService } from "@/services/user.service";
@@ -18,10 +18,16 @@ export default function ProfilePage() {
   const { data: session } = useSession();
   const queryClient = useQueryClient();
   const userId = id as string;
+  const [mounted, setMounted] = useState(false);
+
+ useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const { data: profile, isLoading, error } = useQuery({
     queryKey: ["profile", userId],
     queryFn: () => userService.getProfile(userId),
+    enabled: mounted,
   });
 
   const followMutation = useMutation({
@@ -40,7 +46,7 @@ export default function ProfilePage() {
     },
   });
 
-  if (isLoading) return <Loading fullPage text="Entering sanctuary..." />;
+  if (!mounted || isLoading) return <Loading fullPage text="Entering sanctuary..." />;
   if (error || !profile) return <div className="p-20 text-center text-neutral-500">Profile not found</div>;
 
   const isOwnProfile = session?.user?.id === userId;

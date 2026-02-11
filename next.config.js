@@ -9,10 +9,8 @@ const withPWA = require("next-pwa")({
 const nextConfig = {
   turbopack: {},
 
-  // Performance optimizations
   reactStrictMode: true,
 
-  // Optimize images
   images: {
     formats: ["image/avif", "image/webp"],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
@@ -27,10 +25,17 @@ const nextConfig = {
         protocol: "https",
         hostname: "res.cloudinary.com",
       },
+      {
+        protocol: "https",
+        hostname: "www.dropbox.com",
+      },
+      {
+        protocol: "https",
+        hostname: "dl.dropboxusercontent.com",
+      },
     ],
   },
 
-  // Compiler optimizations
   compiler: {
     removeConsole:
       process.env.NODE_ENV === "production"
@@ -40,15 +45,12 @@ const nextConfig = {
         : false,
   },
 
-  // Experimental features for better performance
   experimental: {
     optimizePackageImports: ["@phosphor-icons/react", "lucide-react"],
   },
 
-  // Compress responses
   compress: true,
 
-  // URL Rewrites
   async rewrites() {
     return [
       {
@@ -66,7 +68,6 @@ const nextConfig = {
     ];
   },
 
-  // Production source maps for debugging (smaller)
   productionBrowserSourceMaps: false,
 };
 

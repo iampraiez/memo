@@ -26,6 +26,12 @@ export const userService = {
   },
   
   getProfile: (userId: string) => {
-    return apiService.get<UserSettings & { followersCount: number; followingCount: number; isFollowing: boolean }>(`/api/user/profile/${userId}`);
+    return apiService.get<
+      UserSettings & {
+        followersCount: number;
+        followingCount: number;
+        isFollowing: boolean;
+      }
+    >(`/user/profile/${userId}`);
   },
 };

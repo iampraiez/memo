@@ -74,6 +74,19 @@ export const socialService = {
   },
   
   searchUsers: (query: string) => {
-    return apiService.get<{ users: any[] }>(`/api/user/search?q=${encodeURIComponent(query)}`);
+    return apiService.get<{
+      users: {
+        id: string;
+        email: string;
+        name: string | null;
+        password: string | null;
+        image: string | null;
+        bio: string | null;
+        username: string | null;
+        createdAt: Date;
+        updatedAt: Date;
+        emailVerified: Date | null;
+      }[];
+    }>(`/api/user/search?q=${encodeURIComponent(query)}`);
   },
 };
