@@ -184,6 +184,34 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.isOnboarded = user.isOnboarded;
       }
       
+      // Refresh isOnboarded status from database on every request IF NOT in Edge Runtime
+      // Database queries with 'pg' driver fail in Edge Runtime (Middleware)
+      const isEdge = process.env.NEXT_RUNTIME === "edge";
+      
+      if (token.id && !isEdge) {
+        try {
+          const dbUser = await db.query.users.findFirst({
+            where: (users, { eq }) => eq(users.id, token.id as string),
+            columns: {
+              isOnboarded: true,
+              username: true,
+              name: true,
+              image: true,
+            },
+          });
+          
+          if (dbUser) {
+            token.isOnboarded = dbUser.isOnboarded;
+            // Also refresh other fields that might have changed
+            if (dbUser.username) token.username = dbUser.username;
+            if (dbUser.name) token.name = dbUser.name;
+            if (dbUser.image) token.image = dbUser.image;
+          }
+        } catch (error) {
+          console.error("Error refreshing user data in JWT:", error);
+        }
+      }
+      
       if (trigger === "update" && session) {
         // Support both nested and flat update structures
         const userData = session.user || session;

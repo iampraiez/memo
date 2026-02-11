@@ -192,26 +192,33 @@ export default function SettingsPage() {
             <div className="p-8 space-y-8">
               <div className="flex flex-col md:flex-row md:items-center gap-8">
                 <div className="relative group">
-                  <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-xl bg-primary-900 flex items-center justify-center ring-1 ring-neutral-200">
-                    {localAvatar ? (
-                      <Image
-                        src={localAvatar}
-                        alt="Profile"
-                        fill
-                        className="object-cover"
-                      />
-                    ) : (
-                      <span className="text-3xl font-bold text-secondary-400">
-                        {localName ? localName[0] : "U"}
-                      </span>
-                    )}
+                  {/* Outer Frame with Gradient and Shadow */}
+                  <div className="p-1 rounded-full bg-linear-to-br from-primary-100 via-white to-secondary-100 shadow-2xl ring-1 ring-neutral-200/50">
+                    <div className="p-1 rounded-full bg-white/40 backdrop-blur-md">
+                      <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-white shadow-xl bg-primary-900 flex items-center justify-center relative">
+                        {localAvatar ? (
+                          <Image
+                            src={localAvatar}
+                            alt="Profile"
+                            fill
+                            className="object-cover transition-transform duration-700 group-hover:scale-110"
+                          />
+                        ) : (
+                          <span className="text-3xl font-bold text-secondary-400">
+                            {localName ? localName[0] : "U"}
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   </div>
+                  
+                  {/* Enhanced Upload Button */}
                   <button
                     onClick={() => document.getElementById("avatar-upload")?.click()}
-                    className="absolute bottom-0 right-0 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg border border-neutral-100 hover:scale-110 transition-transform text-primary-600"
+                    className="absolute -bottom-1 -right-1 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-2xl border border-neutral-100 hover:scale-110 active:scale-95 transition-all text-primary-600 z-10"
                     title="Change Photo"
                   >
-                    <Camera weight="bold" className="w-4 h-4" />
+                    <Camera weight="bold" className="w-5 h-5" />
                   </button>
                   <input
                     type="file"

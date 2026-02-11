@@ -43,7 +43,6 @@ function validateEnv() {
   if (isServer) {
     const serverResult = serverSchema.safeParse({
       ...process.env,
-      // If ADMIN_EMAIL is not in process.env, provide the default for the schema
       ADMIN_EMAIL: process.env.ADMIN_EMAIL || "himpraise571@gmail.com",
     });
     if (!serverResult.success) {
@@ -53,7 +52,8 @@ function validateEnv() {
     return { ...serverResult.data, ...clientResult.data };
   }
 
-  return clientResult.data as any;
+  return clientResult.data as z.infer<typeof clientSchema> &
+    z.infer<typeof serverSchema>;
 }
 
 export const env = validateEnv() as z.infer<typeof serverSchema> & z.infer<typeof clientSchema>;

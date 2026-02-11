@@ -14,7 +14,10 @@ export interface UserSettings {
     aiEnabled: boolean;
     autoBackup: boolean;
     privacyMode: "private" | "selective" | "family";
-    notifications: any;
+    notifications: {
+      email: boolean;
+      push: boolean;
+    };
   };
 }
 

@@ -45,10 +45,25 @@ export const authConfig = {
         return false;
       }
 
+      if (!isLoggedIn && !isPublicPage && !isOnboardingPage) {
+        return false;
+      }
+
       return true;
     },
-    // We can keep the simpler redirects here or in the specialized auth.ts
-    // For middleware 'authorized' callback is key.
+    // Add lightweight callbacks for middleware to access token data
+    async jwt({ token, user }) {
+      if (user) {
+        token.isOnboarded = user.isOnboarded;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (token.isOnboarded !== undefined) {
+        session.user.isOnboarded = token.isOnboarded as boolean;
+      }
+      return session;
+    },
   },
   providers: [], // Providers are configured in auth.ts
 } satisfies NextAuthConfig;

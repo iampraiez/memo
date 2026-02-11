@@ -5,7 +5,7 @@ export const useUserSettings = () => {
   return useQuery<UserSettings>({
     queryKey: ["userSettings"],
     queryFn: () => userService.getSettings(),
-    staleTime: 0, // Always fetch fresh settings on mount
+    staleTime: 0,
   });
 };
 

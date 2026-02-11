@@ -217,11 +217,13 @@ const OnboardingFlow: React.FC = () => {
           name: profileData.name,
           username: profileData.username,
           image: imageUrl,
+          isOnboarded: true,
         }
       });
 
       localStorage.removeItem("route");
-      router.push("/timeline");
+      // Force a hard reload to ensure the session and middleware are fully synced
+      window.location.href = "/timeline";
       toast.success("Welcome to your Sanctuary!");
     } catch (error: any) {
       console.error("Onboarding error:", error);
