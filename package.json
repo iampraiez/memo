@@ -54,13 +54,13 @@
   "devDependencies": {
     "@types/nodemailer": "^7.0.9",
     "@types/pg": "^8.16.0",
-    "@types/react": "19.2.10",
+    "@types/react": "19.2.14",
     "@types/web-push": "^3.6.4",
-    "drizzle-kit": "^0.31.8",
+    "drizzle-kit": "^0.31.9",
     "eslint": "^8.57.0",
     "eslint-config-next": "16.1.6",
-    "@typescript-eslint/eslint-plugin": "^8.24.0",
-    "@typescript-eslint/parser": "^8.24.0",
+    "@typescript-eslint/eslint-plugin": "^8.55.0",
+    "@typescript-eslint/parser": "^8.55.0",
     "tsx": "^4.21.0",
     "typescript": "5.9.3"
   },
