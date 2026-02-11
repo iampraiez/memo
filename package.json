@@ -6,8 +6,7 @@
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "studio": "drizzle-kit studio",
     "db:migrate": "drizzle-kit migrate",
-    "db:deploy": "drizzle-kit deploy",
-    "db:generate": "drizzle-kit generate"
+    "db:deploy": "drizzle-kit deploy"
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.11.1",
