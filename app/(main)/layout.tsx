@@ -42,18 +42,17 @@ export default function DashboardLayout({
       await createMemoryMutation.mutateAsync(newMemory);
       toast.success("Memory created successfully!");
       setCreateModalOpen(false);
-    } catch (error) {
+    } catch {
       toast.error("Failed to save memory");
     }
   };
 
   if (status === "loading") {
-    return null; // Or a loader
+    return null;
   }
 
   if (!session) return null;
 
-  // Extract the current "page" from the pathname for the sidebar highlight
   const currentPage = pathname.split("/").pop() || "timeline";
 
   return (
@@ -80,7 +79,7 @@ export default function DashboardLayout({
         />
 
         <main className="flex-1 lg:ml-64 transition-all duration-300">
-          <div className="max-w-[1600px] mx-auto min-h-[calc(100vh-80px)]">
+          <div className="max-w-400 mx-auto min-h-[calc(100vh-80px)]">
             {children}
           </div>
         </main>
@@ -94,7 +93,7 @@ export default function DashboardLayout({
 
       <NotificationToast
         notifications={notifications}
-        onMarkAsRead={(id) => {}}
+        onMarkAsRead={() => {}}
         onMarkAllAsRead={() => {}}
         onClose={() => setShowNotifications(false)}
         isOpen={showNotifications}

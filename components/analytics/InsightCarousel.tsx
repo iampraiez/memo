@@ -54,29 +54,38 @@ export default function InsightCarousel() {
       {/* Decorative Background Elements */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-secondary-400/10 rounded-full blur-[120px] -mr-32 -mt-32 animate-pulse" />
       <div className="absolute bottom-0 left-0 w-64 h-64 bg-primary-400/10 rounded-full blur-[100px] -ml-32 -mb-32" />
-      
+
       {/* Glass Overlay Effect */}
-      <div className="absolute inset-0 bg-white/[0.02] backdrop-blur-[1px]" />
+      <div className="absolute inset-0 bg-white/2 backdrop-blur-[1px]" />
 
       <div className="relative flex flex-col md:flex-row items-center md:items-start space-y-8 md:space-y-0 md:space-x-10 z-10">
-        <div className={cn(
-          "w-20 h-20 rounded-3xl flex items-center justify-center shrink-0 transition-all duration-500 shadow-xl",
-          "bg-white/5 border border-white/10 backdrop-blur-md group-hover:scale-110",
-          isExiting ? "opacity-0 scale-90" : "opacity-100 scale-100"
-        )}>
-          <Icon className={cn("w-10 h-10", activeInsight.color)} weight="duotone" />
+        <div
+          className={cn(
+            "w-20 h-20 rounded-3xl flex items-center justify-center shrink-0 transition-all duration-500 shadow-xl",
+            "bg-white/5 border border-white/10 backdrop-blur-md group-hover:scale-110",
+            isExiting ? "opacity-0 scale-90" : "opacity-100 scale-100",
+          )}
+        >
+          <Icon
+            className={cn("w-10 h-10", activeInsight.color)}
+            weight="duotone"
+          />
         </div>
 
         <div className="flex-1 space-y-4 text-center md:text-left h-full flex flex-col justify-center">
-          <div className={cn(
-            "space-y-2 transition-all duration-500",
-            isExiting ? "opacity-0 translate-y-2" : "opacity-100 translate-y-0"
-          )}>
-             <div className="flex items-center justify-center md:justify-start space-x-2">
-                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-secondary-400/80 bg-secondary-400/10 px-2 py-0.5 rounded-full border border-secondary-400/20">
-                    AI Sanctuary Insight
-                </span>
-             </div>
+          <div
+            className={cn(
+              "space-y-2 transition-all duration-500",
+              isExiting
+                ? "opacity-0 translate-y-2"
+                : "opacity-100 translate-y-0",
+            )}
+          >
+            <div className="flex items-center justify-center md:justify-start space-x-2">
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-secondary-400/80 bg-secondary-400/10 px-2 py-0.5 rounded-full border border-secondary-400/20">
+                AI Sanctuary Insight
+              </span>
+            </div>
             <h3 className="text-3xl font-display font-bold italic tracking-tight">
               {activeInsight.title}
             </h3>
@@ -91,7 +100,9 @@ export default function InsightCarousel() {
                 key={idx}
                 className={cn(
                   "h-1.5 rounded-full transition-all duration-500",
-                  idx === currentIndex ? "w-8 bg-secondary-400" : "w-1.5 bg-white/20"
+                  idx === currentIndex
+                    ? "w-8 bg-secondary-400"
+                    : "w-1.5 bg-white/20",
                 )}
               />
             ))}
@@ -99,18 +110,18 @@ export default function InsightCarousel() {
         </div>
 
         <div className="hidden lg:flex items-center self-center">
-            <button 
-                onClick={() => {
-                    setIsExiting(true);
-                    setTimeout(() => {
-                        setCurrentIndex((prev) => (prev + 1) % insights.length);
-                        setIsExiting(false);
-                    }, 500);
-                }}
-                className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors group/btn"
-            >
-                <ArrowRight className="w-5 h-5 text-white group-hover/btn:translate-x-0.5 transition-transform" />
-            </button>
+          <button
+            onClick={() => {
+              setIsExiting(true);
+              setTimeout(() => {
+                setCurrentIndex((prev) => (prev + 1) % insights.length);
+                setIsExiting(false);
+              }, 500);
+            }}
+            className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors group/btn"
+          >
+            <ArrowRight className="w-5 h-5 text-white group-hover/btn:translate-x-0.5 transition-transform" />
+          </button>
         </div>
       </div>
     </div>

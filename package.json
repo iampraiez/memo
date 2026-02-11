@@ -4,7 +4,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
-    "studio": "drizzle-kit studio"
+    "studio": "drizzle-kit studio",
+    "db:migrate": "drizzle-kit migrate",
+    "db:deploy": "drizzle-kit deploy",
+    "db:generate": "drizzle-kit generate"
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.11.1",

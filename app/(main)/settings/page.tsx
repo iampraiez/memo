@@ -5,9 +5,7 @@ import {
   Download,
   Trash,
   Cloud,
-  Palette,
   SignOut,
-  ArrowsClockwise,
   PencilSimple,
   Check,
   X,
@@ -68,7 +66,7 @@ useEffect(() => {
         bio: localBio,
         username: localUsername,
       });
-      
+
       // Update session to reflect changes across the app
       await updateSession({
         ...session,
@@ -77,12 +75,12 @@ useEffect(() => {
           name: localName,
           username: localUsername,
           image: localAvatar,
-        }
+        },
       });
-      
+
       setIsEditing(false);
       toast.success("Profile updated successfully");
-    } catch (err) {
+    } catch {
       toast.error("Failed to update profile");
     }
   };
@@ -116,7 +114,7 @@ useEffect(() => {
 
   if (error || !settings) {
     return (
-      <div className="min-h-[400px] flex items-center justify-center">
+      <div className="min-h-100 flex items-center justify-center">
         <Card className="max-w-md">
           <div className="text-center p-6">
             <p className="text-destructive-600">Failed to load settings</p>
@@ -157,8 +155,10 @@ useEffect(() => {
                       : "text-neutral-500 hover:bg-primary-50 hover:text-primary-900"
                   }`}
                 >
-                  <section.icon className="w-5 h-5 flex-shrink-0" />
-                  <span className="font-medium text-sm sm:text-base">{section.label}</span>
+                  <section.icon className="w-5 h-5 shrink-0" />
+                  <span className="font-medium text-sm sm:text-base">
+                    {section.label}
+                  </span>
                 </button>
               ))}
             </nav>
@@ -185,7 +185,7 @@ useEffect(() => {
                     </button>
                   ) : (
                     <div className="flex items-center space-x-2">
-                       <button
+                      <button
                         onClick={handleCancelEdit}
                         className="p-2 text-neutral-500 hover:text-destructive-900 hover:bg-destructive-50 rounded-lg transition-colors"
                         title="Cancel"
@@ -198,7 +198,11 @@ useEffect(() => {
                         className="p-2 text-neutral-500 hover:text-green-700 hover:bg-green-50 rounded-lg transition-colors"
                         title="Save"
                       >
-                        {updateSettings.isPending ? <Spinner className="w-5 h-5 animate-spin" /> : <Check className="w-5 h-5" />}
+                        {updateSettings.isPending ? (
+                          <Spinner className="w-5 h-5 animate-spin" />
+                        ) : (
+                          <Check className="w-5 h-5" />
+                        )}
                       </button>
                     </div>
                   )}
@@ -208,69 +212,93 @@ useEffect(() => {
                     <label className="block text-sm font-medium text-neutral-700 mb-2">
                       Profile Picture
                     </label>
-                      <div className="flex items-center space-x-4">
-                        <div className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-neutral-100 shadow-sm bg-primary-900 flex items-center justify-center">
-                          {localAvatar ? (
-                            <Image
-                              src={localAvatar}
-                              alt="Profile"
-                              fill
-                              className="object-cover"
-                            />
-                          ) : (
-                            <span className="text-2xl font-bold text-secondary-400">{localName ? localName[0] : 'U'}</span>
-                          )}
-                        </div>
-                        {isEditing && (
-                          <>
-                            <input
-                              type="file"
-                              accept="image/jpeg,image/png,image/webp"
-                              onChange={async (e) => {
-                                const file = e.target.files?.[0];
-                                if (!file) return;
-
-                                // Validate file size (max 5MB)
-                                if (file.size > 5 * 1024 * 1024) {
-                                  toast.error("Image must be less than 5MB");
-                                  return;
-                                }
-
-                                // Validate file type
-                                if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
-                                  toast.error("Only JPG, PNG, and WebP images are supported");
-                                  return;
-                                }
-
-                                // Show loading toast
-                                const uploadToast = toast.loading("Uploading profile picture...");
-
-                                try {
-                                  const urls = await apiService.uploadFiles(file);
-                                  
-                                  if (!urls || urls.length === 0) {
-                                    throw new Error("Failed to upload profile picture");
-                                  }
-
-                                  const imageUrl = urls[0];
-                                  setLocalAvatar(imageUrl);
-                                  toast.success("Profile picture uploaded successfully!", { id: uploadToast });
-                                } catch (error: any) {
-                                  console.error("Upload error:", error);
-                                  toast.error(error.message || "Failed to upload image. Please try again.", { id: uploadToast });
-                                }
-                              }}
-                              className="hidden"
-                              id="avatar-upload"
-                            />
-                            <label htmlFor="avatar-upload" className="cursor-pointer">
-                              <span className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-md bg-neutral-100 text-neutral-900 hover:bg-neutral-200 transition-colors">
-                                Change Photo
-                              </span>
-                            </label>
-                          </>
+                    <div className="flex items-center space-x-4">
+                      <div className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-neutral-100 shadow-sm bg-primary-900 flex items-center justify-center">
+                        {localAvatar ? (
+                          <Image
+                            src={localAvatar}
+                            alt="Profile"
+                            fill
+                            className="object-cover"
+                          />
+                        ) : (
+                          <span className="text-2xl font-bold text-secondary-400">
+                            {localName ? localName[0] : "U"}
+                          </span>
                         )}
                       </div>
+                      {isEditing && (
+                        <>
+                          <input
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp"
+                            onChange={async (e) => {
+                              const file = e.target.files?.[0];
+                              if (!file) return;
+
+                              // Validate file size (max 5MB)
+                              if (file.size > 5 * 1024 * 1024) {
+                                toast.error("Image must be less than 5MB");
+                                return;
+                              }
+
+                              // Validate file type
+                              if (
+                                ![
+                                  "image/jpeg",
+                                  "image/png",
+                                  "image/webp",
+                                ].includes(file.type)
+                              ) {
+                                toast.error(
+                                  "Only JPG, PNG, and WebP images are supported",
+                                );
+                                return;
+                              }
+
+                              // Show loading toast
+                              const uploadToast = toast.loading(
+                                "Uploading profile picture...",
+                              );
+
+                              try {
+                                const urls = await apiService.uploadFiles(file);
+
+                                if (!urls || urls.length === 0) {
+                                  throw new Error(
+                                    "Failed to upload profile picture",
+                                  );
+                                }
+
+                                const imageUrl = urls[0];
+                                setLocalAvatar(imageUrl);
+                                toast.success(
+                                  "Profile picture uploaded successfully!",
+                                  { id: uploadToast },
+                                );
+                              } catch (error: any) {
+                                console.error("Upload error:", error);
+                                toast.error(
+                                  error.message ||
+                                    "Failed to upload image. Please try again.",
+                                  { id: uploadToast },
+                                );
+                              }
+                            }}
+                            className="hidden"
+                            id="avatar-upload"
+                          />
+                          <label
+                            htmlFor="avatar-upload"
+                            className="cursor-pointer"
+                          >
+                            <span className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-md bg-neutral-100 text-neutral-900 hover:bg-neutral-200 transition-colors">
+                              Change Photo
+                            </span>
+                          </label>
+                        </>
+                      )}
+                    </div>
                   </div>
 
                   <div>
@@ -295,7 +323,9 @@ useEffect(() => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-neutral-700 mb-2">Bio</label>
+                    <label className="block text-sm font-medium text-neutral-700 mb-2">
+                      Bio
+                    </label>
                     <textarea
                       value={localBio}
                       onChange={(e) => setLocalBio(e.target.value)}
@@ -312,7 +342,9 @@ useEffect(() => {
                       onChange={() => {}}
                       disabled
                     />
-                    <p className="mt-1 text-sm text-neutral-500">Email cannot be changed</p>
+                    <p className="mt-1 text-sm text-neutral-500">
+                      Email cannot be changed
+                    </p>
                   </div>
                 </div>
               </Card>
@@ -331,14 +363,17 @@ useEffect(() => {
                     disabled={isSigningOut}
                     className="flex items-center space-x-2"
                   >
-                    {isSigningOut ? <Spinner className="w-4 h-4 mr-2 animate-spin" /> : <SignOut className="w-4 h-4" />}
+                    {isSigningOut ? (
+                      <Spinner className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <SignOut className="w-4 h-4" />
+                    )}
                     <span>{isSigningOut ? "Signing Out..." : "Sign Out"}</span>
                   </Button>
                 </div>
               </Card>
             </div>
           )}
-
 
           {activeSection === "data" && (
             <div className="space-y-6">
@@ -351,14 +386,19 @@ useEffect(() => {
                 </div>
                 <div className="p-6">
                   <p className="text-neutral-600 mb-4">
-                    Download all your memories and data in JSON format. This process happens in the background.
+                    Download all your memories and data in JSON format. This
+                    process happens in the background.
                   </p>
-                  <Button 
-                    variant="secondary" 
-                    onClick={handleExportData} 
+                  <Button
+                    variant="secondary"
+                    onClick={handleExportData}
                     disabled={isExporting}
                   >
-                    {isExporting ? <Spinner className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />}
+                    {isExporting ? (
+                      <Spinner className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <Download className="w-4 h-4 mr-2" />
+                    )}
                     {isExporting ? "Starting Export..." : "Export All Data"}
                   </Button>
                 </div>
