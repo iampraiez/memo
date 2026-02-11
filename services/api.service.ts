@@ -66,15 +66,15 @@ class ApiService {
     return this.request<T>({ ...config, url, method: "GET" });
   }
 
-  public post<T>(url: string, data?: T, config?: AxiosRequestConfig) {
+  public post<T = any, D = any>(url: string, data?: D, config?: AxiosRequestConfig) {
     return this.request<T>({ ...config, url, data, method: "POST" });
   }
 
-  public patch<T>(url: string, data?: T, config?: AxiosRequestConfig) {
+  public patch<T = any, D = any>(url: string, data?: D, config?: AxiosRequestConfig) {
     return this.request<T>({ ...config, url, data, method: "PATCH" });
   }
 
-  public put<T>(url: string, data?: T, config?: AxiosRequestConfig) {
+  public put<T = any, D = any>(url: string, data?: D, config?: AxiosRequestConfig) {
     return this.request<T>({ ...config, url, data, method: "PUT" });
   }
 
