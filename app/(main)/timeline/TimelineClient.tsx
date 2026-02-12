@@ -15,7 +15,7 @@ interface TimelineClientProps {
 
 export default function TimelineClient({ initialMemories }: TimelineClientProps) {
   const { data: memoriesData, isLoading: isLoadingMemories } =
-    useMemories(undefined, 100, 0, initialMemories);
+    useMemories(undefined, 100, 0);
   
   const deleteMemoryMutation = useDeleteMemory();
   const updateMemoryMutation = useUpdateMemory();

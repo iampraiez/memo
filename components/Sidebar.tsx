@@ -9,6 +9,7 @@ import {
   ChartLineUp,
   Shield,
   Users,
+  User,
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { useSession } from "next-auth/react";
@@ -40,6 +41,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   
   const navigation = [
     { name: "Timeline", icon: House, id: "timeline" },
+    { name: "Profile", icon: User, id: "profile" },
     { name: "Friends", icon: Users, id: "friends" },
     { name: "Search", icon: MagnifyingGlass, id: "search" },
     { name: "Tags", icon: Tag, id: "tags" },
@@ -96,7 +98,8 @@ const Sidebar: React.FC<SidebarProps> = ({
                 <button
                   key={item.id}
                   onClick={() => {
-                    onNavigate(item.id);
+                    const path = item.id === "profile" ? `/profile/${session?.user?.id}` : `/${item.id}`;
+                    onNavigate(path.startsWith("/") ? path.slice(1) : path);
                     onClick();
                   }}
                   onMouseEnter={() => {

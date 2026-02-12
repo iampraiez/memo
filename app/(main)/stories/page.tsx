@@ -70,7 +70,7 @@ export default function StoriesPage() {
 
       clearInterval(interval);
       setProgress(100);
-      setGeneratedStory(result.story.content);
+      setGeneratedStory(result.story.content || null);
       toast.success("Story generated successfully!");
     } catch (error) {
       toast.error("Failed to generate story. Please try again.");

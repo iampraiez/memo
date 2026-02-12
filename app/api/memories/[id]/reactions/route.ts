@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import db from "@/drizzle/index";
-import { reactions } from "@/drizzle/db/schema";
+import { reactions, memories, notifications } from "@/drizzle/db/schema";
 import { and, eq } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 
@@ -39,7 +39,6 @@ export async function POST(
   const params = await props.params;
   const session = await auth();
   const memoryId = params.id;
-
 
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -79,6 +78,24 @@ export async function POST(
     };
 
     await db.insert(reactions).values(newReaction);
+
+    // Notification trigger
+    const memory = await db.query.memories.findFirst({
+      where: eq(memories.id, memoryId),
+      columns: { userId: true, title: true }
+    });
+
+    if (memory && memory.userId !== userId) {
+      await db.insert(notifications).values({
+        id: uuidv4(),
+        userId: memory.userId,
+        type: 'reaction',
+        title: 'New Reaction',
+        message: `${session.user.name || 'Someone'} reacted to your memory "${memory.title}"`,
+        relatedId: memoryId,
+        read: false,
+      });
+    }
 
     return NextResponse.json({ action: "added", reaction: newReaction });
   } catch (error) {

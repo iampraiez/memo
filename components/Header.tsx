@@ -1,3 +1,4 @@
+import React from 'react'
 import { Plus, Cloud, CloudSlash, List, Bell } from "@phosphor-icons/react";
 import Button from "./ui/Button";
 import { cn } from "@/lib/utils";
@@ -10,7 +11,7 @@ interface HeaderProps {
   syncStatus: "online" | "offline" | "syncing";
   notificationCount?: number;
   className?: string;
-  onNavigate: (page: string) => void; // Add onNavigate prop
+  onNavigate: (page: string) => void;
 }
 
 const Header: React.FC<HeaderProps> = ({
@@ -88,7 +89,13 @@ const Header: React.FC<HeaderProps> = ({
             >
               <Bell weight="bold" className="w-5 h-5 text-neutral-700" />
               {notificationCount > 0 && (
-                <span className="absolute top-2 right-2 w-2 h-2 bg-destructive-500 rounded-full ring-2 ring-white" />
+                <>
+                  <span className="absolute top-2 right-2 w-2 h-2 bg-destructive-500 rounded-full ring-2 ring-white" />
+                  <span className="absolute top-2 right-2 w-2 h-2 bg-destructive-500 rounded-full animate-ping" />
+                  <span className="absolute -top-1 -right-1 flex items-center justify-center bg-destructive-500 text-white text-[8px] font-bold min-w-[14px] h-[14px] px-1 rounded-full border border-white">
+                    {notificationCount > 9 ? "9+" : notificationCount}
+                  </span>
+                </>
               )}
             </Button>
 

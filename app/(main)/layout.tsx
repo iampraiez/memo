@@ -3,7 +3,8 @@ import React, { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import OfflineBanner from "@/components/ui/OfflineBanner";
-import NotificationToast from "@/components/ui/NotificationToast";
+import NotificationPanel from "@/components/NotificationPanel";
+import { useNotifications } from "@/hooks/useNotifications";
 import { usePathname, useRouter } from "next/navigation";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { useSession } from "next-auth/react";
@@ -20,7 +21,7 @@ export default function DashboardLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [notifications, setNotifications] = useState<any[]>([]);
+  const { unreadCount } = useNotifications();
   const isOnline = useNetworkStatus();
   const pathname = usePathname();
   const router = useRouter();
@@ -62,7 +63,7 @@ export default function DashboardLayout({
         onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
         onShowNotifications={() => setShowNotifications(!showNotifications)}
         syncStatus={isOnline ? "online" : "offline"}
-        notificationCount={notifications.filter((n) => !n.read).length}
+        notificationCount={unreadCount}
         onNavigate={(page) => router.push(`/${page}`)}
       />
       <OfflineBanner isVisible={!isOnline} />
@@ -91,12 +92,9 @@ export default function DashboardLayout({
         onSave={handleCreateMemory}
       />
 
-      <NotificationToast
-        notifications={notifications}
-        onMarkAsRead={() => {}}
-        onMarkAllAsRead={() => {}}
-        onClose={() => setShowNotifications(false)}
+      <NotificationPanel
         isOpen={showNotifications}
+        onClose={() => setShowNotifications(false)}
       />
     </div>
   );

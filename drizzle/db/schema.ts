@@ -305,6 +305,19 @@ export const exportJobs = pgTable("export_jobs", {
   completedAt: timestamp("completed_at"),
 });
 
+export const notifications = pgTable("notifications", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  type: text("type").notNull(), // 'comment', 'reaction', 'follow', 'family_invite', 'memory_share'
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  relatedId: text("related_id"), // ID of memory, comment, user, etc.
+  read: boolean("read").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 export const pushSubscriptions = pgTable("push_subscriptions", {
   id: text("id").primaryKey(),
   userId: text("user_id")
@@ -396,6 +409,13 @@ export const followsRelations = relations(follows, ({ one }) => ({
     fields: [follows.followingId],
     references: [users.id],
     relationName: "following",
+  }),
+}));
+
+export const notificationsRelations = relations(notifications, ({ one }) => ({
+  user: one(users, {
+    fields: [notifications.userId],
+    references: [users.id],
   }),
 }));
 

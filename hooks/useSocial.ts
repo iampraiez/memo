@@ -1,13 +1,19 @@
 import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
+import { useLiveQuery } from "dexie-react-hooks";
+import { db } from "@/lib/dexie/db";
 import { Memory } from "@/types/types";
 import { socialService, Comment, Reaction } from "@/services/social.service";
 
 export const useTimelineMemories = (sort: string = "date", initialData?: Memory[]) => {
+  // We can use useLiveQuery to get all "other" memories if we want real-time timeline,
+  // but for infinite scroll, React Query is still useful for cursor management.
+  // The socialService.getTimeline now reads from Dexie.
+  
   return useInfiniteQuery({
     queryKey: ["memories", "timeline", sort],
     queryFn: ({ pageParam }) => socialService.getTimeline({ cursor: pageParam as string | undefined, sort }),
     initialPageParam: undefined as string | undefined,
-    getNextPageParam: (lastPage) => lastPage.nextCursor || undefined,
+    getNextPageParam: (lastPage) => (lastPage as any).nextCursor || undefined,
     initialData: initialData 
       ? { 
           pages: [{ memories: initialData, nextCursor: undefined }], 
@@ -18,11 +24,21 @@ export const useTimelineMemories = (sort: string = "date", initialData?: Memory[
 };
 
 export const useComments = (memoryId: string) => {
-  return useQuery<{ comments: Comment[] }>({
+  const comments = useLiveQuery(() => 
+    db.comments.where('memoryId').equals(memoryId).sortBy('createdAt'),
+    [memoryId]
+  );
+
+  const query = useQuery<{ comments: Comment[] }>({
     queryKey: ["comments", memoryId],
     queryFn: () => socialService.getComments(memoryId),
     enabled: !!memoryId,
   });
+
+  return {
+    ...query,
+    data: comments ? { comments: comments as Comment[] } : query.data,
+  };
 };
 
 export const useAddComment = () => {
@@ -39,11 +55,21 @@ export const useAddComment = () => {
 };
 
 export const useReactions = (memoryId: string) => {
-  return useQuery<{ reactions: Reaction[] }>({
+  const reactions = useLiveQuery(() => 
+    db.reactions.where('memoryId').equals(memoryId).toArray(),
+    [memoryId]
+  );
+
+  const query = useQuery<{ reactions: Reaction[] }>({
     queryKey: ["reactions", memoryId],
     queryFn: () => socialService.getReactions(memoryId),
     enabled: !!memoryId,
   });
+
+  return {
+    ...query,
+    data: reactions ? { reactions: reactions as Reaction[] } : query.data,
+  };
 };
 
 export const useToggleReaction = () => {
@@ -107,6 +133,7 @@ export const useFollowing = (userId: string) => {
         enabled: !!userId,
     });
 };
+
 export const useSearchUsers = (query: string) => {
     return useQuery({
         queryKey: ["users", "search", query],

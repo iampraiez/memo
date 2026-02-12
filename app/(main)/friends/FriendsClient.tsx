@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Users, Heart, ChatCircle, MagnifyingGlass, UserPlus, UserMinus, CaretDown } from "@phosphor-icons/react";
 import Loading from "@/components/ui/Loading";
 import Card from "@/components/ui/Card";
@@ -18,6 +19,7 @@ export default function FriendsClient({ initialMemories }: FriendsClientProps) {
   const [friendSearch, setFriendSearch] = useState("");
   const [discoverySearch, setDiscoverySearch] = useState("");
   const [sort, setSort] = useState("date"); // 'date' | 'random'
+  const router = useRouter();
   
   const { 
     data: timelineData, 
@@ -82,70 +84,72 @@ export default function FriendsClient({ initialMemories }: FriendsClientProps) {
         </div>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="max-w-2xl mx-auto relative group">
           <div className="relative">
-              <MagnifyingGlass className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400 w-5 h-5" />
+              <MagnifyingGlass className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400 w-5 h-5 transition-colors group-focus-within:text-primary-500" />
               <input 
                 type="text" 
-                placeholder="Filter loaded memories..."
-                value={friendSearch}
-                onChange={(e) => setFriendSearch(e.target.value)}
-                className="w-full pl-12 pr-4 py-4 rounded-2xl border border-neutral-100 bg-white shadow-soft focus:ring-2 focus:ring-primary-500 transition-all font-medium"
-              />
-          </div>
-          <div className="relative">
-              <Users className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400 w-5 h-5" />
-              <input 
-                type="text" 
-                placeholder="Find new people by @username..."
+                placeholder="Find people by @username..."
                 value={discoverySearch}
                 onChange={(e) => setDiscoverySearch(e.target.value)}
-                className="w-full pl-12 pr-4 py-4 rounded-2xl border border-neutral-100 bg-white shadow-soft focus:ring-2 focus:ring-secondary-500 transition-all font-medium"
+                className="w-full pl-12 pr-4 py-4 rounded-2xl border border-neutral-100 bg-white shadow-soft focus:ring-2 focus:ring-primary-500 transition-all font-medium text-sm"
               />
+              {isLoadingDiscovery && (
+                <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                  <div className="w-4 h-4 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
+                </div>
+              )}
           </div>
+
+          {/* Real-time Search Results Dropdown */}
+          {discoverySearch.length >= 2 && discoveryData?.users && (
+            <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-xl border border-neutral-100 overflow-hidden z-20 animate-in fade-in slide-in-from-top-2 duration-200">
+              {discoveryData.users.length > 0 ? (
+                <div className="divide-y divide-neutral-50">
+                  {discoveryData.users.slice(0, 5).map((user: any) => (
+                    <div 
+                      key={user.id} 
+                      className="p-4 flex items-center justify-between hover:bg-neutral-50 transition-colors cursor-pointer group/item"
+                      onClick={() => router.push(`/profile/${user.username || user.id}`)}
+                    >
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-primary-900 rounded-full flex items-center justify-center text-secondary-400 font-bold overflow-hidden border-2 border-white shadow-sm">
+                          {user.image ? <Image src={user.image} alt={user.name} width={40} height={40} /> : user.name[0]}
+                        </div>
+                        <div>
+                          <p className="font-bold text-neutral-900 text-sm group-hover/item:text-primary-600 transition-colors">{user.name}</p>
+                          <p className="text-[10px] text-neutral-400 font-bold uppercase tracking-widest">@{user.username || user.id.slice(0, 8)}</p>
+                        </div>
+                      </div>
+                      <Button 
+                        variant={user.isFollowing ? "ghost" : "primary"} 
+                        size="sm" 
+                        className="rounded-full px-4 h-8 text-[10px] font-bold"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          user.isFollowing ? handleUnfollow(user.id) : handleFollow(user.id);
+                        }}
+                        loading={updatingUserId === user.id}
+                      >
+                        {user.isFollowing ? "Unfollow" : "Follow"}
+                      </Button>
+                    </div>
+                  ))}
+                  {discoveryData.users.length > 5 && (
+                    <div className="p-3 bg-neutral-50/50 text-center">
+                       <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">Showing top 5 matches</p>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="p-8 text-center text-neutral-400 text-sm font-medium italic">
+                  No matches found in the sanctuary.
+                </div>
+              )}
+            </div>
+          )}
       </div>
 
-      {/* Discovery Results */}
-      {discoverySearch.length >= 2 && (
-          <div className="space-y-4">
-              <h2 className="text-sm font-bold uppercase tracking-widest text-neutral-400 px-2">Discovery Results</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {isLoadingDiscovery ? (
-                      <div className="p-8 text-center text-neutral-400 animate-pulse">Searching the sanctuary...</div>
-                  ) : discoveryData?.users && discoveryData.users.length > 0 ? (
-                      discoveryData.users.map((user: any) => (
-                          <Card key={user.id} className="p-4 flex items-center justify-between hover:bg-neutral-50 border-neutral-100 transition-colors">
-                              <div className="flex items-center space-x-3">
-                                  <div className="w-12 h-12 bg-primary-900 rounded-full flex items-center justify-center text-secondary-400 font-bold overflow-hidden">
-                                      {user.image ? <Image src={user.image} alt={user.name} width={48} height={48} /> : user.name[0]}
-                                  </div>
-                                  <div>
-                                      <p className="font-bold text-neutral-900">{user.name}</p>
-                                      <p className="text-xs text-neutral-500">@{user.username || user.id.slice(0, 8)}</p>
-                                  </div>
-                              </div>
-                              <Button 
-                                variant={user.isFollowing ? "secondary" : "primary"} 
-                                size="sm" 
-                                className="rounded-xl px-4"
-                                onClick={() => user.isFollowing ? handleUnfollow(user.id) : handleFollow(user.id)}
-                                loading={updatingUserId === user.id}
-                              >
-                                {!user.isFollowing && updatingUserId !== user.id && <UserPlus weight="bold" className="mr-2" />}
-                                {user.isFollowing && updatingUserId !== user.id && <UserMinus weight="bold" className="mr-2" />}
-                                <span className="font-bold text-xs">
-                                  {updatingUserId === user.id ? (user.isFollowing ? "Unfollowing..." : "Following...") : (user.isFollowing ? "Unfollow" : "Follow")}
-                                </span>
-                              </Button>
-                          </Card>
-                      ))
-                  ) : (
-                      <div className="p-8 text-center text-neutral-400">No keepers found matching that username.</div>
-                  )
-                  }
-              </div>
-          </div>
-      )}
 
       {/* Feed */}
       <div className="space-y-8">
@@ -156,7 +160,11 @@ export default function FriendsClient({ initialMemories }: FriendsClientProps) {
         {filteredMemories.length > 0 ? (
           <>
             {filteredMemories.map((memory: any) => (
-                <Card key={memory.id} className="p-8 space-y-6 hover:shadow-2xl transition-all duration-500 border-neutral-100">
+                <Card 
+                  key={memory.id} 
+                  className="p-8 space-y-6 hover:shadow-2xl transition-all duration-500 border-neutral-100 cursor-pointer group"
+                  onClick={() => router.push(`/memories/${memory.id}`)}
+                >
                    <div className="flex items-center justify-between border-b border-neutral-100 pb-4">
                        <div className="flex items-center space-x-3">
                            <div className="w-10 h-10 bg-primary-900 rounded-full flex items-center justify-center text-secondary-400 font-bold overflow-hidden">

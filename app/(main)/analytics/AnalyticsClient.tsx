@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   TrendUp,
   Calendar,
@@ -9,6 +10,7 @@ import {
 } from "@phosphor-icons/react";
 import Card from "@/components/ui/Card";
 import StatCard from "@/components/ui/StatCard";
+import Button from "@/components/ui/Button";
 import Select from "@/components/ui/Select";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import Loading from "@/components/ui/Loading";
@@ -30,6 +32,7 @@ interface AnalyticsClientProps {
 
 export default function AnalyticsClient({ initialAnalytics }: AnalyticsClientProps) {
   const [timeRange, setTimeRange] = useState("year");
+  const router = useRouter();
   const { data: analyticsData, isLoading, error } = useAnalytics(timeRange);
 
   // Use initial data if available and timeRange matches default (year), otherwise use fetched data
@@ -48,6 +51,25 @@ export default function AnalyticsClient({ initialAnalytics }: AnalyticsClientPro
   }
 
   if (!analytics) return null;
+
+  if (analytics.totalMemories === 0) {
+    return (
+      <div className="max-w-4xl mx-auto p-6 space-y-8 flex flex-col items-center justify-center min-h-[70vh] text-center">
+        <div className="w-24 h-24 bg-neutral-50 rounded-[2.5rem] flex items-center justify-center mb-6 border border-neutral-100 shadow-inner">
+          <ChartBar className="w-12 h-12 text-neutral-300" />
+        </div>
+        <h1 className="text-3xl font-display font-bold text-neutral-900 tracking-tight">Your Sanctuary is Quiet</h1>
+        <p className="text-neutral-500 max-w-md mx-auto leading-relaxed mt-2">
+          Your personal growth and emotional patterns will bloom here once you start capturing your memories.
+        </p>
+        <div className="pt-8">
+          <Button variant="primary" onClick={() => router.push("/timeline")} className="h-12 px-8 rounded-2xl shadow-lg shadow-primary-900/20">
+            Start Your Archive
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-8">

@@ -1,3 +1,4 @@
+import React from 'react'
 import { X } from "lucide-react";
 import { cn } from "../../lib/utils";
 
@@ -19,6 +20,7 @@ const Tag: React.FC<TagProps> = ({
   onRemove,
   className,
   onClick,
+
 }) => {
   const baseStyles = "inline-flex items-center rounded-full font-medium";
 

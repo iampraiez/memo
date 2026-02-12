@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import db from "@/drizzle/index";
-import { familyMembers, users } from "@/drizzle/db/schema";
+import { familyMembers, users, notifications } from "@/drizzle/db/schema";
 import { and, eq, or } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 
@@ -91,6 +91,19 @@ export async function POST(req: Request) {
       status: "pending",
       role: "member",
     });
+    
+    // Notification trigger
+    if (existingUser) {
+      await db.insert(notifications).values({
+        id: uuidv4(),
+        userId: existingUser.id,
+        type: 'family_invite',
+        title: 'Family Invitation',
+        message: `${session.user.name || 'Someone'} invited you to join their family circle as a ${relationship}.`,
+        relatedId: session.user.id,
+        read: false,
+      });
+    }
 
     return NextResponse.json({ 
       success: true, 

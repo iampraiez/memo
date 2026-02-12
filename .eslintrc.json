@@ -28,6 +28,7 @@
     "dist",
     "build",
     "coverage",
-    ".vercel"
+    ".vercel",
+    "public"
   ]
 }

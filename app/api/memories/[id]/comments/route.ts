@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import db from "@/drizzle/index";
-import { comments } from "@/drizzle/db/schema";
+import { comments, memories, notifications } from "@/drizzle/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 
@@ -41,7 +41,6 @@ export async function POST(
   const session = await auth();
   const memoryId = params.id;
 
-
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -63,6 +62,24 @@ export async function POST(
     };
 
     await db.insert(comments).values(newComment);
+
+    // Notification trigger
+    const memory = await db.query.memories.findFirst({
+      where: eq(memories.id, memoryId),
+      columns: { userId: true, title: true }
+    });
+
+    if (memory && memory.userId !== session.user.id) {
+       await db.insert(notifications).values({
+        id: uuidv4(),
+        userId: memory.userId,
+        type: 'comment',
+        title: 'New Comment',
+        message: `${session.user.name || 'Someone'} commented on your memory "${memory.title}"`,
+        relatedId: memoryId,
+        read: false,
+      });
+    }
 
     return NextResponse.json({ comment: newComment });
   } catch (error) {

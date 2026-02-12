@@ -1,82 +1,147 @@
-import webpush from "web-push";
-import { logger } from "@/lib/logger";
+import { apiService } from "./api.service";
+import { db, type LocalNotification } from "@/lib/dexie/db";
+import { syncService } from "./sync.service";
 
-if (
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY &&
-  process.env.VAPID_PRIVATE_KEY &&
-  process.env.EMAIL_USER
-) {
-  webpush.setVapidDetails(
-    `mailto:${process.env.EMAIL_USER}`,
-    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
-    process.env.VAPID_PRIVATE_KEY
-  );
-} else {
-  logger.warn("VAPID keys or Email not found. Push notifications will not work.");
-}
-
-export interface PushSubscription {
-  endpoint: string;
-  keys: {
-    p256dh: string;
-    auth: string;
-  };
-}
-
-export interface NotificationPayload {
+export interface Notification {
+  id: string;
+  userId: string;
+  type: 'comment' | 'reaction' | 'follow' | 'family_invite' | 'memory_share';
   title: string;
-  body: string;
-  icon?: string;
-  url?: string;
+  message: string;
+  relatedId?: string;
+  read: boolean;
+  createdAt: string;
 }
 
-export const sendPushNotification = async (
-  subscription: PushSubscription,
-  payload: NotificationPayload
-) => {
-  try {
-    await webpush.sendNotification(subscription, JSON.stringify(payload));
-    return true;
-  } catch (error) {
-    logger.error("Error sending push notification:", error);
-    return false;
-  }
+export const notificationService = {
+  // Get notifications (offline-first)
+  getAll: async () => {
+    const userId = await notificationService.getCurrentUserId();
+
+    // Read from Dexie
+    let notifications = await db.notifications
+      .where('userId')
+      .equals(userId || '')
+      .reverse()
+      .sortBy('createdAt');
+
+    // Background sync if online
+    if (syncService.getOnlineStatus()) {
+      try {
+        const response = await apiService.get<{ notifications: Notification[] }>("/api/notifications");
+
+        // Update cache
+        for (const notification of response.notifications) {
+          await db.notifications.put({
+            ...notification,
+            _syncStatus: 'synced',
+            _lastSync: Date.now(),
+          } as LocalNotification);
+        }
+
+        // Re-read
+        notifications = await db.notifications
+          .where('userId')
+          .equals(userId || '')
+          .reverse()
+          .sortBy('createdAt');
+
+        return response;
+      } catch (error) {
+        console.error('[NotificationService] Sync failed, using cache:', error);
+      }
+    }
+
+    return { notifications: notifications as Notification[] };
+  },
+
+  // Mark all as read (optimistic)
+  markAllAsRead: async () => {
+    const userId = await notificationService.getCurrentUserId();
+
+    // Update Dexie
+    await db.notifications
+      .where('userId')
+      .equals(userId || '')
+      .modify({ read: true });
+
+    // Queue for sync
+    await syncService.queueOperation({
+      operation: 'update',
+      entity: 'notification',
+      entityId: 'all',
+      data: { action: 'markAllRead' },
+    });
+
+    return { success: true };
+  },
+
+  // Mark one as read (optimistic)
+  markAsRead: async (id: string) => {
+    await db.notifications.update(id, { read: true });
+
+    // Queue for sync
+    await syncService.queueOperation({
+      operation: 'update',
+      entity: 'notification',
+      entityId: id,
+      data: { action: 'markRead' },
+    });
+
+    return { success: true };
+  },
+
+  // Helper
+  getCurrentUserId: async (): Promise<string | null> => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('currentUserId');
+    }
+    return null;
+  },
 };
 
-import db from "@/drizzle/index";
-import { pushSubscriptions } from "@/drizzle/db/schema";
-import { eq } from "drizzle-orm";
+export const sendNotificationToUser = async (userId: string, payload: { title: string; body: string; data?: any }) => {
+  if (typeof window !== 'undefined') {
+    console.warn('sendNotificationToUser should only be called on the server');
+    return;
+  }
 
-export const sendNotificationToUser = async (
-  userId: string,
-  payload: NotificationPayload
-) => {
-    // Fetch subscriptions
-    const subscriptions = await db.select().from(pushSubscriptions).where(eq(pushSubscriptions.userId, userId));
-    
-    if (!subscriptions.length) return [];
+  try {
+    const { default: webpush } = await import("web-push");
+    const { default: drizzleDb } = await import("@/drizzle/index");
+    const { pushSubscriptions } = await import("@/drizzle/db/schema");
+    const { eq } = await import("drizzle-orm");
 
-    // Ideally, catch "Gone" (410) errors and remove invalid subscriptions.
-    const results = await Promise.all(
-        subscriptions.map(async (sub) => {
-            const pushSub = {
-                endpoint: sub.endpoint,
-                keys: sub.keys as any, // Cast JSON to keys
-            };
-            try {
-                await webpush.sendNotification(pushSub, JSON.stringify(payload));
-                return { success: true, endpoint: sub.endpoint };
-            } catch (error: any) {
-                if (error.statusCode === 410 || error.statusCode === 404) {
-                    // Subscription is invalid/expired
-                    await db.delete(pushSubscriptions).where(eq(pushSubscriptions.endpoint, sub.endpoint));
-                    return { success: false, endpoint: sub.endpoint, delete: true };
-                }
-                logger.error("Error sending push to specific sub:", error);
-                return { success: false, endpoint: sub.endpoint };
-            }
-        })
+    // Configure web-push
+    webpush.setVapidDetails(
+      `mailto:${process.env.EMAIL_USER || 'admin@memo.com'}`,
+      process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
+      process.env.VAPID_PRIVATE_KEY!
     );
-    
-    return results;
+
+    // Fetch user subscriptions from drizzle db (server-side)
+    const subs = await drizzleDb.select().from(pushSubscriptions).where(eq(pushSubscriptions.userId, userId));
+
+    const notifications = subs.map(async (sub) => {
+      try {
+        await webpush.sendNotification(
+          {
+            endpoint: sub.endpoint,
+            keys: sub.keys as any,
+          },
+          JSON.stringify(payload)
+        );
+      } catch (error: any) {
+        if (error.statusCode === 410 || error.statusCode === 404) {
+          // Subscription has expired or is no longer valid
+          await drizzleDb.delete(pushSubscriptions).where(eq(pushSubscriptions.id, sub.id));
+        }
+        console.error('Error sending push notification:', error);
+      }
+    });
+
+    await Promise.all(notifications);
+  } catch (error) {
+    console.error('Failed to send push notification:', error);
+  }
 };

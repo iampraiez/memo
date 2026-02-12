@@ -7,6 +7,7 @@ import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persist
 import { SessionProvider } from "next-auth/react";
 import { useState, useEffect } from "react";
 import { Session } from "next-auth";
+import { SyncProvider } from "@/components/providers/SyncProvider";
 
 export function Providers({ 
   children, 
@@ -51,10 +52,12 @@ export function Providers({
   return (
     <SessionProvider session={session}>
       <QueryClientProvider client={queryClient}>
-        {children}
-        {process.env.NODE_ENV === 'development' && (
-          <ReactQueryDevtools initialIsOpen={false} />
-        )}
+        <SyncProvider>
+          {children}
+          {process.env.NODE_ENV === 'development' && (
+            <ReactQueryDevtools initialIsOpen={false} />
+          )}
+        </SyncProvider>
       </QueryClientProvider>
     </SessionProvider>
   );

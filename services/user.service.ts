@@ -1,4 +1,6 @@
 import { apiService } from "./api.service";
+import { db, type LocalUser } from "@/lib/dexie/db";
+import { syncService } from "./sync.service";
 
 export interface UserSettings {
   id: string;
@@ -23,29 +25,102 @@ export interface UserSettings {
 
 export const userService = {
   getSettings: async () => {
-    console.log("[UserService] Fetching settings from database...");
-    const res = await apiService.get<UserSettings>("/user/settings");
-    console.log("[UserService] Fetched settings successfully:", {
-      username: res.username,
-      name: res.name,
-      avatar: !!res.avatar ? "Present" : "Missing",
-      theme: res.preferences?.theme
-    });
-    return res;
+    const userId = await userService.getCurrentUserId();
+    const cachedUser = await db.users.get(userId || '');
+    if (syncService.getOnlineStatus()) {
+      try {
+        const res = await apiService.get<UserSettings>("/user/settings");
+        
+        await db.users.put({
+          ...res,
+          isOnboarded: true, 
+          _syncStatus: 'synced',
+          _lastSync: Date.now(),
+        } as unknown as LocalUser);
+
+        return res;
+      } catch (error) {
+        console.error("[UserService] Fetch settings failed, using cache:", error);
+        if (cachedUser) {
+          return cachedUser as unknown as UserSettings;
+        }
+      }
+    }
+
+    if (!cachedUser) {
+      // Fallback or empty state
+      return null as unknown as UserSettings;
+    }
+
+    return cachedUser as unknown as UserSettings;
   },
 
-  updateSettings: (data: Partial<UserSettings>) => {
-    return apiService.patch<UserSettings>("/user/settings", data);
+  // Update settings (optimistic)
+  updateSettings: async (data: Partial<UserSettings>) => {
+    const userId = await userService.getCurrentUserId();
+    const existing = await db.users.get(userId || '');
+
+    if (existing) {
+      const updated: LocalUser = {
+        ...existing,
+        ...data as unknown as LocalUser,
+        _syncStatus: 'pending',
+        _lastSync: Date.now(),
+      };
+      await db.users.put(updated);
+    }
+
+    await syncService.queueOperation({
+      operation: 'update',
+      entity: 'user',
+      entityId: userId || 'current',
+      data,
+    });
+
+    return data as UserSettings;
   },
   
-  getProfile: (userId: string) => {
-    return apiService.get<
-      UserSettings & {
-        followersCount: number;
-        followingCount: number;
-        memoriesCount: number;
-        isFollowing: boolean;
+  // Profile is usually dynamic, but we can cache viewed profiles
+  getProfile: async (userId: string) => {
+    // Try cache first
+    const cached = await db.users.get(userId);
+
+    if (syncService.getOnlineStatus()) {
+      try {
+        const res = await apiService.get<
+          UserSettings & {
+            followersCount: number;
+            followingCount: number;
+            memoriesCount: number;
+            isFollowing: boolean;
+          }
+        >(`/user/profile/${userId}`);
+
+        await db.users.put({
+          ...res,
+          isOnboarded: true,
+          _syncStatus: 'synced',
+          _lastSync: Date.now(),
+        } as unknown as LocalUser);
+
+        return res;
+      } catch (error) {
+        console.error("[UserService] Get profile failed:", error);
       }
-    >(`/user/profile/${userId}`);
+    }
+
+    if (cached) {
+      return cached
+    }
+
+    throw new Error("Profile not available offline");
+  },
+
+  // Helper
+  getCurrentUserId: async (): Promise<string | null> => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('currentUserId');
+    }
+    return null;
   },
 };

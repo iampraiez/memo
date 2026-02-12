@@ -91,3 +91,26 @@ export interface Story {
   status: "generating" | "ready" | "error";
   createdAt: string;
 }
+
+export interface Comment {
+  id: string;
+  memoryId: string;
+  userId: string;
+  content: string;
+  createdAt: string;
+  user?: {
+    name: string;
+    image?: string;
+  };
+}
+
+export interface Reaction {
+  id: string;
+  memoryId: string;
+  userId: string;
+  type: string;
+  user?: {
+    name: string;
+    image?: string;
+  };
+}

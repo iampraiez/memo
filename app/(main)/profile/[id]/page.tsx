@@ -62,12 +62,12 @@ export default function ProfilePage() {
             {profile.avatar ? (
               <Image 
                 src={profile.avatar} 
-                alt={profile.name} 
+                alt={profile.name || "User profile"} 
                 fill 
                 className="object-cover"
               />
             ) : (
-              <span className="text-4xl font-bold text-secondary-400">{profile.name[0]}</span>
+              <span className="text-4xl font-bold text-secondary-400">{profile.name?.[0] || "?"}</span>
             )}
           </div>
           
@@ -84,27 +84,33 @@ export default function ProfilePage() {
               <Button variant="secondary" onClick={() => router.push("/settings")}>Edit Profile</Button>
             ) : (
               <Button 
-                variant={profile.isFollowing ? "secondary" : "primary"}
-                onClick={() => profile.isFollowing ? unfollowMutation.mutate() : followMutation.mutate()}
+                variant={profile?.isFollowing ? "secondary" : "primary"}
+                onClick={() => profile?.isFollowing ? unfollowMutation.mutate() : followMutation.mutate()}
                 disabled={followMutation.isPending || unfollowMutation.isPending}
               >
-                {profile.isFollowing ? "Unfollow" : "Follow"}
+                {profile?.isFollowing ? "Unfollow" : "Follow"}
               </Button>
             )}
           </div>
         </div>
 
         <div className="grid grid-cols-3 gap-4 border-t border-neutral-100 pt-6">
-          <div className="text-center">
-            <p className="text-xl font-bold text-neutral-900">{profile.followersCount}</p>
+          <div 
+            className="text-center cursor-pointer hover:bg-neutral-50 rounded-2xl p-2 transition-colors"
+            onClick={() => router.push(`/profile/${userId}/followers`)}
+          >
+            <p className="text-xl font-bold text-neutral-900">{profile?.followersCount ?? 0}</p>
             <p className="text-xs text-neutral-400 uppercase tracking-widest font-bold">Followers</p>
           </div>
-          <div className="text-center border-x border-neutral-100">
-            <p className="text-xl font-bold text-neutral-900">{profile.followingCount}</p>
+          <div 
+            className="text-center border-x border-neutral-100 cursor-pointer hover:bg-neutral-50 rounded-2xl p-2 transition-colors"
+            onClick={() => router.push(`/profile/${userId}/following`)}
+          >
+            <p className="text-xl font-bold text-neutral-900">{profile?.followingCount ?? 0}</p>
             <p className="text-xs text-neutral-400 uppercase tracking-widest font-bold">Following</p>
           </div>
-          <div className="text-center">
-            <p className="text-xl font-bold text-neutral-900">{profile.memoriesCount}</p>
+          <div className="text-center p-2">
+            <p className="text-xl font-bold text-neutral-900">{profile?.memoriesCount ?? 0}</p>
             <p className="text-xs text-neutral-400 uppercase tracking-widest font-bold">Memories</p>
           </div>
         </div>
