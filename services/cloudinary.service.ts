@@ -47,11 +47,6 @@ export class CloudinaryService {
         throw new Error('Cloudinary credentials not configured. Please set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET');
       }
 
-      // Convert buffer to base64 if needed
-      const base64String = Buffer.isBuffer(fileBuffer)
-        ? `data:image/jpeg;base64,${fileBuffer.toString('base64')}`
-        : fileBuffer;
-
       // Clean filename for public_id
       const cleanFileName = fileName
         .replace(/[^a-zA-Z0-9.-]/g, '_')
@@ -60,8 +55,38 @@ export class CloudinaryService {
       const timestamp = Date.now();
       const publicId = `${folder}/${timestamp}_${cleanFileName}`;
 
-      // Upload to Cloudinary with optimizations
-      const result = await cloudinary.uploader.upload(base64String, {
+      // Use upload_stream for Buffers (more efficient)
+      if (Buffer.isBuffer(fileBuffer)) {
+        return new Promise((resolve, reject) => {
+          const uploadStream = cloudinary.uploader.upload_stream(
+            {
+              public_id: publicId,
+              folder: folder,
+              resource_type: 'auto',
+              transformation: [
+                { quality: 'auto:good' },
+                { fetch_format: 'auto' }
+              ],
+              overwrite: false
+            },
+            (error, result) => {
+              if (error) {
+                console.error('Cloudinary stream upload error:', error);
+                return reject(error);
+              }
+              if (!result) {
+                return reject(new Error('Cloudinary upload result is undefined'));
+              }
+              console.log(`Successfully uploaded to Cloudinary (stream): ${result.secure_url}`);
+              resolve(result.secure_url);
+            }
+          );
+          uploadStream.end(fileBuffer);
+        });
+      }
+
+      // Fallback for string/base64 inputs
+      const result = await cloudinary.uploader.upload(fileBuffer as string, {
         public_id: publicId,
         folder: folder,
         resource_type: 'auto',
@@ -76,10 +101,14 @@ export class CloudinaryService {
       return result.secure_url;
 
     } catch (error: unknown) {
-      const err = error as { message?: string; http_code?: number };
-      console.error('Cloudinary upload failed:', {
+      console.error('Cloudinary upload failed raw error:', error);
+      const cloudinaryError = (error as any)?.error || error;
+      const err = cloudinaryError as { message?: string; http_code?: number; status?: number };
+      
+      console.error('Cloudinary upload failed details:', {
         message: err.message,
-        code: err.http_code
+        code: err.http_code || err.status,
+        name: (error as Error).name || (cloudinaryError as any).name,
       });
 
       // Handle specific error types

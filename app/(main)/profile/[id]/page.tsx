@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState} from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, notFound } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { userService } from "@/services/user.service";
 import { socialService } from "@/services/social.service";
@@ -11,6 +11,7 @@ import Button from "@/components/ui/Button";
 import Loading from "@/components/ui/Loading";
 import { Calendar } from "@phosphor-icons/react";
 import { toast } from "sonner";
+import { is404Error } from "@/lib/utils";
 
 export default function ProfilePage() {
   const { id } = useParams();
@@ -47,7 +48,15 @@ export default function ProfilePage() {
   });
 
   if (!mounted || isLoading) return <Loading fullPage text="Entering sanctuary..." />;
-  if (error || !profile) return <div className="p-20 text-center text-neutral-500">Profile not found</div>;
+  
+if (is404Error(error) || (!isLoading && !profile)) {
+  notFound();
+}
+  if (error) {
+    return <div className="p-20 text-center text-neutral-500">Something went wrong. Please try again.</div>;
+  }
+
+  if (!profile) return null;
 
   const isOwnProfile = session?.user?.id === userId;
 

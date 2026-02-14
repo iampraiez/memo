@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import { useState,useEffect } from "react";
 import Timeline from "@/components/Timeline";
 import { useMemories, useDeleteMemory, useUpdateMemory } from "@/hooks/useMemories";
 import { Memory } from "@/types/types";
@@ -21,8 +21,14 @@ export default function TimelineClient({ initialMemories }: TimelineClientProps)
   const [viewingMemoryDetail, setViewingMemoryDetail] = useState<string | null>(null);
   const [selectedMemory, setSelectedMemory] = useState<Memory | null>(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
-  const memories = memoriesData?.memories || initialMemories;
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  const memories = isMounted ? (memoriesData?.memories || initialMemories) : initialMemories;
+  const isLoading = isMounted ? isLoadingMemories : true;
 
   const handleEditMemory = (memory: Memory) => {
     setSelectedMemory(memory);
@@ -75,7 +81,7 @@ export default function TimelineClient({ initialMemories }: TimelineClientProps)
         <h1 className="text-3xl font-display font-bold text-neutral-900">
           Your Timeline
         </h1>
-        {isLoadingMemories && memories.length === 0 ? (
+        {isLoading && memories.length === 0 ? (
           <Loading fullPage text="Retrieving your memories..." />
         ) : (
           <Timeline

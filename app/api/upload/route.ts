@@ -23,7 +23,7 @@ export async function POST(req: Request) {
     const uploadPromises = files.map(async (file) => {
       const arrayBuffer = await file.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
-      return CloudinaryService.uploadFile(buffer, file.name);
+      return CloudinaryService.uploadFile(buffer, file.name, "memo");
     });
 
     const urls = await Promise.all(uploadPromises);

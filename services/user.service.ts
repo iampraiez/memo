@@ -1,6 +1,7 @@
 import { apiService } from "./api.service";
 import { db, type LocalUser } from "@/lib/dexie/db";
 import { syncService } from "./sync.service";
+import { AxiosError } from "axios";
 
 export interface UserSettings {
   id: string;
@@ -105,6 +106,9 @@ export const userService = {
 
         return res;
       } catch (error) {
+        if ((error instanceof AxiosError) && error.status === 404) {
+           throw error;
+        }
         console.error("[UserService] Get profile failed:", error);
       }
     }
