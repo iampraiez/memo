@@ -29,6 +29,8 @@ export const tagService = {
           await db.tags.put({
             ...tag,
             userId: userId || '',
+            color: 'bg-neutral-200 text-neutral-800', // Default color
+            usageCount: tag.count,
             _syncStatus: 'synced',
             _lastSync: Date.now(),
           } as LocalTag);

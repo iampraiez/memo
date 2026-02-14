@@ -13,39 +13,32 @@ export async function GET(req: Request) {
   }
 
   const { searchParams } = new URL(req.url);
-  const cursor = searchParams.get("cursor"); // Timestamp for date sort
+  const cursor = searchParams.get("cursor"); 
   const limit = parseInt(searchParams.get("limit") || "10");
-  const sort = searchParams.get("sort") || "date"; // 'date' | 'random'
+  const sort = searchParams.get("sort") || "date";
 
   try {
     const userId = session.user.id;
 
-    // 1. Get IDs of users I'm following
-    // Optimize: query only IDs
     const following = await db.select({ followingId: follows.followingId }).from(follows).where(eq(follows.followerId, userId));
     const followingIds = following.map(f => f.followingId);
     
-    // Always include self
     const relevantUserIds = [userId, ...followingIds];
 
-    // Debug log
-    // console.log("Fetching timeline for:", relevantUserIds);
-
-    // 2. Fetch memories
     const query = db.query.memories.findMany({
       where: and(
         inArray(memories.userId, relevantUserIds),
         or(
-            eq(memories.userId, userId), // My memories (all)
+            eq(memories.userId, userId), 
             and(
-                inArray(memories.userId, followingIds), // Others' memories
-                eq(memories.isPublic, true) // Only public
+                inArray(memories.userId, followingIds), 
+                eq(memories.isPublic, true) 
             )
         ),
         cursor ? lt(memories.date, new Date(cursor)) : undefined
       ),
       orderBy: sort === 'random' ? sql`RANDOM()` : desc(memories.date),
-      limit: limit + 1, // Fetch one more to check if next page exists
+      limit: limit + 1, 
       with: {
         user: true,
         memoryMedia: true,
@@ -61,10 +54,9 @@ export async function GET(req: Request) {
 
     const allRelevantMemories = await query as unknown as Timeline[];
     
-    // Pagination logic
     let nextCursor = null;
     if (allRelevantMemories.length > limit) {
-        const nextItem = allRelevantMemories.pop(); // Remove the extra item
+        const nextItem = allRelevantMemories.pop(); 
         if (nextItem) {
           nextCursor = nextItem.date.toISOString();
         }

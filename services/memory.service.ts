@@ -1,5 +1,5 @@
 import { apiService } from "./api.service";
-import { db, type LocalMemory } from "@/lib/dexie/db";
+import { db, type Memory as LocalMemory } from "@/lib/dexie/db";
 import { syncService } from "./sync.service";
 import { Memory } from "@/types/types";
 import { v4 as uuidv4 } from "uuid";
@@ -45,8 +45,8 @@ export const memoryService = {
         for (const memory of response.memories) {
           await db.memories.put({
             ...memory,
-            _syncStatus: 'synced',
-            _lastSync: Date.now(),
+            syncStatus: 'synced',
+            lastSync: Date.now(),
           });
         }
 
@@ -77,8 +77,8 @@ export const memoryService = {
         // Update cache
         await db.memories.put({
           ...response.memory,
-          _syncStatus: 'synced',
-          _lastSync: Date.now(),
+          syncStatus: 'synced',
+          lastSync: Date.now(),
         });
 
         return response;
@@ -116,8 +116,8 @@ export const memoryService = {
       isPublic: data.isPublic || false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      _syncStatus: 'pending',
-      _lastSync: Date.now(),
+      syncStatus: 'pending',
+      lastSync: Date.now(),
     };
 
     // Immediate write to Dexie
@@ -145,8 +145,8 @@ export const memoryService = {
       ...existing,
       ...data,
       updatedAt: new Date().toISOString(),
-      _syncStatus: 'pending',
-      _lastSync: Date.now(),
+      syncStatus: 'pending',
+      lastSync: Date.now(),
     };
 
     // Immediate update in Dexie
@@ -207,8 +207,8 @@ export const memoryService = {
         for (const memory of response.memories) {
           await db.memories.put({
             ...memory,
-            _syncStatus: 'synced',
-            _lastSync: Date.now(),
+            syncStatus: 'synced',
+            lastSync: Date.now(),
           });
         }
 

@@ -64,10 +64,12 @@ export const storyService = {
       id: tempId,
       userId: userId || '',
       title: data.title,
-      description: `${data.tone} story from ${data.dateRange.start} to ${data.dateRange.end}`,
-      memoryIds: [],
+      content: `${data.tone} story from ${data.dateRange.start} to ${data.dateRange.end}`,
+      dateRange: data.dateRange,
+      tone: data.tone,
+      length: data.length,
+      status: 'generating',
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
       _syncStatus: 'pending',
       _lastSync: Date.now(),
     };
@@ -82,7 +84,7 @@ export const storyService = {
       data: data as unknown as Record<string, unknown>,
     });
 
-    return { story: { content: newStory.description } };
+    return { story: { content: newStory.content } };
   },
 
   // Helper

@@ -34,6 +34,7 @@ export const familyService = {
         for (const member of response.members) {
           await db.familyMembers.put({
             ...member,
+            userId: member.userId || "", // Ensure userId is a string
             _syncStatus: 'synced',
             _lastSync: Date.now(),
           });

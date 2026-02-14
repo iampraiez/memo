@@ -38,15 +38,14 @@ const Tag: React.FC<TagProps> = ({
   return (
     <span
       className={cn(baseStyles, variants[variant], sizes[size], className)}
-      onClick={onClick} // Add this to make the entire tag clickable
+      onClick={onClick} 
     >
       {children}
       {removable && (
         <button
           onClick={(e) => {
-            e.stopPropagation(); // Prevent triggering the parent's onClick
+            e.stopPropagation(); 
             onRemove?.();
-            console.log("finn");
           }}
           className="ml-1 hover:bg-black/10 rounded-full p-0.5"
         >

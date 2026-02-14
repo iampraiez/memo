@@ -33,8 +33,8 @@ export const socialService = {
         for (const memory of response.memories) {
           await db.memories.put({
             ...memory,
-            _syncStatus: 'synced',
-            _lastSync: Date.now(),
+            syncStatus: 'synced',
+            lastSync: Date.now(),
           });
         }
 
@@ -73,6 +73,7 @@ export const socialService = {
         for (const comment of response.comments) {
           await db.comments.put({
             ...comment,
+            createdAt: comment.createdAt || new Date().toISOString(),
             _syncStatus: 'synced',
             _lastSync: Date.now(),
           });
@@ -90,7 +91,7 @@ export const socialService = {
       }
     }
 
-    return { comments: comments as Comment[] };
+    return { comments: comments as unknown as Comment[] };
   },
 
   // Add comment (optimistic)
@@ -119,7 +120,7 @@ export const socialService = {
       data: { memoryId, content } as unknown as Record<string, unknown>,
     });
 
-    return newComment as Comment;
+    return newComment as unknown as Comment;
   },
 
   // Delete comment (optimistic)
@@ -174,7 +175,7 @@ export const socialService = {
       }
     }
 
-    return { reactions: reactions as Reaction[] };
+    return { reactions: reactions as unknown as Reaction[] };
   },
 
   // Toggle reaction (optimistic)
@@ -207,8 +208,9 @@ export const socialService = {
         type,
         _syncStatus: 'pending',
         _lastSync: Date.now(),
-      };
+      } as LocalReaction;
 
+      
       await db.reactions.add(newReaction);
 
       await syncService.queueOperation({
