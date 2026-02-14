@@ -1,19 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLiveQuery } from "dexie-react-hooks";
-import { db } from "@/lib/dexie/db";
+import { db, type LocalStory } from "@/lib/dexie/db";
 import { storyService, StorySettings } from "@/services/story.service";
-
-export interface Story {
-  id: string;
-  userId: string;
-  title: string;
-  content: string;
-  tone: string;
-  length: string;
-  dateRange: { start: string; end: string };
-  status: string;
-  createdAt: string;
-}
 
 export const useStories = () => {
   const stories = useLiveQuery(async () => {
@@ -22,14 +10,17 @@ export const useStories = () => {
     return await db.stories.where('userId').equals(userId).reverse().sortBy('createdAt');
   });
 
-  const query = useQuery<{ stories: Story[] }>({
+  const query = useQuery<{ stories: LocalStory[] }>({
     queryKey: ["stories"],
-    queryFn: () => storyService.getAll() as any,
+    queryFn: async () => {
+      const data = await storyService.getAll();
+      return data as { stories: LocalStory[] };
+    },
   });
 
   return {
     ...query,
-    data: stories ? { stories: stories as unknown as Story[] } : query.data,
+    data: stories ? { stories: stories } : query.data,
   };
 };
 

@@ -1,12 +1,12 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
 import { env } from "@/config/env";
+import { User } from "@/types/types";
 
-export class ApiError extends Error {
+export class ApiError<T> extends Error {
   constructor(
     public message: string,
     public status: number,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    public data?: any,
+    public data?: T,
   ) {
     super(message);
     this.name = "ApiError";
@@ -66,15 +66,15 @@ class ApiService {
     return this.request<T>({ ...config, url, method: "GET" });
   }
 
-  public post<T = any, D = any>(url: string, data?: D, config?: AxiosRequestConfig) {
+  public post<T, D>(url: string, data?: D, config?: AxiosRequestConfig) {
     return this.request<T>({ ...config, url, data, method: "POST" });
   }
 
-  public patch<T = any, D = any>(url: string, data?: D, config?: AxiosRequestConfig) {
+  public patch<T, D>(url: string, data?: D, config?: AxiosRequestConfig) {
     return this.request<T>({ ...config, url, data, method: "PATCH" });
   }
 
-  public put<T = any, D = any>(url: string, data?: D, config?: AxiosRequestConfig) {
+  public put<T, D>(url: string, data?: D, config?: AxiosRequestConfig) {
     return this.request<T>({ ...config, url, data, method: "PUT" });
   }
 
@@ -102,7 +102,7 @@ class ApiService {
 
   public async userExists(user: string) {
     try {
-      const res = await this.post("/auth/sign_in", { user });
+      const res = await this.post("/auth/sign_in", { user }) as { user: User[]}
       return res.user?.[0];
     } catch (err) {
       console.error("[API] userExists error:", err);
@@ -129,7 +129,7 @@ class ApiService {
         },
       };
     } catch (err) {
-      const apiError = err as ApiError;
+      const apiError = err as ApiError<User>;
       return {
         data: {
           success: false,

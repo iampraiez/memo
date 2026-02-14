@@ -44,7 +44,7 @@ export default function LoginClient() {
       } else {
         router.push("/timeline");
       }
-    } catch (err) {
+    } catch {
       toast.error("An error occurred during Google Sign-In.");
     } finally {
       setLoadingGoogle(false);
@@ -75,8 +75,10 @@ export default function LoginClient() {
               body: JSON.stringify({ email }),
             });
             router.push(`/auth/verify?email=${encodeURIComponent(email)}`);
-          } catch (resendError) {
-            toast.error("Failed to resend code. Please try again from the verification page.");
+          } catch {
+            toast.error(
+              "Failed to resend code. Please try again from the verification page.",
+            );
             router.push(`/auth/verify?email=${encodeURIComponent(email)}`);
           }
           return;
@@ -101,7 +103,7 @@ export default function LoginClient() {
           router.push("/timeline");
         }
       }
-    } catch (err) {
+    } catch{
       toast.error("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);

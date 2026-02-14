@@ -36,9 +36,40 @@ export async function getTimelineMemories() {
   });
 
   // Transform for the timeline to match the expected Memory type
-  return allRelevantMemories.map((mem: any) => ({
+  return allRelevantMemories.map((mem) => ({
     ...mem,
-    tags: mem.memoryTags.map((t: any) => t.tag.name),
-    images: mem.memoryMedia.filter((m: any) => m.type.startsWith('image')).map((m: any) => m.url),
+    date: mem.date.toISOString(),
+    createdAt: mem.createdAt.toISOString(),
+    updatedAt: mem.updatedAt.toISOString(),
+    tags: mem.memoryTags.map((t) => t.tag.name),
+    images: mem.memoryMedia
+      .filter((m) => m.type.startsWith("image"))
+      .map((m) => m.url),
+    comments: (mem as typeof mem & { 
+      comments?: Array<{ 
+        id: string; 
+        memoryId: string; 
+        userId: string; 
+        content: string; 
+        createdAt: Date; 
+        updatedAt: Date; 
+      }> 
+    }).comments?.map((c) => ({
+      ...c,
+      createdAt: c.createdAt.toISOString(),
+      updatedAt: c.updatedAt.toISOString(),
+    })) || [],
+    reactions: (mem as typeof mem & { 
+      reactions?: Array<{ 
+        id: string; 
+        memoryId: string; 
+        userId: string; 
+        type: string; 
+        createdAt: Date; 
+      }> 
+    }).reactions?.map((r) => ({
+      ...r,
+      createdAt: r.createdAt.toISOString(),
+    })) || [],
   })) as Memory[];
 }

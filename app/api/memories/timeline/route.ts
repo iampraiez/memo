@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import db from "@/drizzle/index";
-import { memories, follows, users } from "@/drizzle/db/schema";
-import { and, eq, or, inArray, desc, sql, gte, lt } from "drizzle-orm";
+import { memories, follows } from "@/drizzle/db/schema";
+import { and, eq, or, inArray, desc, sql, lt } from "drizzle-orm";
+import { Timeline } from "@/app/_types/types";
 
 export async function GET(req: Request) {
   const session = await auth();
@@ -58,7 +59,7 @@ export async function GET(req: Request) {
       }
     });
 
-    const allRelevantMemories = await query;
+    const allRelevantMemories = await query as unknown as Timeline[];
     
     // Pagination logic
     let nextCursor = null;
@@ -69,18 +70,14 @@ export async function GET(req: Request) {
         }
     }
 
-    // Transform
-    const timeline = allRelevantMemories.map((mem: any) => ({
+    const timeline = allRelevantMemories.map((mem: Timeline) => ({
       ...mem,
-      tags: mem.memoryTags.map((t: any) => t.tag.name),
-      images: mem.memoryMedia.filter((m: any) => m.type.startsWith('image')).map((m: any) => m.url),
+      tags: mem.memoryTags.map((t) => t.tag.name),
+      images: mem.memoryMedia
+        .filter((m) => m.type.startsWith("image"))
+        .map((m) => m.url),
       reactionCount: mem.reactions.length,
       commentCount: mem.comments.length,
-    //   user: {
-    //       name: mem.user.name,
-    //       image: mem.user.image,
-    //       id: mem.user.id
-    //   }
     }));
 
     return NextResponse.json({ 

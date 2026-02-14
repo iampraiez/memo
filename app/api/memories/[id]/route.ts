@@ -90,7 +90,7 @@ export async function PATCH(
     }
 
     // Update memory
-    const updateData: any = {
+    const updateData: Record<string, unknown> = {
       ...validatedData,
       updatedAt: new Date(),
     };

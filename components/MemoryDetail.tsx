@@ -1,10 +1,8 @@
 "use client";
-import React, { useState } from "react";
 import {
   ArrowLeft,
   PencilSimple,
   ShareNetwork,
-  Heart,
   MapPin,
   Calendar,
   ArrowsClockwise,

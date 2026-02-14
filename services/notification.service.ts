@@ -1,6 +1,7 @@
 import { apiService } from "./api.service";
 import { db, type LocalNotification } from "@/lib/dexie/db";
 import { syncService } from "./sync.service";
+import { HttpError } from "@/types/types";
 
 export interface Notification {
   id: string;
@@ -28,7 +29,9 @@ export const notificationService = {
     // Background sync if online
     if (syncService.getOnlineStatus()) {
       try {
-        const response = await apiService.get<{ notifications: Notification[] }>("/api/notifications");
+        const response = await apiService.get<{
+          notifications: Notification[];
+        }>("/notifications");
 
         // Update cache
         for (const notification of response.notifications) {
@@ -70,7 +73,7 @@ export const notificationService = {
       operation: 'update',
       entity: 'notification',
       entityId: 'all',
-      data: { action: 'markAllRead' },
+      data: { action: 'markAllRead' } as unknown as Record<string, unknown>,
     });
 
     return { success: true };
@@ -85,7 +88,7 @@ export const notificationService = {
       operation: 'update',
       entity: 'notification',
       entityId: id,
-      data: { action: 'markRead' },
+      data: { action: 'markRead' } as unknown as Record<string, unknown>,
     });
 
     return { success: true };
@@ -100,9 +103,12 @@ export const notificationService = {
   },
 };
 
-export const sendNotificationToUser = async (userId: string, payload: { title: string; body: string; data?: any }) => {
-  if (typeof window !== 'undefined') {
-    console.warn('sendNotificationToUser should only be called on the server');
+export const sendNotificationToUser = async (
+  userId: string,
+  payload: { title: string; body: string; data?: never },
+) => {
+  if (typeof window !== "undefined") {
+    console.warn("sendNotificationToUser should only be called on the server");
     return;
   }
 
@@ -114,34 +120,38 @@ export const sendNotificationToUser = async (userId: string, payload: { title: s
 
     // Configure web-push
     webpush.setVapidDetails(
-      `mailto:${process.env.EMAIL_USER || 'admin@memo.com'}`,
+      `mailto:${process.env.EMAIL_USER || "admin@memo.com"}`,
       process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-      process.env.VAPID_PRIVATE_KEY!
+      process.env.VAPID_PRIVATE_KEY!,
     );
 
     // Fetch user subscriptions from drizzle db (server-side)
-    const subs = await drizzleDb.select().from(pushSubscriptions).where(eq(pushSubscriptions.userId, userId));
+    const subs = await drizzleDb
+      .select()
+      .from(pushSubscriptions)
+      .where(eq(pushSubscriptions.userId, userId));
 
     const notifications = subs.map(async (sub) => {
       try {
         await webpush.sendNotification(
           {
             endpoint: sub.endpoint,
-            keys: sub.keys as any,
+            keys: sub.keys as { auth: string; p256dh: string },
           },
-          JSON.stringify(payload)
+          JSON.stringify(payload),
         );
-      } catch (error: any) {
-        if (error.statusCode === 410 || error.statusCode === 404) {
-          // Subscription has expired or is no longer valid
-          await drizzleDb.delete(pushSubscriptions).where(eq(pushSubscriptions.id, sub.id));
-        }
-        console.error('Error sending push notification:', error);
+      } catch (error: unknown) {
+        if (error instanceof HttpError && (error.statusCode === 410 || error.statusCode === 404)) {
+          await drizzleDb
+            .delete(pushSubscriptions)
+            .where(eq(pushSubscriptions.id, sub.id));
+        } 
+        console.error("Error sending push notification:", error);
       }
     });
 
     await Promise.all(notifications);
   } catch (error) {
-    console.error('Failed to send push notification:', error);
+    console.error("Failed to send push notification:", error);
   }
 };

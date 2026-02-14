@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   User as UserIcon,
   Download,
@@ -14,7 +14,6 @@ import {
   Sparkle,
   Database,
   Camera,
-  CaretRight,
 } from "@phosphor-icons/react";
 import Image from "next/image";
 import Card from "@/components/ui/Card";
@@ -56,7 +55,7 @@ export default function SettingsPage() {
   useEffect(() => {
     if (settings) {
       setLocalName(settings.name);
-      setLocalAvatar(settings.avatar || "");
+      setLocalAvatar(settings.image || "");
       setLocalBio(settings.bio || "");
       setLocalUsername(settings.username || "");
       setLocalAiEnabled(settings.preferences?.aiEnabled ?? true);
@@ -74,7 +73,7 @@ export default function SettingsPage() {
     try {
       await updateSettings.mutateAsync({
         name: localName,
-        avatar: localAvatar,
+        image: localAvatar,
         bio: localBio,
         username: localUsername,
       });
@@ -91,27 +90,35 @@ export default function SettingsPage() {
 
       setIsEditingProfile(false);
       toast.success("Profile updated successfully");
-    } catch (err: any) {
-      toast.error(err.message || "Failed to update profile");
+    } catch {
+      if (settings) {
+        setLocalName(settings.name);
+        setLocalAvatar(settings.image || "");
+        setLocalBio(settings.bio || "");
+        setLocalUsername(settings.username || "");
+      }
+      toast.error("Failed to update profile");
     }
   };
 
-  const handleUpdatePreference = async (key: string, value: any) => {
+  const handleUpdatePreference = async (key: string, value: boolean | string) => {
     try {
-      // Optimistic update for UI if needed, but here we just send
-      const updatedPreferences: any = {
-        aiEnabled: key === "aiEnabled" ? value : localAiEnabled,
-        privacyMode: key === "privacyMode" ? value : localPrivacyMode,
-        autoBackup: key === "autoBackup" ? value : localAutoBackup,
+      if (!settings) return;
+
+      const updatedPreferences = {
+        ...settings.preferences,
+        aiEnabled: key === "aiEnabled" ? (value as boolean) : localAiEnabled,
+        privacyMode: (key === "privacyMode" ? (value as string) : localPrivacyMode) as "private" | "selective" | "family",
+        autoBackup: key === "autoBackup" ? (value as boolean) : localAutoBackup,
       };
 
       await updateSettings.mutateAsync({
-        preferences: updatedPreferences as any
+        preferences: updatedPreferences
       });
 
-      if (key === "aiEnabled") setLocalAiEnabled(value);
-      if (key === "privacyMode") setLocalPrivacyMode(value);
-      if (key === "autoBackup") setLocalAutoBackup(value);
+      if (key === "aiEnabled") setLocalAiEnabled(value as boolean);
+      if (key === "privacyMode") setLocalPrivacyMode(value as "private" | "selective" | "family");
+      if (key === "autoBackup") setLocalAutoBackup(value as boolean);
       
       toast.success("Preferences updated");
     } catch {
@@ -306,7 +313,7 @@ export default function SettingsPage() {
                       value={localBio}
                       onChange={(e) => setLocalBio(e.target.value)}
                       placeholder="Share a bit about your journey..."
-                      className="w-full px-4 py-3 rounded-xl border border-neutral-200 focus:ring-2 focus:ring-primary-500 focus:border-transparent min-h-[100px] resize-none transition-all outline-none"
+                      className="w-full px-4 py-3 rounded-xl border border-neutral-200 focus:ring-2 focus:ring-primary-500 focus:border-transparent min-h-25 resize-none transition-all outline-none"
                     />
                   </div>
                 </div>

@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect } from "react";
 import { useNotifications, useMarkNotificationRead, useMarkAllNotificationsRead } from "@/hooks/useNotifications";
-import { X, Bell, CheckCircle2, MessageCircle, Heart, UserPlus, Users, Share } from "lucide-react";
+import { X, Bell, MessageCircle, Heart, UserPlus, Users, Share } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Button from "./ui/Button";
 import { formatDistanceToNow } from "date-fns";

@@ -1,31 +1,8 @@
 import { apiService } from "./api.service";
 import { db, type LocalComment, type LocalReaction } from "@/lib/dexie/db";
 import { syncService } from "./sync.service";
-import { Memory } from "@/types/types";
+import { Memory, User, Comment, Reaction, Follow } from "@/types/types";
 import { v4 as uuidv4 } from "uuid";
-
-export interface Comment {
-  id: string;
-  memoryId: string;
-  userId: string;
-  content: string;
-  createdAt: string;
-  user?: {
-    name: string;
-    image?: string;
-  };
-}
-
-export interface Reaction {
-  id: string;
-  memoryId: string;
-  userId: string;
-  type: string;
-  user?: {
-    name: string;
-    image?: string;
-  };
-}
 
 export const socialService = {
   // Get timeline (offline-first)
@@ -139,7 +116,7 @@ export const socialService = {
       operation: 'create',
       entity: 'comment',
       entityId: tempId,
-      data: { memoryId, content },
+      data: { memoryId, content } as unknown as Record<string, unknown>,
     });
 
     return newComment as Comment;
@@ -155,7 +132,7 @@ export const socialService = {
       operation: 'delete',
       entity: 'comment',
       entityId: commentId,
-      data: {},
+      data: {} as unknown as Record<string, unknown>,
     });
 
     return { success: true };
@@ -218,7 +195,7 @@ export const socialService = {
         operation: 'delete',
         entity: 'reaction',
         entityId: existing.id,
-        data: { memoryId, type },
+        data: { memoryId, type } as unknown as Record<string, unknown>,
       });
     } else {
       // Add new reaction
@@ -238,7 +215,7 @@ export const socialService = {
         operation: 'create',
         entity: 'reaction',
         entityId: tempId,
-        data: { memoryId, type },
+        data: { memoryId, type } as unknown as Record<string, unknown>,
       });
     }
 
@@ -251,7 +228,7 @@ export const socialService = {
       operation: 'create',
       entity: 'user',
       entityId: userId,
-      data: { action: 'follow', userId },
+      data: { action: 'follow', userId } as unknown as Record<string, unknown>,
     });
 
     return { success: true };
@@ -262,7 +239,7 @@ export const socialService = {
       operation: 'delete',
       entity: 'user',
       entityId: userId,
-      data: { action: 'unfollow', userId },
+      data: { action: 'unfollow', userId } as unknown as Record<string, unknown>,
     });
 
     return { success: true };
@@ -270,27 +247,16 @@ export const socialService = {
 
   // Search users (API only)
   getFollowers: (userId: string) => {
-    return apiService.get<{ followers: any[] }>(`/api/user/${userId}/followers`);
+    return apiService.get<{ followers: Follow[] }>(`/api/user/${userId}/followers`);
   },
 
   getFollowing: (userId: string) => {
-    return apiService.get<{ following: any[] }>(`/api/user/${userId}/following`);
+    return apiService.get<{ following: Follow[] }>(`/api/user/${userId}/following`);
   },
   
   searchUsers: (query: string) => {
     return apiService.get<{
-      users: {
-        id: string;
-        email: string;
-        name: string | null;
-        password: string | null;
-        image: string | null;
-        bio: string | null;
-        username: string | null;
-        createdAt: Date;
-        updatedAt: Date;
-        emailVerified: Date | null;
-      }[];
+      user: User[];
     }>(`/user/search?q=${encodeURIComponent(query)}`);
   },
 

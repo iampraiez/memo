@@ -64,7 +64,7 @@ export default function InsightCarousel() {
           )}
         >
           <Icon
-            className={cn("w-10 h-10", activeInsight.color.replace('text-', 'text-'))}
+            className={cn("w-10 h-10")}
             weight="duotone"
           />
         </div>

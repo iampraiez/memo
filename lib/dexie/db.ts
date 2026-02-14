@@ -12,11 +12,20 @@ export interface LocalUser {
   email: string;
   name: string | null;
   username: string | null;
-  avatar: string | null;
+  image: string | null;
   bio: string | null;
   isOnboarded: boolean;
   createdAt: string;
-  preferences?: any;
+  preferences?: {
+    theme: "light" | "dark" | "system";
+    aiEnabled: boolean;
+    autoBackup: boolean;
+    privacyMode: "private" | "selective" | "family";
+    notifications: {
+      email: boolean;
+      push: boolean;
+    };
+  };
   followersCount?: number;
   followingCount?: number;
   memoriesCount?: number;
@@ -89,7 +98,7 @@ export interface SyncQueue {
   operation: 'create' | 'update' | 'delete';
   entity: 'memory' | 'comment' | 'reaction' | 'notification' | 'family' | 'story' | 'tag' | 'user';
   entityId: string;
-  data: any;
+  data: Record<string, unknown>;
   createdAt: number;
   retryCount: number;
   lastError?: string;

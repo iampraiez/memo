@@ -1,5 +1,4 @@
 "use client";
-import React from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useFollowers } from "@/hooks/useSocial";
 import { ArrowLeft, UserPlus, UserMinus, User } from "lucide-react";
@@ -76,7 +75,7 @@ export default function FollowersPage() {
                   {user.image ? (
                     <img 
                       src={user.image} 
-                      alt={user.name} 
+                      alt={user.name || "User"} 
                       className="w-12 h-12 rounded-full object-cover"
                     />
                   ) : (
@@ -93,13 +92,22 @@ export default function FollowersPage() {
 
               {session?.user?.id !== user.id && (
                 <Button
-                  variant="ghost"
+                  variant={user.isFollowing ? "secondary" : "primary"}
                   size="sm"
                   className="rounded-full px-4 font-bold text-xs h-9"
-                  onClick={() => handleFollow(user.id)}
+                  onClick={() => user.isFollowing ? handleUnfollow(user.id) : handleFollow(user.id)}
                 >
-                  <UserPlus className="w-4 h-4 mr-2" />
-                  Follow
+                  {user.isFollowing ? (
+                    <>
+                      <UserMinus className="w-4 h-4 mr-2" />
+                      Unfollow
+                    </>
+                  ) : (
+                    <>
+                      <UserPlus className="w-4 h-4 mr-2" />
+                      Follow
+                    </>
+                  )}
                 </Button>
               )}
             </div>

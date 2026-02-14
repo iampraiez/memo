@@ -1,16 +1,10 @@
 import NextAuth from "next-auth";
-import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import Nodemailer from "next-auth/providers/nodemailer";
 import nodemailer from "nodemailer";
 import db from "@/drizzle/index";
-import {
-  accounts,
-  users,
-  verificationTokens,
-  sessions,
-} from "@/drizzle/db/schema";
+import { accounts, users, verificationTokens, sessions } from "@/db/db/schema";
 import type { Provider } from "next-auth/providers";
 import brcypt from "bcryptjs";
 import { userExists } from "./query";
@@ -106,7 +100,6 @@ const providers: Provider[] = [
   }),
 ];
 
-
 export const providerMap = providers
   .map((provider) => {
     if (typeof provider === "function") {
@@ -127,7 +120,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: providers,
   trustHost: true,
   adapter: DrizzleAdapter(db, {
-
     usersTable: users,
     accountsTable: accounts,
     sessionsTable: sessions,
@@ -151,27 +143,27 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (token.id && session.user) {
         session.user.id = token.id as string;
       }
-      
+
       if (token.email) {
         session.user.email = token.email as string;
       }
-      
+
       if (token.username) {
         session.user.username = token.username as string;
       }
-      
+
       if (token.name) {
         session.user.name = token.name as string;
       }
-      
+
       if (token.image) {
         session.user.image = token.image as string;
       }
-      
+
       if (token.isOnboarded !== undefined) {
         session.user.isOnboarded = token.isOnboarded as boolean;
       }
-      
+
       return session;
     },
     async jwt({ token, user, trigger, session }) {
@@ -183,11 +175,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.image = user.image;
         token.isOnboarded = user.isOnboarded;
       }
-      
+
       // Refresh isOnboarded status from database on every request IF NOT in Edge Runtime
       // Database queries with 'pg' driver fail in Edge Runtime (Middleware)
       const isEdge = process.env.NEXT_RUNTIME === "edge";
-      
+
       if (token.id && !isEdge) {
         try {
           const dbUser = await db.query.users.findFirst({
@@ -199,7 +191,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               image: true,
             },
           });
-          
+
           if (dbUser) {
             token.isOnboarded = dbUser.isOnboarded;
             // Also refresh other fields that might have changed
@@ -211,18 +203,19 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           console.error("Error refreshing user data in JWT:", error);
         }
       }
-      
+
       if (trigger === "update" && session) {
         // Support both nested and flat update structures
         const userData = session.user || session;
-        
+
         if (userData.username !== undefined) token.username = userData.username;
         if (userData.name !== undefined) token.name = userData.name;
         if (userData.image !== undefined) token.image = userData.image;
         if (userData.avatar !== undefined) token.image = userData.avatar;
-        if (userData.isOnboarded !== undefined) token.isOnboarded = userData.isOnboarded;
+        if (userData.isOnboarded !== undefined)
+          token.isOnboarded = userData.isOnboarded;
       }
-      
+
       return token;
     },
   },

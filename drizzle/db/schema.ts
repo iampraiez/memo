@@ -7,7 +7,7 @@ import {
   unique,
   json,
 } from "drizzle-orm/pg-core";
-import { sql, relations } from "drizzle-orm";
+import { relations } from "drizzle-orm";
 
 export const users = pgTable("users", {
   id: text("id").primaryKey(),
@@ -128,7 +128,7 @@ export const memoryMedia = pgTable("memory_media", {
   filename: text("filename").notNull(),
   size: integer("size"),
   metadata: json("metadata"),
-  storageProvider: text("storage_provider").notNull().default("local"), // 'local', 'dropbox'
+  storageProvider: text("storage_provider").notNull().default("cloudinary"), // 'local', 'cloudinary'
   storageKey: text("storage_key"), // External ID or path
 });
 

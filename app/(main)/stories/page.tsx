@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { MagicWand, BookOpen, FileText, Download, ArrowsClockwise } from "@phosphor-icons/react";
+import { MagicWand, BookOpen, FileText, Download } from "@phosphor-icons/react";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import Select from "@/components/ui/Select";
@@ -72,7 +72,7 @@ export default function StoriesPage() {
       setProgress(100);
       setGeneratedStory(result.story.content || null);
       toast.success("Story generated successfully!");
-    } catch (error) {
+    } catch {
       toast.error("Failed to generate story. Please try again.");
     } finally {
       setTimeout(() => setProgress(0), 1000);

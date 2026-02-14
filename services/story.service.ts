@@ -79,7 +79,7 @@ export const storyService = {
       operation: 'create',
       entity: 'story',
       entityId: tempId,
-      data,
+      data: data as unknown as Record<string, unknown>,
     });
 
     return { story: { content: newStory.description } };

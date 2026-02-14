@@ -31,7 +31,7 @@ export default function RegisterClient() {
       } else {
         toast.error(res?.data.error || "Registration failed. This email might already be in use.");
       }
-    } catch (err) {
+    } catch {
       toast.error("An unexpected error occurred. Please try again later.");
     } finally {
       setLoading(false);

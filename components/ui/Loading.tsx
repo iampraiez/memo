@@ -14,11 +14,11 @@ export default function Loading({
   size = 'md',
   text = "Loading..."
 }: LoadingProps) {
-  const sizeClasses = {
-    sm: "w-8 h-8 text-sm",
-    md: "w-16 h-16 text-base",
-    lg: "w-24 h-24 text-lg",
-  };
+  // const sizeClasses = {
+  //   sm: "w-8 h-8 text-sm",
+  //   md: "w-16 h-16 text-base",
+  //   lg: "w-24 h-24 text-lg",
+  // };
 
   const iconSizes = {
     sm: "w-8 h-8",

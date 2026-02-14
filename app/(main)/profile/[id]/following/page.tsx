@@ -66,7 +66,7 @@ export default function FollowingPage() {
                   {user.image ? (
                     <img 
                       src={user.image} 
-                      alt={user.name} 
+                      alt={user.name || "User"} 
                       className="w-12 h-12 rounded-full object-cover"
                     />
                   ) : (

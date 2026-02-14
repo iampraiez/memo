@@ -207,7 +207,7 @@ const MemoryCard: React.FC<MemoryCardProps> = ({
                 <span
                   className={cn(
                     "inline-flex items-center px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border",
-                    moodColors[memory.mood]
+                    moodColors[memory.mood as keyof typeof moodColors]
                   )}
                 >
                   <Heart className="w-3 h-3 mr-1" weight="fill" />

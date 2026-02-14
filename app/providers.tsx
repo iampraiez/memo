@@ -1,11 +1,11 @@
 "use client";
+import React, { useState, useEffect } from "react";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { persistQueryClient } from "@tanstack/react-query-persist-client";
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 import { SessionProvider } from "next-auth/react";
-import { useState, useEffect } from "react";
 import { Session } from "next-auth";
 import { SyncProvider } from "@/components/providers/SyncProvider";
 
@@ -27,7 +27,7 @@ export function Providers({
             refetchOnMount: true,
             retry: 1,
             persistOn: true,
-          } as any,
+          } as Record<string, unknown>,
           mutations: {
             retry: 1,
           },
@@ -46,6 +46,17 @@ export function Providers({
         persister,
         maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
       });
+
+      /* Service Worker is handled by next-pwa in next.config.js
+      if ("serviceWorker" in navigator && process.env.NODE_ENV === "production") {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker
+            .register("/sw.js")
+            .then((reg) => console.log("SW registered:", reg))
+            .catch((err) => console.log("SW registration failed:", err));
+        });
+      }
+      */
     }
   }, [queryClient]);
 

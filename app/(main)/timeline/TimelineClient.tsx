@@ -7,7 +7,6 @@ import Loading from "@/components/ui/Loading";
 import { toast } from "sonner";
 import MemoryDetail from "@/components/MemoryDetail";
 import CreateMemoryModal from "@/components/CreateMemoryModal";
-import { memoryService } from "@/services/memory.service";
 
 interface TimelineClientProps {
   initialMemories: Memory[];
@@ -35,7 +34,7 @@ export default function TimelineClient({ initialMemories }: TimelineClientProps)
       try {
         await deleteMemoryMutation.mutateAsync(memoryId);
         toast.success("Memory deleted");
-      } catch (error) {
+      } catch {
         toast.error("Failed to delete memory");
       }
     }
@@ -46,11 +45,15 @@ export default function TimelineClient({ initialMemories }: TimelineClientProps)
       const response = await fetch(`/api/memories/${memory.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ isPublic: !memory.isPublic })
-       });
-       if(!response.ok) throw new Error("Failed");
-       toast.success(memory.isPublic ? "Memory is now private" : "Memory shared with sanctuary circle");
-    } catch (error) {
+        body: JSON.stringify({ isPublic: !memory.isPublic }),
+      });
+      if (!response.ok) throw new Error("Failed");
+      toast.success(
+        memory.isPublic
+          ? "Memory is now private"
+          : "Memory shared with sanctuary circle",
+      );
+    } catch {
       toast.error("Failed to update share status");
     }
   };

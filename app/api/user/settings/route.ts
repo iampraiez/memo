@@ -39,7 +39,7 @@ export async function GET() {
       userId: user.id,
       name: user.name || "",
       email: user.email,
-      avatar: user.image,
+      image: user.image,
       bio: user.bio || "",
       username: user.username || "",
       isOnboarded: user.isOnboarded ?? false,
@@ -91,7 +91,14 @@ export async function PATCH(req: Request) {
     }
 
     // Update user profile
-    const updateData: any = {
+    const updateData: {
+      updatedAt: Date;
+      name?: string;
+      image?: string | null;
+      bio?: string;
+      username?: string;
+      isOnboarded?: boolean;
+    } = {
       updatedAt: new Date(),
     };
 

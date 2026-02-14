@@ -2,25 +2,15 @@
 import React, { useState, useEffect } from "react";
 import {
   MagnifyingGlass,
-  Funnel,
-  Clock,
-  ArrowsClockwise,
   GlobeHemisphereWest,
   User,
 } from "@phosphor-icons/react";
 import Loading from "@/components/ui/Loading";
 import MemoryCard from "@/components/MemoryCard";
 import EmptyState from "@/components/ui/EmptyState";
-import Modal from "@/components/ui/Modal";
 import Input from "@/components/ui/Input";
-import Button from "@/components/ui/Button";
-import { Memory } from "@/types/types";
-import DatePicker from "@/components/ui/DatePicker";
-import MultiSelect from "@/components/ui/MultiSelect";
 import { useSearchMemories } from "@/hooks/useMemories";
-import { useTags } from "@/hooks/useTags";
 import { useRouter } from "next/navigation";
-import Select from "@/components/ui/Select";
 
 export default function SearchPage() {
   const [searchQuery, setSearchQuery] = useState("");

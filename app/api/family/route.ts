@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import db from "@/drizzle/index";
 import { familyMembers, users, notifications } from "@/drizzle/db/schema";
-import { and, eq, or } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 
 export async function GET() {
@@ -29,11 +29,11 @@ export async function GET() {
     const allMemberRelationships = [...myFamily, ...partOfFamily];
     
     const detailedMembers = await Promise.all(
-      allMemberRelationships.map(async (rel: any) => {
+      allMemberRelationships.map(async (rel) => {
         // If I'm owner, get details of memberId (if exists) or use the invitation email/name
         // If I'm member, get details of ownerId
         let targetUserId = rel.ownerId === userId ? rel.memberId : rel.ownerId;
-        
+
         let userDetails = null;
         if (targetUserId) {
           userDetails = await db.query.users.findFirst({
@@ -51,7 +51,7 @@ export async function GET() {
           status: rel.status,
           role: rel.role,
         };
-      })
+      }),
     );
 
     return NextResponse.json({ members: detailedMembers });

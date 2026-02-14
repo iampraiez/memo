@@ -114,21 +114,21 @@ class SyncService {
 
     switch (entity) {
       case 'memory':
-        return this.syncMemory(op, entityId, data);
+        return this.syncMemory(op, entityId, data as unknown as Record<string, unknown>);
       case 'comment':
-        return this.syncComment(op, entityId, data);
+        return this.syncComment(op, entityId, data as unknown as { memoryId: string; content: string });
       case 'reaction':
-        return this.syncReaction(op, entityId, data);
+        return this.syncReaction(op, entityId, data as unknown as { memoryId: string; type: string });
       case 'notification':
-        return this.syncNotification(op, entityId, data);
+        return this.syncNotification(op, entityId, data as unknown as Record<string, unknown>);
       case 'family':
-        return this.syncFamily(op, entityId, data);
+        return this.syncFamily(op, entityId, data as unknown as { email: string; name?: string; relationship: string });
       case 'story':
-        return this.syncStory(op, entityId, data);
+        return this.syncStory(op, entityId, data as unknown as { content: string; mediaUrl?: string });
       case 'tag':
-        return this.syncTag(op, entityId, data);
+        return this.syncTag(op, entityId, data as unknown as { name: string });
       case 'user':
-        return this.syncUser(op, entityId, data);
+        return this.syncUser(op, entityId, data as unknown as Record<string, unknown>);
       default:
         throw new Error(`Unknown entity type: ${entity}`);
     }

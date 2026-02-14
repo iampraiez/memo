@@ -48,7 +48,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     { name: "Stories", icon: BookOpen, id: "stories" },
     { name: "Analytics", icon: ChartLineUp, id: "analytics" },
     { name: "Settings", icon: Gear, id: "settings" },
-    ...((session?.user as any)?.role === "admin"
+    ...((session?.user as { role?: string })?.role === "admin"
       ? [{ name: "AdminCenter", icon: Shield, id: "admin" }]
       : []),
   ];

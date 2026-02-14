@@ -1,5 +1,5 @@
 import React from "react";
-import { WifiOff, RefreshCw, Loader2, Cloud } from "lucide-react";
+import { WifiOff, RefreshCw, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Button from "./Button";
 import { useSync } from "@/components/providers/SyncProvider";

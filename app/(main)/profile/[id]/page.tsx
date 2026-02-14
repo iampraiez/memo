@@ -9,7 +9,7 @@ import Image from "next/image";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Loading from "@/components/ui/Loading";
-import { Users, Calendar, MapPin, Heart, ChatCircle } from "@phosphor-icons/react";
+import { Calendar } from "@phosphor-icons/react";
 import { toast } from "sonner";
 
 export default function ProfilePage() {
@@ -59,9 +59,9 @@ export default function ProfilePage() {
         
         <div className="relative flex flex-col md:flex-row items-center md:items-end space-y-4 md:space-y-0 md:space-x-6 pt-12">
           <div className="relative w-32 h-32 rounded-3xl overflow-hidden border-4 border-white shadow-2xl bg-primary-900 flex items-center justify-center">
-            {profile.avatar ? (
+            {profile.image ? (
               <Image 
-                src={profile.avatar} 
+                src={profile.image} 
                 alt={profile.name || "User profile"} 
                 fill 
                 className="object-cover"

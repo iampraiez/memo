@@ -26,7 +26,7 @@ export default function ForgotPasswordClient() {
       } else {
         toast.error("Failed to send magic link.");
       }
-    } catch (err) {
+    } catch {
       toast.error("An error occurred. Please try again.");
     } finally {
       setLoading(false);

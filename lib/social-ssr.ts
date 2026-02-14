@@ -4,7 +4,7 @@ import { memories, follows } from "@/drizzle/db/schema";
 import { and, eq, or, inArray, desc } from "drizzle-orm";
 import { Memory } from "@/types/types";
 
-export async function getSocialTimeline(sort: string = "date") {
+export async function getSocialTimeline(_sort: string = "date") {
   const session = await auth();
   if (!session?.user?.id) return null;
 
@@ -46,12 +46,26 @@ export async function getSocialTimeline(sort: string = "date") {
     });
 
     // Transform for the client
-    return allRelevantMemories.map((mem: any) => ({
+    return allRelevantMemories.map((mem) => ({
       ...mem,
-      tags: mem.memoryTags.map((t: any) => t.tag.name),
-      images: mem.memoryMedia.filter((m: any) => m.type.startsWith('image')).map((m: any) => m.url),
+      date: mem.date.toISOString(),
+      createdAt: mem.createdAt.toISOString(),
+      updatedAt: mem.updatedAt.toISOString(),
+      tags: mem.memoryTags.map((t) => t.tag.name),
+      images: mem.memoryMedia
+        .filter((m) => m.type.startsWith("image"))
+        .map((m) => m.url),
       reactionCount: mem.reactions.length,
       commentCount: mem.comments.length,
+      comments: mem.comments.map(c => ({
+        ...c,
+        createdAt: c.createdAt.toISOString(),
+        updatedAt: c.updatedAt.toISOString(),
+      })),
+      reactions: mem.reactions.map(r => ({
+        ...r,
+        createdAt: r.createdAt.toISOString(),
+      })),
     })) as Memory[];
 
   } catch (error) {

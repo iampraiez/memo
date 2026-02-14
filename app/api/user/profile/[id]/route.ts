@@ -54,7 +54,7 @@ export async function GET(
       id: user.id,
       name: user.name,
       email: user.email,
-      avatar: user.image,
+      image: user.image,
       bio: user.bio,
       createdAt: user.createdAt,
       followersCount: Number(followers[0]?.count || 0),

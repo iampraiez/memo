@@ -35,22 +35,23 @@ class ErrorBoundary extends Component<Props, State> {
       }
 
       return (
-        <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50 flex items-center justify-center p-6">
+        <div className="min-h-screen bg-linear-to-br from-primary-50 via-white to-secondary-50 flex items-center justify-center p-6">
           <div className="max-w-md w-full bg-white rounded-2xl shadow-lg border border-neutral-200 p-8 text-center space-y-6">
             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto">
               <Warning className="w-8 h-8 text-red-600" weight="fill" />
             </div>
-            
+
             <div className="space-y-2">
               <h2 className="text-2xl font-bold text-neutral-900">
                 Something went wrong
               </h2>
               <p className="text-neutral-600">
-                We encountered an unexpected error. Don't worry, your data is safe.
+                We encountered an unexpected error. Don't worry, your data is
+                safe.
               </p>
             </div>
 
-            {process.env.NODE_ENV === 'development' && this.state.error && (
+            {process.env.NODE_ENV === "development" && this.state.error && (
               <div className="bg-neutral-50 rounded-lg p-4 text-left">
                 <p className="text-xs font-mono text-red-600 break-all">
                   {this.state.error.message}
@@ -62,7 +63,7 @@ class ErrorBoundary extends Component<Props, State> {
               <Button
                 variant="secondary"
                 className="flex-1"
-                onClick={() => window.location.href = '/'}
+                onClick={() => (window.location.href = "/")}
               >
                 Go Home
               </Button>

@@ -1,13 +1,12 @@
 "use client";
 import React, { useState } from "react";
-import { Tag as TagIcon, TrendUp, Calendar, MagnifyingGlass, ArrowsClockwise } from "@phosphor-icons/react";
+import { Tag as TagIcon, MagnifyingGlass } from "@phosphor-icons/react";
 import Loading from "@/components/ui/Loading";
 import MemoryCard from "@/components/MemoryCard";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import EmptyState from "@/components/ui/EmptyState";
-import { Memory } from "@/types/types";
 import { useTags } from "@/hooks/useTags";
 import { useMemories } from "@/hooks/useMemories";
 import { useRouter } from "next/navigation";

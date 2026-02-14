@@ -21,7 +21,6 @@ const Header: React.FC<HeaderProps> = ({
   syncStatus,
   notificationCount = 0,
   className,
-  onNavigate, // Destructure onNavigate
 }) => {
   const syncIcons = {
     online: Cloud,

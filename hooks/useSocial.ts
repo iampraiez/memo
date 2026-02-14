@@ -1,8 +1,8 @@
 import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/dexie/db";
-import { Memory } from "@/types/types";
-import { socialService, Comment, Reaction } from "@/services/social.service";
+import { Memory, Comment, Reaction } from "@/types/types";
+import { socialService } from "@/services/social.service";
 
 export const useTimelineMemories = (sort: string = "date", initialData?: Memory[]) => {
   // We can use useLiveQuery to get all "other" memories if we want real-time timeline,
@@ -13,7 +13,7 @@ export const useTimelineMemories = (sort: string = "date", initialData?: Memory[
     queryKey: ["memories", "timeline", sort],
     queryFn: ({ pageParam }) => socialService.getTimeline({ cursor: pageParam as string | undefined, sort }),
     initialPageParam: undefined as string | undefined,
-    getNextPageParam: (lastPage) => (lastPage as any).nextCursor || undefined,
+    getNextPageParam: (lastPage) => (lastPage as { nextCursor?: string }).nextCursor || undefined,
     initialData: initialData 
       ? { 
           pages: [{ memories: initialData, nextCursor: undefined }], 
@@ -89,10 +89,12 @@ export const useDeleteComment = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ memoryId, commentId }: { memoryId: string; commentId: string }) => 
+    mutationFn: ({ commentId }: { memoryId: string; commentId: string }) =>
       socialService.deleteComment(commentId),
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["comments", variables.memoryId] });
+      queryClient.invalidateQueries({
+        queryKey: ["comments", variables.memoryId],
+      });
       queryClient.invalidateQueries({ queryKey: ["memories", "timeline"] });
     },
   });
@@ -104,6 +106,8 @@ export const useFollowUser = () => {
       mutationFn: (userId: string) => socialService.followUser(userId),
       onSuccess: (_, userId) => {
         queryClient.invalidateQueries({ queryKey: ["profile", userId] });
+        queryClient.invalidateQueries({ queryKey: ["followers"] });
+        queryClient.invalidateQueries({ queryKey: ["following"] });
       },
     });
 };
@@ -114,6 +118,8 @@ export const useUnfollowUser = () => {
       mutationFn: (userId: string) => socialService.unfollowUser(userId),
       onSuccess: (_, userId) => {
         queryClient.invalidateQueries({ queryKey: ["profile", userId] });
+        queryClient.invalidateQueries({ queryKey: ["followers"] });
+        queryClient.invalidateQueries({ queryKey: ["following"] });
       },
     });
 };

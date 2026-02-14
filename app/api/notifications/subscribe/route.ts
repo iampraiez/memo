@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import db from "@/drizzle/index";
-import { users, pushSubscriptions } from "@/drizzle/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { pushSubscriptions } from "@/drizzle/db/schema";
 import { logger } from "@/lib/logger";
 
 export async function POST(req: Request) {

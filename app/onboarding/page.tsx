@@ -1,9 +1,7 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
 import {
   CaretRight,
-  CaretLeft,
   UploadSimple,
   Shield,
   Sparkle,
@@ -13,6 +11,7 @@ import {
   Spinner,
   Camera,
   X,
+  CaretLeft,
 } from "@phosphor-icons/react";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
@@ -24,13 +23,12 @@ import Image from "next/image";
 import { apiService } from "@/services/api.service";
 
 const OnboardingFlow: React.FC = () => {
-  const router = useRouter();
   const { data: session, update } = useSession();
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   const [profileData, setProfileData] = useState({
     name: "",
     username: "",
@@ -40,7 +38,7 @@ const OnboardingFlow: React.FC = () => {
 
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  
+
   const [preferences, setPreferences] = useState({
     importData: false,
     privacyMode: "private",
@@ -51,7 +49,7 @@ const OnboardingFlow: React.FC = () => {
   // Pre-fill data for Google users
   useEffect(() => {
     if (session?.user) {
-      setProfileData(prev => ({
+      setProfileData((prev) => ({
         ...prev,
         name: session.user.name || "",
         image: session.user.image || null,
@@ -72,10 +70,26 @@ const OnboardingFlow: React.FC = () => {
   ];
 
   const suggestedTags = [
-    "family", "friends", "travel", "work", "hobbies",
-    "food", "pets", "sports", "music", "books",
-    "movies", "celebrations", "holidays", "achievements",
-    "learning", "health", "nature", "photography", "art", "technology",
+    "family",
+    "friends",
+    "travel",
+    "work",
+    "hobbies",
+    "food",
+    "pets",
+    "sports",
+    "music",
+    "books",
+    "movies",
+    "celebrations",
+    "holidays",
+    "achievements",
+    "learning",
+    "health",
+    "nature",
+    "photography",
+    "art",
+    "technology",
   ];
 
   const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -105,33 +119,30 @@ const OnboardingFlow: React.FC = () => {
     setIsUploadingImage(true);
     try {
       const urls = await apiService.uploadFiles(file);
-      
+
       if (!urls || urls.length === 0) {
         throw new Error("Failed to upload profile picture");
       }
 
       const imageUrl = urls[0];
-      
+
       // Store the uploaded URL
-      setProfileData(prev => ({ ...prev, image: imageUrl }));
+      setProfileData((prev) => ({ ...prev, image: imageUrl }));
       setSelectedFile(null); // Clear selected file since it's now uploaded
       toast.success("Profile picture uploaded successfully!");
-    } catch (error: any) {
-      console.error("Upload error details:", {
-        message: error.message,
-        status: error.status,
-        data: error.data,
-      });
-      
-      toast.error(error.message || "Failed to upload image. Please try again.");
-      
+    } catch (error: unknown) {
+      console.error("Upload error details:", error);
+
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Failed to upload image. Please try again.";
+      toast.error(message);
+
       // Clear the file input so the user can try the same file again
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
-      
-      // Note: We deliberately DON'T revert imagePreview here so the user sees 
-      // the image they tried to upload and can attempt a retry.
     } finally {
       setIsUploadingImage(false);
     }
@@ -140,7 +151,10 @@ const OnboardingFlow: React.FC = () => {
   const removeImage = () => {
     setSelectedFile(null);
     setImagePreview(session?.user?.image || null);
-    setProfileData(prev => ({ ...prev, image: session?.user?.image || null }));
+    setProfileData((prev) => ({
+      ...prev,
+      image: session?.user?.image || null,
+    }));
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -168,7 +182,9 @@ const OnboardingFlow: React.FC = () => {
         return;
       }
       if (!/^[a-zA-Z0-9_]+$/.test(profileData.username)) {
-        toast.error("Username can only contain letters, numbers, and underscores");
+        toast.error(
+          "Username can only contain letters, numbers, and underscores",
+        );
         return;
       }
     }
@@ -200,7 +216,7 @@ const OnboardingFlow: React.FC = () => {
             aiEnabled: preferences.aiEnabled,
             privacyMode: preferences.privacyMode,
             // selectedTags could be handled separately or added to preferences if needed
-          }
+          },
         }),
       });
 
@@ -218,16 +234,20 @@ const OnboardingFlow: React.FC = () => {
           username: profileData.username,
           image: imageUrl,
           isOnboarded: true,
-        }
+        },
       });
 
       localStorage.removeItem("route");
       // Force a hard reload to ensure the session and middleware are fully synced
       window.location.href = "/timeline";
       toast.success("Welcome to your Sanctuary!");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Onboarding error:", error);
-      toast.error(error.message || "Failed to complete setup. Please try again.");
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Failed to complete setup. Please try again.";
+      toast.error(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -249,7 +269,7 @@ const OnboardingFlow: React.FC = () => {
   };
 
   if (!session) {
-    return null; 
+    return null;
   }
 
   const renderStep = () => {
@@ -279,9 +299,7 @@ const OnboardingFlow: React.FC = () => {
               <h2 className="text-2xl font-display font-bold text-neutral-900">
                 Create Your Profile
               </h2>
-              <p className="text-neutral-600">
-                Tell us about yourself
-              </p>
+              <p className="text-neutral-600">Tell us about yourself</p>
             </div>
 
             <div className="space-y-6 max-w-md mx-auto">
@@ -328,8 +346,8 @@ const OnboardingFlow: React.FC = () => {
                   className="hidden"
                 />
                 <p className="text-xs text-neutral-500 text-center">
-                  {session?.user?.image && !selectedFile 
-                    ? "Using your Google profile picture. Click to change." 
+                  {session?.user?.image && !selectedFile
+                    ? "Using your Google profile picture. Click to change."
                     : "Upload a profile picture (optional, max 5MB)"}
                 </p>
               </div>
@@ -339,12 +357,16 @@ const OnboardingFlow: React.FC = () => {
                 <Input
                   label="Name"
                   value={profileData.name}
-                  onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
+                  onChange={(e) =>
+                    setProfileData({ ...profileData, name: e.target.value })
+                  }
                   placeholder="Your full name"
                   required
                 />
                 <p className="text-xs text-neutral-500 mt-1">
-                  {session?.user?.name ? "Pre-filled from your Google account. You can change it." : "How should we address you?"}
+                  {session?.user?.name
+                    ? "Pre-filled from your Google account. You can change it."
+                    : "How should we address you?"}
                 </p>
               </div>
 
@@ -353,13 +375,17 @@ const OnboardingFlow: React.FC = () => {
                 <Input
                   label="Username"
                   value={profileData.username}
-                  onChange={(e) => setProfileData({ ...profileData, username: e.target.value })}
+                  onChange={(e) =>
+                    setProfileData({ ...profileData, username: e.target.value })
+                  }
                   placeholder="e.g. memorykeeper"
                   required
                 />
-                <p className="text-xs text-neutral-500 mt-1">Unique identifier for social discovery.</p>
+                <p className="text-xs text-neutral-500 mt-1">
+                  Unique identifier for social discovery.
+                </p>
               </div>
-              
+
               {/* Bio Textarea */}
               <div>
                 <label className="block text-sm font-medium text-neutral-700 mb-1">
@@ -367,14 +393,17 @@ const OnboardingFlow: React.FC = () => {
                 </label>
                 <textarea
                   value={profileData.bio}
-                  onChange={(e) => setProfileData({ ...profileData, bio: e.target.value })}
+                  onChange={(e) =>
+                    setProfileData({ ...profileData, bio: e.target.value })
+                  }
                   placeholder="Tell us a bit about yourself..."
                   rows={4}
                   maxLength={500}
                   className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                 />
                 <p className="text-xs text-neutral-500 mt-1">
-                  Optional. Visible on your profile. ({profileData.bio.length}/500)
+                  Optional. Visible on your profile. ({profileData.bio.length}
+                  /500)
                 </p>
               </div>
             </div>
@@ -455,7 +484,7 @@ const OnboardingFlow: React.FC = () => {
                 className={cn(
                   "p-4 cursor-pointer transition-all",
                   preferences.privacyMode === "private" &&
-                    "border-primary-300 bg-primary-50"
+                    "border-primary-300 bg-primary-50",
                 )}
                 onClick={() =>
                   setPreferences((prev) => ({
@@ -486,7 +515,7 @@ const OnboardingFlow: React.FC = () => {
                 className={cn(
                   "p-4 cursor-pointer transition-all",
                   preferences.privacyMode === "selective" &&
-                    "border-primary-300 bg-primary-50"
+                    "border-primary-300 bg-primary-50",
                 )}
                 onClick={() =>
                   setPreferences((prev) => ({
@@ -516,7 +545,7 @@ const OnboardingFlow: React.FC = () => {
                 className={cn(
                   "p-4 cursor-pointer transition-all",
                   preferences.privacyMode === "family" &&
-                    "border-primary-300 bg-primary-50"
+                    "border-primary-300 bg-primary-50",
                 )}
                 onClick={() =>
                   setPreferences((prev) => ({ ...prev, privacyMode: "family" }))
@@ -569,7 +598,7 @@ const OnboardingFlow: React.FC = () => {
                       "w-6 h-6 rounded border-2 flex items-center justify-center",
                       preferences.aiEnabled
                         ? "bg-primary-600 border-primary-600"
-                        : "border-neutral-300"
+                        : "border-neutral-300",
                     )}
                   >
                     {preferences.aiEnabled && (
@@ -637,7 +666,7 @@ const OnboardingFlow: React.FC = () => {
                       "px-3 py-2 rounded-full text-sm font-medium border transition-colors",
                       preferences.selectedTags.includes(tag)
                         ? "bg-primary-100 border-primary-300 text-primary-800"
-                        : "bg-white border-neutral-300 text-neutral-600 hover:border-neutral-400"
+                        : "bg-white border-neutral-300 text-neutral-600 hover:border-neutral-400",
                     )}
                   >
                     {tag}

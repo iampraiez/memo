@@ -3,15 +3,15 @@ import React, { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import OfflineBanner from "@/components/ui/OfflineBanner";
-import NotificationPanel from "@/components/NotificationPanel";
+import NotificationPanel from "@/components/NotificationPanel"
 import { useNotifications } from "@/hooks/useNotifications";
 import { usePathname, useRouter } from "next/navigation";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { useSession } from "next-auth/react";
 import CreateMemoryModal from "@/components/CreateMemoryModal";
 import { useCreateMemory } from "@/hooks/useMemories";
+import { Memory } from "@/types/types";
 import { toast } from "sonner";
-import Loading from "@/app/loading";
 
 export default function DashboardLayout({
   children,
@@ -38,7 +38,7 @@ export default function DashboardLayout({
   //   }
   // }, [status, router]);
 
-  const handleCreateMemory = async (newMemory: any) => {
+  const handleCreateMemory = async (newMemory: Memory) => {
     try {
       await createMemoryMutation.mutateAsync(newMemory);
       toast.success("Memory created successfully!");

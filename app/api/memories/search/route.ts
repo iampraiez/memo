@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import db from "@/drizzle/index";
-import { memories, follows, users } from "@/drizzle/db/schema";
+import { memories, follows } from "@/drizzle/db/schema";
 import { and, eq, or, inArray, desc, ilike } from "drizzle-orm";
+import { Timeline } from "@/app/_types/types";
 
 export async function GET(req: Request) {
   const session = await auth();
@@ -28,23 +29,24 @@ export async function GET(req: Request) {
     );
 
     if (scope === "circle") {
-        // Get following IDs
-        const following = await db.select({ followingId: follows.followingId }).from(follows).where(eq(follows.followerId, userId));
-        const followingIds = following.map(f => f.followingId);
-        
-        // Include self
-        const relevantUserIds = [userId, ...followingIds];
+      // Get following IDs
+      const following = await db
+        .select({ followingId: follows.followingId })
+        .from(follows)
+        .where(eq(follows.followerId, userId));
+      const followingIds = following.map((f) => f.followingId);
 
-        whereCondition = and(
-            searchCondition,
-            or(
-                eq(memories.userId, userId),
-                and(
-                    inArray(memories.userId, followingIds),
-                    eq(memories.isPublic, true)
-                )
-            )
-        );
+      // Include self
+      whereCondition = and(
+        searchCondition,
+        or(
+          eq(memories.userId, userId),
+          and(
+            inArray(memories.userId, followingIds),
+            eq(memories.isPublic, true),
+          ),
+        ),
+      );
     } else {
         // Mine only
         whereCondition = and(
@@ -71,10 +73,10 @@ export async function GET(req: Request) {
     });
 
     // Transform
-    const searchResults = results.map((mem: any) => ({
+    const searchResults = (results as unknown as Timeline[]).map((mem) => ({
       ...mem,
-      tags: mem.memoryTags.map((t: any) => t.tag.name),
-      images: mem.memoryMedia.filter((m: any) => m.type.startsWith('image')).map((m: any) => m.url),
+      tags: mem.memoryTags.map((t) => t.tag.name),
+      images: mem.memoryMedia.filter((m) => m.type.startsWith('image')).map((m) => m.url),
       reactionCount: mem.reactions.length,
       commentCount: mem.comments.length,
     }));

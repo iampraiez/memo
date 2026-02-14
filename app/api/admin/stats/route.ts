@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import db from "@/drizzle/index";
-import { users, memories, aiJobs, systemLogs } from "@/drizzle/db/schema";
+import { users, memories, aiJobs } from "@/drizzle/db/schema";
 import { eq, count, sql } from "drizzle-orm";
 import { logger } from "@/lib/logger";
 

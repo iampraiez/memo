@@ -46,7 +46,7 @@ export default function DeleteAccountModal({
       setStep("otp");
       setTimeLeft(300);
       toast.success(`Verification code sent to ${userEmail}`);
-    } catch (error) {
+    } catch{
       toast.error("Failed to send verification code. Please try again.");
     } finally {
       setIsLoading(false);
@@ -74,8 +74,9 @@ export default function DeleteAccountModal({
 
       toast.success("Account deleted successfully");
       signOut({ callbackUrl: "/" });
-    } catch (error: any) {
-      toast.error(error.message);
+    } catch (error: unknown) {
+      const err = error as { message?: string };
+      toast.error(err.message || "An error occurred");
       setIsLoading(false);
     }
   };

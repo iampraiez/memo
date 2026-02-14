@@ -1,4 +1,4 @@
-import { OAuth2Client } from "google-auth-library";
+import { OAuth2Client, TokenPayload } from "google-auth-library";
 import { env } from "@/config/env";
 import db from "@/drizzle/index";
 import { users, accounts } from "@/drizzle/db/schema";
@@ -60,8 +60,9 @@ export async function verifyGoogleToken(token: string) {
   }
 }
 
-export async function getOrCreateGoogleUser(payload: any) {
+export async function getOrCreateGoogleUser(payload: TokenPayload) {
   const { email, sub: googleId, name, picture } = payload;
+  if (!email) throw new Error("Google email is required");
 
   const [user] = await db
     .select()
@@ -94,7 +95,7 @@ export async function getOrCreateGoogleUser(payload: any) {
       .insert(users)
       .values({
         id: userId,
-        email,
+        email: email as string,
         name,
         image: picture,
         emailVerified: new Date(),
@@ -106,7 +107,7 @@ export async function getOrCreateGoogleUser(payload: any) {
       userId: newUser.id,
       type: "oauth",
       provider: "google",
-      providerAccountId: googleId,
+      providerAccountId: googleId as string,
     });
 
   return newUser;

@@ -4,7 +4,6 @@ import {
     memories, 
     userPreferences, 
     exportJobs, 
-    pushSubscriptions 
 } from "@/drizzle/db/schema";
 import { eq } from "drizzle-orm";
 import { sendEmail } from "@/services/email.service";
@@ -78,13 +77,14 @@ export const runExportJob = async (jobId: string, userId: string) => {
 
         logger.info(`Export job ${jobId} completed successfully`);
 
-    } catch (error: any) {
-        logger.error(`Export job ${jobId} failed:`, error);
+    } catch (error: unknown) {
+        const err = error as { message?: string };
+        logger.error(`Export job ${jobId} failed:`, err);
         
         await db.update(exportJobs)
             .set({ 
                 status: "failed", 
-                error: error.message || "Unknown error" 
+                error: err.message || "Unknown error" 
             })
             .where(eq(exportJobs.id, jobId));
 

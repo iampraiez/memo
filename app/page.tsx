@@ -16,7 +16,6 @@ import {
   GithubLogo,
 } from "@phosphor-icons/react/dist/ssr";
 import Button from "@/components/ui/Button";
-import { cn } from "@/lib/utils";
 import NavWrapper from "@/components/landing/NavWrapper";
 import "./global.css";
 

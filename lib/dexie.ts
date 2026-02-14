@@ -5,7 +5,7 @@ export interface OfflineChange {
   id?: number;
   type: "add" | "update" | "delete";
   collection: string;
-  data: any;
+  data: Record<string, unknown>;
   timestamp: number;
 }
 

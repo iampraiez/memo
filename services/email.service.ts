@@ -1,11 +1,13 @@
+import type { Attachment } from 'nodemailer/lib/mailer';
 import nodemailer from "nodemailer";
 import { logger } from "@/lib/logger";
+import { env } from "@/config/env";
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
+    user: env.EMAIL_USER,
+    pass: env.EMAIL_PASS,
   },
 });
 
@@ -13,14 +15,14 @@ interface SendEmailParams {
   to: string;
   subject: string;
   html: string;
-  attachments?: any[];
+  attachments?: Attachment[]
 }
 
 export const sendEmail = async ({ to, subject, html, attachments }: SendEmailParams, retries = 3) => {
   for (let i = 0; i < retries; i++) {
     try {
       const info = await transporter.sendMail({
-        from: process.env.EMAIL_USER,
+        from: env.EMAIL_USER,
         to,
         subject,
         html,
@@ -81,7 +83,7 @@ export const sendDeletionOTP = async (email: string, code: string) => {
   return sendEmail({ to: email, subject, html });
 };
 
-export const sendErrorReportEmail = async (error: any, context?: string) => {
+export const sendErrorReportEmail = async (error: Error, context?: string) => {
   const adminEmail = process.env.ADMIN_EMAIL || "himpraise571@gmail.com";
   const subject = `🚨 CRITICAL ERROR: ${context || "System Alert"}`;
   

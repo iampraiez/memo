@@ -12,7 +12,7 @@ import { db } from "@/lib/dexie";
 interface CreateMemoryModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (memory: Partial<Memory>) => void;
+  onSave: (memory: Memory) => void | Promise<void>;
   editingMemory?: Memory;
 }
 
@@ -219,7 +219,7 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
         await db.offline_changes.add({
           type: editingMemory ? "update" : "add",
           collection: "memories",
-          data: newMemory,
+          data: newMemory as unknown as Record<string, unknown>,
           timestamp: Date.now(),
         });
       }

@@ -79,7 +79,7 @@ export const familyService = {
       operation: 'create',
       entity: 'family',
       entityId: tempId,
-      data,
+      data: data as unknown as Record<string, unknown>,
     });
 
     return { success: true };

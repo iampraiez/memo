@@ -5,10 +5,9 @@ type LogLevel = "info" | "warn" | "error" | "debug";
 
 class Logger {
   private lastAlertedAt: number = 0;
-  private readonly ALERT_COOLDOWN = 5 * 60 * 1000; // 5 minutes
+  private readonly ALERT_COOLDOWN = 5 * 60 * 1000;
 
-  private log(level: LogLevel, message: string, ...args: any[]) {
-    // In production, we still want to see errors and warnings in the logs
+  private log(level: LogLevel, message: string, ...args: unknown[]) {
     if (!isDev && level !== "error" && level !== "warn") return;
 
     const timestamp = new Date().toISOString();
@@ -30,7 +29,7 @@ class Logger {
     }
   }
 
-  private async notifyAdmin(message: string, ...args: any[]) {
+  private async notifyAdmin(message: string, ...args: unknown[]) {
     if (!isServer || isDev) return;
 
     const now = Date.now();
@@ -40,39 +39,36 @@ class Logger {
     }
 
     try {
-      // Use dynamic import to avoid circular dependency
       const { sendErrorReportEmail } = await import("@/services/email.service");
-      
-      const error = args.find(arg => arg instanceof Error) || new Error(message);
-      const context = args.length > 0 ? JSON.stringify(args) : undefined;
-      
+
+      const error =
+        args.find((arg) => arg instanceof Error) || new Error(message);
+
       await sendErrorReportEmail(error, message);
       this.lastAlertedAt = now;
       this.info("[Logger] Admin notified of critical error");
     } catch (err) {
-      // Avoid recursion if email fails
       console.error("[Logger] Failed to notify admin:", err);
     }
   }
 
-  info(message: string, ...args: any[]) {
+  info(message: string, ...args: unknown[]) {
     this.log("info", message, ...args);
   }
 
-  warn(message: string, ...args: any[]) {
+  warn(message: string, ...args: unknown[]) {
     this.log("warn", message, ...args);
   }
 
-  error(message: string, ...args: any[]) {
+  error(message: string, ...args: unknown[]) {
     this.log("error", message, ...args);
-    
-    // Auto-notify admin for errors in production
+
     if (!isDev) {
       this.notifyAdmin(message, ...args).catch(() => {});
     }
   }
 
-  debug(message: string, ...args: any[]) {
+  debug(message: string, ...args: unknown[]) {
     this.log("debug", message, ...args);
   }
 }

@@ -33,7 +33,7 @@ export default function MoodChart({ data }: MoodChartProps) {
             ))}
           </Pie>
           <Tooltip 
-            formatter={(value: any) => [`${value} memories`, 'Count']}
+            formatter={(value: number | string | undefined) => [`${value ?? 0} memories`, 'Count']}
             contentStyle={{ borderRadius: "8px", border: "none" }}
           />
           <Legend layout="vertical" verticalAlign="middle" align="right" wrapperStyle={{ fontSize: "12px" }} />

@@ -7,7 +7,7 @@ export interface UserSettings {
   userId: string;
   name: string;
   email: string;
-  avatar?: string;
+  image?: string;
   bio?: string;
   username?: string;
   createdAt: string;
@@ -63,7 +63,7 @@ export const userService = {
     if (existing) {
       const updated: LocalUser = {
         ...existing,
-        ...data as unknown as LocalUser,
+        ...data, // data is Partial<UserSettings>, spreading it is fine
         _syncStatus: 'pending',
         _lastSync: Date.now(),
       };
@@ -74,10 +74,10 @@ export const userService = {
       operation: 'update',
       entity: 'user',
       entityId: userId || 'current',
-      data,
+      data: data as unknown as Record<string, unknown>,
     });
 
-    return data as UserSettings;
+    return data as UserSettings; // Cast to UserSettings is appropriate here
   },
   
   // Profile is usually dynamic, but we can cache viewed profiles

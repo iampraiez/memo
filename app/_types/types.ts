@@ -46,20 +46,74 @@ export interface Memory {
   user?: {
     id: string;
     name: string;
-    image?: string;
-    username?: string;
+    image?: string | null;
+    username?: string | null;
   };
+  reactions?: Reaction[];
+  comments?: Comment[];
+  reactionCount?: number;
+  commentCount?: number;
+}
+
+export interface Timeline  {
+    date: Date;
+    id: string;
+    createdAt: Date;
+    updatedAt: Date;
+    userId: string;
+    title: string;
+    content: string;
+    summary: string | null;
+    location: string | null;
+    mood: string | null;
+    isPublic: boolean;
+    isAiGenerated: boolean;
+    syncStatus: string;
+    user: {
+        id: string;
+        email: string;
+        name: string | null;
+        password: string | null;
+        image: string | null;
+        bio: string | null;
+        username: string | null;
+        isOnboarded: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        emailVerified: Date | null;
+    };
+    memoryMedia: {
+        id: string;
+        type: string;
+        memoryId: string;
+        url: string;
+        filename: string;
+        size: number | null;
+        metadata: unknown;
+        storageProvider: string;
+        storageKey: string | null;
+    }[];
+    memoryTags: {
+        tag: {
+            name: string;
+            color: string;
+        }
+    }[];
+    reactions: Reaction[];
+    comments: Comment[];
 }
 
 export interface User {
   id: string;
-  name: string;
   email: string;
-  avatar?: string;
-  preferences?: {
-    theme: "light" | "dark" | "system";
-  };
-  role?: "user" | "admin";
+  name: string | null;
+  password: string | null;
+  image: string | null;
+  bio: string | null;
+  username: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  emailVerified: Date | null;
 }
 
 export interface Tag {
@@ -113,4 +167,23 @@ export interface Reaction {
     name: string;
     image?: string;
   };
+}
+
+export interface Follow {
+  id: string;
+  name: string | null;
+  username: string | null;
+  image: string | null;
+  bio: string | null;
+  isFollowing?: boolean;
+}
+
+export class HttpError extends Error {
+  statusCode: number;
+  
+  constructor(message: string, statusCode: number) {
+    super(message);
+    this.statusCode = statusCode;
+    this.name = 'HttpError';
+  }
 }
