@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import db from "@/drizzle/index";
-import { memories } from "@/drizzle/db/schema";
+import { memories, tags, memoryTags, memoryMedia } from "@/drizzle/db/schema";
 import { eq, and, sql } from "drizzle-orm";
 import { logger } from "@/lib/logger";
 import { z } from "zod";
+import { v4 as uuidv4 } from "uuid";
 
 const updateMemorySchema = z.object({
   title: z.string().min(1).optional(),
@@ -112,9 +113,66 @@ export async function PATCH(
       );
     }
 
+    // Handle Tags (replace existing)
+    if (validatedData.tags !== undefined) {
+      // Remove old associations
+      await db.delete(memoryTags).where(eq(memoryTags.memoryId, id));
+      
+      if (validatedData.tags.length > 0) {
+        for (const tagName of validatedData.tags) {
+          let tagId;
+          const existingTag = await db.query.tags.findFirst({
+            where: eq(tags.name, tagName)
+          });
+          
+          if (existingTag) {
+            tagId = existingTag.id;
+          } else {
+            tagId = uuidv4();
+            await db.insert(tags).values({
+              id: tagId,
+              name: tagName,
+              color: "#3B82F6",
+            });
+          }
+          
+          await db.insert(memoryTags).values({
+            id: uuidv4(),
+            memoryId: id,
+            tagId: tagId
+          });
+        }
+      }
+    }
+
+    // Handle Images (replace existing)
+    if (validatedData.images !== undefined) {
+      // Remove old media
+      await db.delete(memoryMedia).where(eq(memoryMedia.memoryId, id));
+      
+      if (validatedData.images.length > 0) {
+        for (const url of validatedData.images) {
+          await db.insert(memoryMedia).values({
+            id: uuidv4(),
+            memoryId: id,
+            url: url,
+            type: "image",
+            filename: "unknown",
+            storageProvider: "cloudinary"
+          });
+        }
+      }
+    }
+
     logger.info(`Updated memory ${id} for user ${user.id}`);
 
-    return NextResponse.json({ memory: updatedMemory }, { status: 200 });
+    return NextResponse.json({ 
+      memory: {
+        ...updatedMemory,
+        tags: validatedData.tags || [],
+        images: validatedData.images || []
+      } 
+    }, { status: 200 });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(

@@ -141,6 +141,20 @@ export const memoryService = {
       throw new Error('Memory not found');
     }
 
+    // Check if anything actually changed to prevent redundant syncs/updates
+    const hasChanges = Object.keys(data).some(key => {
+      const k = key as keyof UpdateMemoryData;
+      if (Array.isArray(data[k]) && Array.isArray(existing[k as keyof LocalMemory])) {
+        return JSON.stringify(data[k]) !== JSON.stringify(existing[k as keyof LocalMemory]);
+      }
+      return data[k] !== existing[k as keyof LocalMemory];
+    });
+
+    if (!hasChanges) {
+      console.log('[MemoryService] No changes detected, skipping update');
+      return { memory: existing as Memory };
+    }
+
     const updated: LocalMemory = {
       ...existing,
       ...data,

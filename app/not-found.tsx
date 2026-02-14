@@ -1,8 +1,11 @@
-import Link from "next/link";
+"use client";
 import { ArrowLeft, House } from "lucide-react";
 import Button from "@/components/ui/Button";
+import { useRouter } from "next/navigation";
 
 export default function NotFound() {
+  const router = useRouter();
+  
   return (
     <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-4">
       <div className="max-w-md w-full text-center space-y-8 animate-fade-in">
@@ -31,18 +34,24 @@ export default function NotFound() {
 
         {/* Actions */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-          <Link href="/timeline" className="w-full sm:w-auto">
-            <Button size="lg" className="w-full rounded-full shadow-lg shadow-primary-900/10">
-              <House className="w-4 h-4 mr-2" />
-              Return Home
-            </Button>
-          </Link>
-          <Link href="javascript:history.back()" className="w-full sm:w-auto">
-            <Button variant="ghost" size="lg" className="w-full rounded-full">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Go Back
-            </Button>
-          </Link>
+          <Button 
+            size="lg" 
+            onClick={() => router.push('/timeline')} 
+            className="w-full sm:w-auto rounded-full shadow-lg shadow-primary-900/10"
+          >
+            <House className="w-4 h-4 mr-2" />
+            Return Home
+          </Button>
+          
+          <Button 
+            variant="ghost" 
+            size="lg" 
+            onClick={() => router.back()} 
+            className="w-full sm:w-auto rounded-full"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Go Back
+          </Button>
         </div>
       </div>
     </div>

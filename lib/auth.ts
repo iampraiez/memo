@@ -10,6 +10,7 @@ import brcypt from "bcryptjs";
 import { userExists } from "./query";
 import { verifyGoogleToken, getOrCreateGoogleUser } from "./google-auth";
 import { env } from "@/config/env";
+import { eq } from "drizzle-orm";
 
 import { CredentialsSignin } from "next-auth";
 
@@ -174,33 +175,45 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.name = user.name;
         token.image = user.image;
         token.isOnboarded = user.isOnboarded;
+        token.lastRefreshed = Date.now();
       }
 
       // Refresh isOnboarded status from database on every request IF NOT in Edge Runtime
       // Database queries with 'pg' driver fail in Edge Runtime (Middleware)
       const isEdge = process.env.NEXT_RUNTIME === "edge";
 
-      if (token.id && !isEdge) {
+      const now = Date.now();
+      const lastRefreshed = (token.lastRefreshed as number) || 0;
+      const oneMinute = 60 * 1000;
+
+      if (token.id && !isEdge && (now - lastRefreshed > oneMinute || trigger === "update")) {
         try {
-          const dbUser = await db.query.users.findFirst({
-            where: (users, { eq }) => eq(users.id, token.id as string),
-            columns: {
-              isOnboarded: true,
-              username: true,
-              name: true,
-              image: true,
-            },
-          });
+          console.log(`[Auth] Refreshing user data for ${token.id}. Trigger: ${trigger}`);
+          
+          const [dbUser] = await db
+            .select({
+              isOnboarded: users.isOnboarded,
+              username: users.username,
+              name: users.name,
+              image: users.image,
+            })
+            .from(users)
+            .where(eq(users.id, token.id as string))
+            .limit(1);
 
           if (dbUser) {
             token.isOnboarded = dbUser.isOnboarded;
-            // Also refresh other fields that might have changed
             if (dbUser.username) token.username = dbUser.username;
             if (dbUser.name) token.name = dbUser.name;
             if (dbUser.image) token.image = dbUser.image;
+            token.lastRefreshed = now;
+            console.log(`[Auth] User data refreshed successfully for ${token.id}`);
+          } else {
+            console.warn(`[Auth] User not found during JWT refresh: ${token.id}`);
           }
         } catch (error) {
-          console.error("Error refreshing user data in JWT:", error);
+          console.error("[Auth] Connection Error during JWT refresh:", error);
+          // Don't crash the session if refresh fails, keep current token
         }
       }
 

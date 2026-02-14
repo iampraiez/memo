@@ -33,8 +33,8 @@ Memory Lane is a modern, AI-powered personal timeline application that helps you
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/memory-lane.git
-   cd memory-lane
+   git clone https://github.com/iampraiez/memo.git
+   cd memo
    ```
 
 2. **Install dependencies**

@@ -96,6 +96,7 @@ export interface LocalStory {
 
 export interface LocalTag {
   id: string;
+  userId: string;
   name: string;
   color: string;
   usageCount: number;
@@ -153,14 +154,14 @@ class MemoDatabase extends Dexie {
 
   constructor() {
     super('MemoDatabaseV2');
-    this.version(1).stores({
+    this.version(2).stores({
       memories: 'id, userId, createdAt, syncStatus, mood, *tags',
       users: 'id, email, username, _syncStatus',
       comments: 'id, memoryId, userId, createdAt, _syncStatus',
       reactions: 'id, memoryId, userId, type, [memoryId+userId+type], _syncStatus',
       familyMembers: 'id, userId, email, status, _syncStatus',
       stories: 'id, userId, createdAt, status, _syncStatus',
-      tags: 'id, name, usageCount, _syncStatus',
+      tags: 'id, userId, name, usageCount, _syncStatus',
       notifications: 'id, userId, read, createdAt, _syncStatus',
       
       syncQueue: '++id, entity, entityId, createdAt, retryCount',

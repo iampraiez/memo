@@ -13,6 +13,8 @@ import { useMemory } from "@/hooks/useMemories";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Memory } from "@/types/types";
+import Lightbox from "@/components/ui/Lightbox";
+import { useState } from "react";
 
 interface MemoryDetailProps {
   memoryId: string;
@@ -30,6 +32,8 @@ export default function MemoryDetail({
   const router = useRouter();
   const { data, isLoading, error } = useMemory(memoryId);
   const memory = data?.memory;
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   const moodColors = {
     joyful: "bg-yellow-50 text-yellow-700 border-yellow-100",
@@ -119,7 +123,14 @@ export default function MemoryDetail({
         {memory.images && memory.images.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
              {memory.images.map((img, idx) => (
-               <div key={idx} className="relative aspect-video rounded-3xl overflow-hidden shadow-2xl ring-1 ring-black/5 group cursor-zoom-in">
+               <div 
+                key={idx} 
+                className="relative aspect-video rounded-3xl overflow-hidden shadow-2xl ring-1 ring-black/5 group cursor-zoom-in"
+                onClick={() => {
+                  setLightboxIndex(idx);
+                  setLightboxOpen(true);
+                }}
+               >
                  <Image src={img} alt={memory.title} fill className="object-cover group-hover:scale-105 transition-transform duration-700" />
                </div>
              ))}
@@ -154,6 +165,16 @@ export default function MemoryDetail({
           </div>
         )}
       </div>
+
+      {memory.images && (
+        <Lightbox
+          images={memory.images}
+          currentIndex={lightboxIndex}
+          isOpen={lightboxOpen}
+          onClose={() => setLightboxOpen(false)}
+          onNavigate={setLightboxIndex}
+        />
+      )}
     </div>
   );
 }

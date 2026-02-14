@@ -17,9 +17,9 @@ const pool =
   globalForDb.pool ??
   new Pool({
     connectionString: process.env.DATABASE_URL,
-    max: 20,
+    max: 10, // Reduced to 10 to avoid system limit exhaustion
     idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 10000, // Increased to 10s for stability in dev
+    connectionTimeoutMillis: 15000, // Increased to 15s for extra stability in dev
   });
 
 const db = globalForDb.db ?? drizzle(pool, { schema });

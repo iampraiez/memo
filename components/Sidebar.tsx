@@ -10,6 +10,7 @@ import {
   Shield,
   Users,
   User,
+  Image as ImageIcon,
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { useSession } from "next-auth/react";
@@ -43,6 +44,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     { name: "Timeline", icon: House, id: "timeline" },
     { name: "Profile", icon: User, id: "profile" },
     { name: "Friends", icon: Users, id: "friends" },
+    { name: "Images", icon: ImageIcon, id: "images" }, // Added Images item
     { name: "Search", icon: MagnifyingGlass, id: "search" },
     { name: "Tags", icon: Tag, id: "tags" },
     { name: "Stories", icon: BookOpen, id: "stories" },

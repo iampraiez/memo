@@ -9,7 +9,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useSync } from "@/components/providers/SyncProvider";
 import { useSession } from "next-auth/react";
 import CreateMemoryModal from "@/components/CreateMemoryModal";
-import { useCreateMemory } from "@/hooks/useMemories";
+import { useCreateMemory, useUpdateMemory } from "@/hooks/useMemories";
 import { Memory } from "@/types/types";
 import { toast } from "sonner";
 
@@ -22,11 +22,12 @@ export default function DashboardLayout({
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const { unreadCount } = useNotifications();
-  const { isOnline, pendingSyncCount } = useSync();
+  const { isOnline } = useSync();
   const pathname = usePathname();
   const router = useRouter();
   const { data: session, status } = useSession();
   const createMemoryMutation = useCreateMemory();
+  const updateMemoryMutation = useUpdateMemory();
 
   useEffect(() => {
     setSidebarOpen(false);
@@ -38,10 +39,20 @@ export default function DashboardLayout({
   //   }
   // }, [status, router]);
 
-  const handleCreateMemory = async (newMemory: Memory) => {
+  const handleSaveMemory = async (memory: Memory) => {
     try {
-      await createMemoryMutation.mutateAsync(newMemory);
-      toast.success("Memory created successfully!");
+      // Check if it's a temp ID or existing ID
+      const isUpdate = memory.id && !memory.id.startsWith('memory-');
+      
+      if (isUpdate) {
+        // Extract only updateable data
+        const { id, ...data } = memory;
+        await updateMemoryMutation.mutateAsync({ id, data });
+        toast.success("Memory updated successfully!");
+      } else {
+        await createMemoryMutation.mutateAsync(memory);
+        toast.success("Memory created successfully!");
+      }
       setCreateModalOpen(false);
     } catch {
       toast.error("Failed to save memory");
@@ -86,7 +97,7 @@ export default function DashboardLayout({
       <CreateMemoryModal
         isOpen={createModalOpen}
         onClose={() => setCreateModalOpen(false)}
-        onSave={handleCreateMemory}
+        onSave={handleSaveMemory}
       />
 
       <NotificationPanel
