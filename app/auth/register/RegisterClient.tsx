@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { EnvelopeSimple, Lock, GoogleLogo, ArrowRight } from "@phosphor-icons/react";
+import { EnvelopeSimple, Lock, GoogleLogo, ArrowRight, Eye, EyeSlash } from "@phosphor-icons/react";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import { apiService } from "@/services/api.service";
@@ -12,6 +12,8 @@ export default function RegisterClient() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingGoogle, setLoadingGoogle] = useState(false);
   const router = useRouter();
@@ -25,14 +27,24 @@ export default function RegisterClient() {
     setLoading(true);
     try {
       const res = await apiService.registerUser({ email, password });
-      if (res?.data.success || res?.data.requiresVerification) {
+      
+      // Handle existing but unverified user (returns 200 OK with requiresVerification)
+      if (res.status === 200 && res.data.requiresVerification) {
+        toast.info(res.data.message || "Email not verified. A new code has been sent.");
+        router.push(`/auth/verify?email=${encodeURIComponent(email)}`);
+      } 
+      // Handle new user registration (returns 201 Created)
+      else if (res.status === 201 || res.data.success) {
         toast.success("Account created successfully! Please verify your email.");
         router.push(`/auth/verify?email=${encodeURIComponent(email)}`);
-      } else {
-        toast.error(res?.data.error || "Registration failed. This email might already be in use.");
+      } 
+      else {
+        toast.error(res.data.message || res.data.error || "Registration failed. This email might already be in use.");
       }
-    } catch {
-      toast.error("An unexpected error occurred. Please try again later.");
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } }; message?: string };
+      const errorMessage = err.response?.data?.message || err.message || "An unexpected error occurred. Please try again later.";
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -91,15 +103,22 @@ export default function RegisterClient() {
                   <Lock size={20} />
                 </div>
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   id="new-password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Minimum 8 characters"
                   autoComplete="new-password"
-                  className="w-full pl-10 pr-4 py-3 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                  className="w-full pl-10 pr-12 py-3 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 focus:outline-none"
+                >
+                  {showPassword ? <EyeSlash size={20} /> : <Eye size={20} />}
+                </button>
               </div>
             </div>
 
@@ -112,14 +131,21 @@ export default function RegisterClient() {
                   <Lock size={20} />
                 </div>
                 <input
-                  type="password"
+                  type={showConfirmPassword ? "text" : "password"}
                   required
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Confirm your password"
                   autoComplete="new-password"
-                  className="w-full pl-10 pr-4 py-3 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                  className="w-full pl-10 pr-12 py-3 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 focus:outline-none"
+                >
+                  {showConfirmPassword ? <EyeSlash size={20} /> : <Eye size={20} />}
+                </button>
               </div>
             </div>
 

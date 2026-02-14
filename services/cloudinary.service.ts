@@ -102,13 +102,20 @@ export class CloudinaryService {
 
     } catch (error: unknown) {
       console.error('Cloudinary upload failed raw error:', error);
-      const cloudinaryError = (error as any)?.error || error;
-      const err = cloudinaryError as { message?: string; http_code?: number; status?: number };
+      
+      interface CloudinaryErrorDetail {
+        message?: string;
+        http_code?: number;
+        status?: number;
+      }
+      
+      const cloudinaryError = (error as { error?: CloudinaryErrorDetail })?.error || (error as CloudinaryErrorDetail);
+      const err = cloudinaryError as CloudinaryErrorDetail;
       
       console.error('Cloudinary upload failed details:', {
         message: err.message,
         code: err.http_code || err.status,
-        name: (error as Error).name || (cloudinaryError as any).name,
+        name: (error as Error).name || (cloudinaryError as { name?: string }).name,
       });
 
       // Handle specific error types

@@ -28,8 +28,44 @@ export async function POST(req: Request) {
     });
 
     if (existingUser) {
+      if (!existingUser.emailVerified) {
+        // User exists but not verified - resend code and redirect to verify page
+        const verificationCode = generateVerificationCode();
+        const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+        // Delete any existing tokens for this email
+        await db
+          .delete(verificationTokens)
+          .where(eq(verificationTokens.identifier, email));
+
+        // Insert new verification token
+        await db.insert(verificationTokens).values({
+          identifier: email,
+          token: verificationCode,
+          expires: expiresAt,
+        });
+
+        // Send verification email
+        const emailResult = await sendVerificationEmail(email, verificationCode);
+
+        if (!emailResult.success) {
+          logger.error(`Failed to send verification email to ${email}`);
+        }
+
+        logger.info(`Verification code resent to existing unverified user: ${email}`);
+
+        return NextResponse.json(
+          {
+            message: "This email is already registered but not verified. A new verification code has been sent.",
+            requiresVerification: true,
+            isExistingUnverified: true,
+          },
+          { status: 200 }
+        );
+      }
+
       return NextResponse.json(
-        { message: "Invalid credentials" },
+        { message: "Email already in use" },
         { status: 409 },
       );
     }

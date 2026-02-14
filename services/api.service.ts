@@ -122,18 +122,23 @@ class ApiService {
       });
 
       return {
+        status: response.status,
         data: {
-          success: response.status === 201,
+          success: true,
           requiresVerification: response.data.requiresVerification,
+          message: response.data.message,
           error: null,
         },
       };
     } catch (err) {
-      const apiError = err as ApiError<User>;
+      const apiError = err as ApiError<unknown>;
       return {
+        status: apiError.status || 500,
         data: {
           success: false,
+          requiresVerification: false,
           error: apiError.message || "Registration failed",
+          message: apiError.message,
         },
       };
     }
