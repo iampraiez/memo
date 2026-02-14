@@ -7,7 +7,9 @@ import Tag from "./ui/Tag";
 import MediaUploader from "./ui/MediaUploader";
 import { Memory } from "@/types/types";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
-import { db } from "@/lib/dexie";
+import { db } from "@/lib/dexie/db";
+import { syncService } from "@/services/sync.service";
+import { toast } from "sonner";
 
 interface CreateMemoryModalProps {
   isOpen: boolean;
@@ -46,14 +48,13 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
   const [formErrors, setFormErrors] = useState<{
     title?: string;
     mood?: string;
-    location?: string; // Add location to formErrors
+    location?: string;
   }>({});
   const [aiLoading, setAiLoading] = useState(false); // New state for AI loading
   const [isSaving, setIsSaving] = useState(false);
   const [aiGeneratedContent, setAiGeneratedContent] = useState(""); // New state for AI generated content
   const [showAiButtons, setShowAiButtons] = useState(false); // New state to control visibility of AI buttons
 
-  // Effect to update form data when editingMemory prop changes
   useEffect(() => {
     if (editingMemory) {
       setFormData({
@@ -189,14 +190,13 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
 
       const newMemory = {
         ...formData,
-        images: formData.images.map((file) => file.url), // Convert UploadedFile[] to string[] for Memory type
+        images: formData.images.map((file) => file.url), 
         id: editingMemory?.id || `memory-${Date.now()}`,
         createdAt: editingMemory?.createdAt || new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         syncStatus: "pending",
-        isPublic: editingMemory?.isPublic ?? false, // Set isPublic based on existing memory or false by default
+        isPublic: editingMemory?.isPublic ?? false,
       } as Memory;
-      console.log("newMemory", newMemory);
       setFormData({
         title: "",
         content: "",
@@ -208,28 +208,23 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
       });
 
       if (isOnline) {
-        // Assume successful save to backend for now
-        console.log("Attempting to save memory to backend:", newMemory);
-        // In a real app, you'd make an API call here, e.g., await saveMemoryToBackend(newMemory);
         newMemory.syncStatus = "synced";
       } else {
-        // Save to IndexedDB and mark as offline/pending
-        console.log("Saving memory to IndexedDB (offline):", newMemory);
         newMemory.syncStatus = "offline";
-        await db.offline_changes.add({
-          type: editingMemory ? "update" : "add",
-          collection: "memories",
+        await syncService.queueOperation({
+          operation: editingMemory ? "update" : "create",
+          entity: "memory",
+          entityId: newMemory.id,
           data: newMemory as unknown as Record<string, unknown>,
-          timestamp: Date.now(),
         });
       }
 
-      await db.memories.put(newMemory); // Save to local Dexie store for immediate UI update
-      await onSave(newMemory); // This `onSave` prop is now primarily for updating the UI with the new/updated memory
+      await db.memories.put(newMemory);
+      await onSave(newMemory); 
       onClose();
     } catch (error) {
       console.error("Save failed:", error);
-      // toast.error("Failed to save memory"); // Assuming toast is available
+      toast.error("Failed to save memory"); 
     } finally {
       setIsSaving(false);
     }

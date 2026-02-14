@@ -55,7 +55,6 @@ const MemoryShareModal: React.FC<MemoryShareModalProps> = ({
 
   const handleShare = () => {
     // Implementation would depend on the sharing method
-    console.log("Sharing memory:", memory.id, "via", shareMethod);
     onClose();
   };
 

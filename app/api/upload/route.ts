@@ -3,6 +3,8 @@ import { auth } from "@/lib/auth";
 import { CloudinaryService } from "@/services/cloudinary.service";
 import { logger } from "@/lib/logger";
 
+export const maxDuration = 60; // Increase timeout to 60 seconds
+
 export async function POST(req: Request) {
   try {
     const session = await auth();
@@ -16,6 +18,16 @@ export async function POST(req: Request) {
 
     if (!files || files.length === 0) {
       return NextResponse.json({ message: "No files provided" }, { status: 400 });
+    }
+
+    // Server-side file size validation (10MB limit)
+    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+    const oversizedFiles = files.filter(file => file.size > MAX_FILE_SIZE);
+
+    if (oversizedFiles.length > 0) {
+      return NextResponse.json({ 
+        message: `File size limit exceeded. The following files are too large: ${oversizedFiles.map(f => f.name).join(", ")}` 
+      }, { status: 400 });
     }
 
     logger.info(`Uploading ${files.length} files for user ${session.user.id}`);

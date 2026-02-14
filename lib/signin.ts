@@ -9,7 +9,6 @@ export async function handleSignIn(
   emailFromForm?: string
 ) {
   try {
-    console.log("email init", emailFromForm, formData);
     if (provider === "nodemailer" && emailFromForm) {
       return await signIn(provider, {
         email: emailFromForm,
@@ -23,7 +22,6 @@ export async function handleSignIn(
         redirect: false,
       });
     }
-    console.log("I wish", provider);
 
     if (formData) {
       return await signIn(provider, {

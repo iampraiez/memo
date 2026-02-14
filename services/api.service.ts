@@ -38,7 +38,6 @@ class ApiService {
           error.message ||
           "An unexpected error occurred";
 
-        // Log important codes for debugging
         if (status === 401) {
           console.warn("[API] Unauthorized - 401");
         } else if (status === 403) {
@@ -85,6 +84,15 @@ class ApiService {
   public async uploadFiles(files: File[] | File): Promise<string[]> {
     const formData = new FormData();
     const fileList = Array.isArray(files) ? files : [files];
+
+    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+    const oversizedFiles = fileList.filter(file => file.size > MAX_FILE_SIZE);
+
+    if (oversizedFiles.length > 0) {
+      const names = oversizedFiles.map(f => f.name).join(", ");
+      throw new Error(`File size limit exceeded (10MB). Too large: ${names}`);
+    }
+
     fileList.forEach((file) => formData.append("file", file));
 
     const response = await this.client.post<{ urls: string[] }>(

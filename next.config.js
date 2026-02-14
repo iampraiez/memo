@@ -24,14 +24,7 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "res.cloudinary.com",
-      },
-      {
-        protocol: "https",
-        hostname: "www.dropbox.com",
-      },
-      {
-        protocol: "https",
-        hostname: "dl.dropboxusercontent.com",
+        pathname: "/**",
       },
     ],
   },

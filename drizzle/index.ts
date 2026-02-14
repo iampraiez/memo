@@ -1,10 +1,33 @@
 import "dotenv/config";
 import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
 import * as schema from "./db/schema";
 import { logger } from "@/lib/logger";
 import { sql } from "drizzle-orm";
+import { NodePgDatabase } from "drizzle-orm/node-postgres";
 
-const db = drizzle(process.env.DATABASE_URL!, { schema });
+// Singleton pattern for DB connection in development
+// to avoid "too many connections" or "authentication timeout" errors during HMR
+const globalForDb = globalThis as unknown as {
+  pool: Pool | undefined;
+  db: NodePgDatabase<typeof schema> | undefined;
+};
+
+const pool =
+  globalForDb.pool ??
+  new Pool({
+    connectionString: process.env.DATABASE_URL,
+    max: 20,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 10000, // Increased to 10s for stability in dev
+  });
+
+const db = globalForDb.db ?? drizzle(pool, { schema });
+
+if (process.env.NODE_ENV !== "production") {
+  globalForDb.pool = pool;
+  globalForDb.db = db;
+}
 
 async function testDbConnection() {
   try {
@@ -17,6 +40,11 @@ async function testDbConnection() {
   }
 }
 
-testDbConnection();
+// Only log connection success on initial load or if explicitly needed
+// to avoid flooding logs during HMR
+if (!globalForDb.pool) {
+    testDbConnection();
+}
 
 export default db;
+export type DbType = typeof db;

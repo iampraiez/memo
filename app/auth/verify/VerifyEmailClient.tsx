@@ -39,6 +39,25 @@ export default function VerifyEmailClient() {
     }
   };
 
+  const handlePaste = (e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData("text").trim();
+    if (!/^\d{8}$/.test(pastedData)) {
+      toast.error("Please paste an 8-digit numeric code");
+      return;
+    }
+
+    const newCode = pastedData.split("");
+    setCode(newCode);
+    
+    // Focus the last input
+    const lastInput = document.getElementById("code-7");
+    if (lastInput) lastInput.focus();
+    
+    // Auto-verify if 8 digits are pasted
+    toast.success("Code pasted!");
+  };
+
   const handleKeyDown = (index: number, e: React.KeyboardEvent) => {
     if (e.key === "Backspace" && !code[index] && index > 0) {
       const prevInput = document.getElementById(`code-${index - 1}`);
@@ -119,6 +138,7 @@ export default function VerifyEmailClient() {
                   value={digit}
                   onChange={(e) => handleCodeChange(index, e.target.value)}
                   onKeyDown={(e) => handleKeyDown(index, e)}
+                  onPaste={handlePaste}
                   className="w-9 h-11 text-center text-lg font-bold bg-neutral-50 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-900/10 focus:border-primary-900 transition-all"
                 />
               ))}

@@ -33,7 +33,7 @@ export default function UserDropdown() {
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center space-x-2 p-1.5 rounded-2xl hover:bg-neutral-50 transition-all border border-transparent hover:border-neutral-100"
       >
-        <div className="w-8 h-8 rounded-full bg-primary-900 flex items-center justify-center text-secondary-400 font-bold overflow-hidden border border-white shadow-sm">
+        <div className="w-8 h-8 rounded-full bg-neutral-200 flex items-center justify-center text-neutral-600 font-bold overflow-hidden border border-white shadow-sm">
           {session.user.image ? (
             <Image src={session.user.image} alt={session.user.name || ""} width={32} height={32} />
           ) : (

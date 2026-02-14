@@ -1,10 +1,39 @@
 import Dexie, { type EntityTable } from 'dexie';
-import type { Memory, Comment, Reaction } from '@/types/types';
 
-export interface LocalMemory extends Omit<Memory, 'mood'> {
+// --- Shared Types ---
+
+export interface Memory {
+  id: string;
+  userId: string;
+  title: string;
+  content: string;
+  date: string;
+  location?: string | null;
   mood?: string | null;
-  _syncStatus?: 'synced' | 'pending' | 'error';
-  _lastSync?: number;
+  tags?: string[];
+  images?: string[];
+  isPublic: boolean;
+  isAiGenerated?: boolean | null;
+  syncStatus?: "synced" | "pending" | "offline" | "error" | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Comment {
+  id: string;
+  memoryId: string;
+  userId: string;
+  content: string;
+  timestamp: number;
+  syncStatus: "synced" | "pending" | "offline";
+}
+
+export interface Like {
+  id: string;
+  memoryId: string;
+  userId: string;
+  timestamp: number;
+  syncStatus: "synced" | "pending" | "offline";
 }
 
 export interface LocalUser {
@@ -26,71 +55,7 @@ export interface LocalUser {
       push: boolean;
     };
   };
-  followersCount?: number;
-  followingCount?: number;
-  memoriesCount?: number;
-  isFollowing?: boolean;
-  _syncStatus?: 'synced' | 'pending' | 'error';
-  _lastSync?: number;
-}
-
-export interface LocalComment extends Comment {
-  id: string; 
-  _syncStatus?: 'synced' | 'pending' | 'error';
-  _lastSync?: number;
-}
-
-export interface LocalReaction extends Reaction {
-  id: string; 
-  _syncStatus?: 'synced' | 'pending' | 'error';
-  _lastSync?: number;
-}
-
-export interface LocalNotification {
-  id: string;
-  userId: string;
-  type: 'comment' | 'reaction' | 'follow' | 'family_invite' | 'memory_share';
-  title: string;
-  message: string;
-  relatedId?: string;
-  read: boolean;
-  createdAt: string;
-  _syncStatus?: 'synced' | 'pending' | 'error';
-  _lastSync?: number;
-}
-
-export interface LocalFamilyMember {
-  id: string;
-  userId: string | null;
-  name: string;
-  email: string;
-  avatar?: string;
-  relationship: string;
-  status: 'pending' | 'accepted';
-  role: 'member' | 'admin';
-  _syncStatus?: 'synced' | 'pending' | 'error';
-  _lastSync?: number;
-}
-
-export interface LocalStory {
-  id: string;
-  userId: string;
-  title: string;
-  description?: string;
-  coverImage?: string;
-  memoryIds: string[];
-  createdAt: string;
-  updatedAt: string;
-  _syncStatus?: 'synced' | 'pending' | 'error';
-  _lastSync?: number;
-}
-
-export interface LocalTag {
-  id: string;
-  name: string;
-  userId: string;
-  _syncStatus?: 'synced' | 'pending' | 'error';
-  _lastSync?: number;
+  syncStatus: "synced" | "pending" | "offline";
 }
 
 export interface SyncQueue {
@@ -104,62 +69,48 @@ export interface SyncQueue {
   lastError?: string;
 }
 
-// Dexie Database
-class MemoDB extends Dexie {
-  memories!: EntityTable<LocalMemory, 'id'>;
+export interface OfflineChange {
+  id?: number;
+  type: "add" | "update" | "delete";
+  collection: string;
+  data: Record<string, unknown>;
+  timestamp: number;
+}
+
+// --- Database Configuration ---
+
+class MemoDatabase extends Dexie {
+  memories!: EntityTable<Memory, 'id'>;
   users!: EntityTable<LocalUser, 'id'>;
-  comments!: EntityTable<LocalComment, 'id'>;
-  reactions!: EntityTable<LocalReaction, 'id'>;
-  notifications!: EntityTable<LocalNotification, 'id'>;
-  familyMembers!: EntityTable<LocalFamilyMember, 'id'>;
-  stories!: EntityTable<LocalStory, 'id'>;
-  tags!: EntityTable<LocalTag, 'id'>;
+  comments!: EntityTable<Comment, 'id'>;
+  likes!: EntityTable<Like, 'id'>;
   syncQueue!: EntityTable<SyncQueue, 'id'>;
+  offline_changes!: EntityTable<OfflineChange, 'id'>;
 
   constructor() {
-    super('MemoDatabase');
-    
+    super('MemoDatabaseV2');
     this.version(1).stores({
-      memories: 'id, userId, createdAt, _syncStatus, _lastSync',
-      users: 'id, email, username, _syncStatus, _lastSync',
-      comments: 'id, memoryId, userId, createdAt, _syncStatus, _lastSync',
-      reactions: 'id, memoryId, userId, type, _syncStatus, _lastSync',
-      notifications: 'id, userId, type, read, createdAt, _syncStatus, _lastSync',
-      familyMembers: 'id, userId, email, status, _syncStatus, _lastSync',
-      stories: 'id, userId, createdAt, _syncStatus, _lastSync',
-      tags: 'id, userId, name, _syncStatus, _lastSync',
+      memories: 'id, userId, createdAt, syncStatus, mood, *tags',
+      users: 'id, email, username, syncStatus',
+      comments: 'id, memoryId, userId, timestamp, syncStatus',
+      likes: 'id, memoryId, userId, timestamp, syncStatus',
       syncQueue: '++id, entity, entityId, createdAt, retryCount',
+      offline_changes: '++id, type, collection, timestamp',
     });
   }
 }
 
-export const db = new MemoDB();
+export const db = new MemoDatabase();
 
-// Utility functions
-export async function clearAllData() {
-  await db.memories.clear();
-  await db.users.clear();
-  await db.comments.clear();
-  await db.reactions.clear();
-  await db.notifications.clear();
-  await db.familyMembers.clear();
-  await db.stories.clear();
-  await db.tags.clear();
-  await db.syncQueue.clear();
-}
+// --- Utility Functions ---
 
-export async function getStorageStats() {
-  const stats = {
-    memories: await db.memories.count(),
-    users: await db.users.count(),
-    comments: await db.comments.count(),
-    reactions: await db.reactions.count(),
-    notifications: await db.notifications.count(),
-    familyMembers: await db.familyMembers.count(),
-    stories: await db.stories.count(),
-    tags: await db.tags.count(),
-    syncQueue: await db.syncQueue.count(),
-  };
-
-  return stats;
+export async function clearAllLocalData() {
+  await Promise.all([
+    db.memories.clear(),
+    db.users.clear(),
+    db.comments.clear(),
+    db.likes.clear(),
+    db.syncQueue.clear(),
+    db.offline_changes.clear(),
+  ]);
 }

@@ -128,8 +128,8 @@ export const memoryMedia = pgTable("memory_media", {
   filename: text("filename").notNull(),
   size: integer("size"),
   metadata: json("metadata"),
-  storageProvider: text("storage_provider").notNull().default("cloudinary"), // 'local', 'cloudinary'
-  storageKey: text("storage_key"), // External ID or path
+  storageProvider: text("storage_provider").notNull().default("cloudinary"), 
+  storageKey: text("storage_key"), 
 });
 
 export const tags = pgTable("tags", {

@@ -19,23 +19,23 @@ import { memoryService } from "@/services/memory.service";
 import { analyticsService } from "@/services/analytics.service";
 import { userService } from "@/services/user.service";
 import { socialService } from "@/services/social.service";
+import { usePathname } from "next/navigation";
 
 interface SidebarProps {
   isOpen: boolean;
-  currentPage: string;
   onNavigate: (page: string) => void;
   onClick: () => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
   isOpen,
-  currentPage,
   onNavigate,
   onClick,
 }) => {
   const { data: session } = useSession();
   const queryClient = useQueryClient();
   const { data: memoriesData } = useMemories();
+  const pathname = usePathname();
   
   const totalMemories = memoriesData?.memories?.length || 0;
   
@@ -92,7 +92,9 @@ const Sidebar: React.FC<SidebarProps> = ({
             </div>
             {navigation.map((item) => {
               const Icon = item.icon;
-              const isActive = currentPage === item.id;
+              const isActive = item.id === "timeline" 
+                ? (pathname === "/" || pathname === "/timeline")
+                : pathname.startsWith(`/${item.id}`);
 
               return (
                 <button

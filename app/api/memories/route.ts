@@ -33,10 +33,14 @@ export async function GET(req: Request) {
     const offset = parseInt(searchParams.get("offset") || "0");
 
     // Get user ID
+    interface User {
+        id: string;
+        email: string;
+    }
     const [user] = await db.query.users.findMany({
       where: sql`email = ${session.user.email}`,
       limit: 1,
-    });
+    }) as User[];
 
     if (!user) {
       return NextResponse.json({ message: "User not found" }, { status: 404 });
@@ -63,20 +67,29 @@ export async function GET(req: Request) {
       }
     });
     
+    if (!userMemories) {
+       logger.warn(`No memories found context for user ${user.id}`);
+       return NextResponse.json({ memories: [] }, { status: 200 });
+    }
+
     // Transform result to include flattened tags and images
-    const formattedMemories = userMemories.map(mem => ({
+    const formattedMemories = userMemories.map((mem) => ({
         ...mem,
-        tags: mem.memoryTags ? mem.memoryTags.map(mt => mt.tag.name) : [],
-        images: mem.memoryMedia ? mem.memoryMedia.map(mm => mm.url) : [],
+        tags: mem.memoryTags ? mem.memoryTags.map((mt) => mt.tag.name) : [],
+        images: mem.memoryMedia ? mem.memoryMedia.map((mm) => mm.url) : [],
     }));
 
     logger.info(`Fetched ${formattedMemories.length} memories for user ${user.id}`);
 
     return NextResponse.json({ memories: formattedMemories }, { status: 200 });
-  } catch (error) {
-    logger.error("Error fetching memories:", error);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    
+    logger.error("Error fetching memories:", { error: errorMessage, stack: errorStack });
+    
     return NextResponse.json(
-      { message: "Internal Server Error" },
+      { message: "Internal Server Error", error: errorMessage },
       { status: 500 }
     );
   }
@@ -95,10 +108,14 @@ export async function POST(req: Request) {
     const validatedData = memorySchema.parse(body);
 
     // Get user ID
+    interface User {
+        id: string;
+        email: string;
+    }
     const [user] = await db.query.users.findMany({
       where: sql`email = ${session.user.email}`,
       limit: 1,
-    });
+    }) as User[];
 
     if (!user) {
       return NextResponse.json({ message: "User not found" }, { status: 404 });
@@ -183,11 +200,12 @@ export async function POST(req: Request) {
       );
     }
 
-    logger.error("Error creating memory:", error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    logger.error("Error creating memory:", { error: errorMessage });
+    
     return NextResponse.json(
       { message: "Internal Server Error" },
       { status: 500 }
     );
   }
 }
-

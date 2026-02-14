@@ -77,7 +77,6 @@ export class CloudinaryService {
               if (!result) {
                 return reject(new Error('Cloudinary upload result is undefined'));
               }
-              console.log(`Successfully uploaded to Cloudinary (stream): ${result.secure_url}`);
               resolve(result.secure_url);
             }
           );
@@ -85,7 +84,6 @@ export class CloudinaryService {
         });
       }
 
-      // Fallback for string/base64 inputs
       const result = await cloudinary.uploader.upload(fileBuffer as string, {
         public_id: publicId,
         folder: folder,
@@ -97,11 +95,9 @@ export class CloudinaryService {
         overwrite: false
       }) as CloudinaryUploadResult;
 
-      console.log(`Successfully uploaded to Cloudinary: ${result.secure_url}`);
       return result.secure_url;
 
     } catch (error: unknown) {
-      console.error('Cloudinary upload failed raw error:', error);
       
       interface CloudinaryErrorDetail {
         message?: string;
@@ -118,7 +114,6 @@ export class CloudinaryService {
         name: (error as Error).name || (cloudinaryError as { name?: string }).name,
       });
 
-      // Handle specific error types
       if (err.http_code === 401) {
         throw new Error('Cloudinary authentication failed - check your API credentials');
       }
@@ -147,12 +142,10 @@ export class CloudinaryService {
       const result = await cloudinary.uploader.destroy(publicId);
       
       if (result.result === 'ok') {
-        console.log(`Successfully deleted from Cloudinary: ${publicId}`);
         return true;
       }
 
       if (result.result === 'not found') {
-        console.log(`File not found in Cloudinary: ${publicId}`);
         return false;
       }
 
@@ -196,12 +189,11 @@ export class CloudinaryService {
     cloudName?: string;
   }> {
     try {
-      // Test by getting account usage
-      const result = await cloudinary.api.usage();
+     await cloudinary.api.usage();
       
       return {
         ok: true,
-        message: 'Cloudinary connection successful: ' + result,
+        message: 'Cloudinary connection successful',
         cloudName: process.env.CLOUDINARY_CLOUD_NAME
       };
     } catch (error: unknown) {

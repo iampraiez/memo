@@ -54,8 +54,6 @@ export default function DashboardLayout({
 
   if (!session) return null;
 
-  const currentPage = pathname.split("/").pop() || "timeline";
-
   return (
     <div className="min-h-screen bg-neutral-50 selection:bg-primary-100 selection:text-primary-900">
       <Header
@@ -71,7 +69,6 @@ export default function DashboardLayout({
       <div className="flex">
         <Sidebar
           isOpen={sidebarOpen}
-          currentPage={currentPage}
           onNavigate={(page) => {
             router.push(`/${page}`);
             setSidebarOpen(false);
