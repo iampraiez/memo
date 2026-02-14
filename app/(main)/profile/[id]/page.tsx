@@ -49,7 +49,7 @@ export default function ProfilePage() {
 
   if (!mounted || isLoading) return <Loading fullPage text="Entering sanctuary..." />;
   
-if (is404Error(error) || (!isLoading && !profile)) {
+if (is404Error(error)) {
   notFound();
 }
   if (error) {

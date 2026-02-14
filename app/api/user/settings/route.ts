@@ -75,6 +75,8 @@ export async function PATCH(req: Request) {
 
     const body = await req.json();
     const { name, avatar, bio, username, image, preferences, isOnboarded } = body;
+    console.log("[API] PATCH /user/settings body:", body);
+    console.log("[API] PATCH /user/settings image:", image, "avatar:", avatar);
 
     // If username is being updated, check for uniqueness
     if (username) {

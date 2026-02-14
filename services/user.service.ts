@@ -58,6 +58,7 @@ export const userService = {
 
   // Update settings (optimistic)
   updateSettings: async (data: Partial<UserSettings>) => {
+    console.log('[UserService] updateSettings called with:', data);
     const userId = await userService.getCurrentUserId();
     const existing = await db.users.get(userId || '');
 

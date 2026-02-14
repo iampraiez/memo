@@ -10,6 +10,12 @@ class SyncService {
     if (typeof window !== 'undefined') {
       window.addEventListener('online', () => this.handleOnline());
       window.addEventListener('offline', () => this.handleOffline());
+      
+      // Process queue on startup if online
+      if (this.isOnline) {
+        // slight delay to let DB initialize
+        setTimeout(() => this.processSyncQueue(), 1000);
+      }
     }
   }
 
@@ -47,6 +53,9 @@ class SyncService {
       createdAt: Date.now(),
       retryCount: 0,
     });
+    console.log('[Sync] Queued operation:', operation.entity, operation.operation);
+
+    // Try to sync immediately if online
 
     // Try to sync immediately if online
     if (this.isOnline) {
@@ -65,6 +74,7 @@ class SyncService {
   // Process sync queue
   async processSyncQueue() {
     if (this.syncInProgress || !this.isOnline) {
+      console.log('[Sync] Skipping processSyncQueue. In progress:', this.syncInProgress, 'Online:', this.isOnline);
       return;
     }
 
@@ -82,7 +92,8 @@ class SyncService {
           // Remove from queue on success
           await db.syncQueue.delete(operation.id!);
         } catch (error) {
-          console.error('[Sync] Operation failed:', error);
+          console.error('[Sync] Execute operation failed:', error);
+          console.error('[Sync] Operation Failed Details:', operation);
           
           // Update retry count
           await db.syncQueue.update(operation.id!, {
@@ -218,6 +229,7 @@ class SyncService {
   private async syncUser<T>(op: string, id: string, data: T) {
     switch (op) {
       case 'update':
+        console.log('[Sync] Syncing user update:', data);
         await apiService.patch('/user/settings', data);
         break;
     }

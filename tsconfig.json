@@ -12,7 +12,7 @@
         "lib/*"
       ],
       "@/types/*": [
-        "app/_types/*"
+        "types/*"
       ],
       "@/services/*": [
         "services/*"

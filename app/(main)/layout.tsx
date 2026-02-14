@@ -6,7 +6,7 @@ import OfflineBanner from "@/components/ui/OfflineBanner";
 import NotificationPanel from "@/components/NotificationPanel"
 import { useNotifications } from "@/hooks/useNotifications";
 import { usePathname, useRouter } from "next/navigation";
-import { useNetworkStatus } from "@/hooks/useNetworkStatus";
+import { useSync } from "@/components/providers/SyncProvider";
 import { useSession } from "next-auth/react";
 import CreateMemoryModal from "@/components/CreateMemoryModal";
 import { useCreateMemory } from "@/hooks/useMemories";
@@ -22,7 +22,7 @@ export default function DashboardLayout({
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const { unreadCount } = useNotifications();
-  const isOnline = useNetworkStatus();
+  const { isOnline, pendingSyncCount } = useSync();
   const pathname = usePathname();
   const router = useRouter();
   const { data: session, status } = useSession();
@@ -64,7 +64,7 @@ export default function DashboardLayout({
         notificationCount={unreadCount}
         onNavigate={(page) => router.push(`/${page}`)}
       />
-      <OfflineBanner isVisible={!isOnline} />
+      <OfflineBanner />
 
       <div className="flex">
         <Sidebar

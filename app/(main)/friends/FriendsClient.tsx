@@ -15,7 +15,7 @@ import { useTimelineMemories, useSearchUsers, useFollowUser, useUnfollowUser } f
 import Image from "next/image";
 import EmptyState from "@/components/ui/EmptyState";
 import Select from "@/components/ui/Select";
-import { Memory, Reaction, User } from "@/app/_types/types";
+import { Memory, Reaction, User } from "@/types/types";
 
 
 interface FriendsClientProps {

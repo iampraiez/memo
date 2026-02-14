@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import db from "@/drizzle/index";
 import { memories, follows } from "@/drizzle/db/schema";
 import { and, eq, or, inArray, desc, sql, lt } from "drizzle-orm";
-import { Timeline } from "@/app/_types/types";
+import { Timeline } from "@/types/types";
 
 export async function GET(req: Request) {
   const session = await auth();
