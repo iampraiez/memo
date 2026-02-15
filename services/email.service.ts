@@ -1,6 +1,6 @@
 import type { Attachment } from 'nodemailer/lib/mailer';
 import nodemailer from "nodemailer";
-import { logger } from "@/lib/logger";
+import { logger } from "@/custom/log/logger";
 import { env } from "@/config/env";
 
 const transporter = nodemailer.createTransport({
@@ -33,7 +33,6 @@ export const sendEmail = async ({ to, subject, html, attachments }: SendEmailPar
     } catch (error) {
       logger.error(`Email attempt ${i + 1} for ${to} failed:`, error);
       if (i === retries - 1) return { success: false, error };
-      // Exponential backoff
       await new Promise((resolve) => setTimeout(resolve, Math.pow(2, i) * 1000));
     }
   }

@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import db from "@/drizzle/index";
 import { memories, tags, memoryTags, memoryMedia } from "@/drizzle/db/schema";
 import { eq, and, sql } from "drizzle-orm";
-import { logger } from "@/lib/logger";
+import { logger } from "@/custom/log/logger";
 import { z } from "zod";
 import { v4 as uuidv4 } from "uuid";
 

@@ -3,7 +3,7 @@ import db from "@/drizzle/index";
 import { users } from "@/drizzle/db/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
-import { logger } from "@/libs/logger";
+import { logger } from "@/custom/log/logger";
 
 const forgotPasswordSchema = z.object({
   email: z.string().email(),

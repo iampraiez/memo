@@ -38,8 +38,6 @@ const Sidebar: React.FC<SidebarProps> = ({
   const { data: memoriesData } = useMemories();
   const pathname = usePathname();
   
-  const totalMemories = memoriesData?.memories?.length || 0;
-  
   const navigation = [
     { name: "Timeline", icon: House, id: "timeline" },
     { name: "Profile", icon: User, id: "profile" },
@@ -164,7 +162,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               <div className="grid grid-cols-1 gap-4">
                 <div className="flex flex-col">
                   <span className="text-[28px] font-display font-bold text-neutral-900 leading-none">
-                    {totalMemories}
+                    {memoriesData?.memories?.length || 0}
                   </span>
                   <span className="text-xs font-medium text-neutral-500 mt-1">Total Memories Captured</span>
                 </div>

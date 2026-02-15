@@ -8,7 +8,7 @@ import {
 import { eq } from "drizzle-orm";
 import { sendEmail } from "@/services/email.service";
 import { sendNotificationToUser } from "@/services/notification.service";
-import { logger } from "@/lib/logger";
+import { logger } from "@/custom/log/logger";
 
 export const runExportJob = async (jobId: string, userId: string) => {
     try {

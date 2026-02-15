@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import db from "@/drizzle/index";
 import { users, userPreferences } from "@/drizzle/db/schema";
 import { eq, sql } from "drizzle-orm";
-import { logger } from "@/lib/logger";
+import { logger } from "@/custom/log/logger";
 import { v4 as uuidv4 } from "uuid";
 
 export async function GET() {

@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import db from "@/drizzle/index";
 import { memories } from "@/drizzle/db/schema";
 import { eq, and, gte, lte, sql } from "drizzle-orm";
-import { logger } from "@/lib/logger";
+import { logger } from "@/custom/log/logger";
 
 export async function GET(req: Request) {
   try {

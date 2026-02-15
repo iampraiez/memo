@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import db from "@/drizzle/index";
 import { verificationTokens } from "@/drizzle/db/schema";
 import { sendDeletionOTP } from "@/services/email.service";
-import { logger } from "@/lib/logger";
+import { logger } from "@/custom/log/logger";
 import { eq, and } from "drizzle-orm";
 
 export async function POST() {

@@ -54,6 +54,7 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
   const [isSaving, setIsSaving] = useState(false);
   const [aiGeneratedContent, setAiGeneratedContent] = useState(""); // New state for AI generated content
   const [showAiButtons, setShowAiButtons] = useState(false); // New state to control visibility of AI buttons
+  const [imageUploading, setImageUploading] = useState(false);
 
   useEffect(() => {
     if (editingMemory) {
@@ -91,10 +92,10 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
     setAiGeneratedContent(""); // Clear AI generated content on modal open/edit
   }, [editingMemory, isOpen]); // Depend on editingMemory and isOpen
 
-  // Real file upload to Dropbox via our API
-  const handleUpload = async (filesToUpload: File[]): Promise<void> => {
+  // Real file upload to Cloudinary/Dropbox via our API
+  const handleUpload = async (uploadPairs: { file: File; id: string }[]): Promise<void> => {
     const formData = new FormData();
-    filesToUpload.forEach((file) => formData.append("file", file));
+    uploadPairs.forEach((pair) => formData.append("file", pair.file));
 
     try {
       const response = await fetch("/api/upload", {
@@ -108,14 +109,14 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
 
       const { urls } = await response.json();
 
-      // Update the formData with real Dropbox URLs
+      // Update the formData with real URLs
       setFormData((prev) => ({
         ...prev,
         images: prev.images.map((img) => {
-          // Find the corresponding uploaded file by name
-          const uploadIndex = filesToUpload.findIndex((f) => f.name === img.name);
-          if (uploadIndex !== -1 && img.url.startsWith("blob:")) {
-            return { ...img, url: urls[uploadIndex] };
+          const match = uploadPairs.find((p) => p.id === img.id);
+          if (match) {
+            const index = uploadPairs.indexOf(match);
+            return { ...img, url: urls[index] };
           }
           return img;
         }),
@@ -181,6 +182,18 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
 
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
+      return;
+    }
+
+    if (imageUploading) {
+      toast.error("Please wait for images to finish uploading");
+      return;
+    }
+
+    // Critical: Ensure no blob URLs are being saved
+    const blobImages = formData.images.filter(img => img.url.startsWith('blob:'));
+    if (blobImages.length > 0) {
+      toast.error("Some images failed to upload. Please remove or re-upload them.");
       return;
     }
 
@@ -399,6 +412,8 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
               }}
               // real upload via Dropbox API
               onUpload={handleUpload} // Pass the real upload function
+              onUploadStart={() => setImageUploading(true)}
+              onUploadEnd={() => setImageUploading(false)}
             />
           </div>
         )}
@@ -506,8 +521,10 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
             >
               Clear
             </Button>
-            <Button onClick={handleSave} loading={isSaving}>
-              {editingMemory ? (isSaving ? "Saving..." : "Save Changes") : (isSaving ? "Creating..." : "Create Memory")}
+            <Button onClick={handleSave} loading={isSaving || imageUploading} disabled={isSaving || imageUploading}>
+              {editingMemory 
+                ? (isSaving ? "Saving..." : (imageUploading ? "Uploading..." : "Save Changes")) 
+                : (isSaving ? "Creating..." : (imageUploading ? "Uploading..." : "Create Memory"))}
             </Button>
           </div>
         </div>

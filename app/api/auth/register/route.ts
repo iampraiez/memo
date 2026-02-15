@@ -4,7 +4,7 @@ import db from "@/drizzle/index";
 import { users, verificationTokens } from "@/drizzle/db/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
-import { logger } from "@/lib/logger";
+import { logger } from "@/custom/log/logger";
 import { v4 as uuidv4 } from "uuid";
 import { sendVerificationEmail } from "@/services/email.service";
 

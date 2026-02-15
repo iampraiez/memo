@@ -3,7 +3,7 @@ import db from "@/drizzle/index";
 import { users, verificationTokens } from "@/drizzle/db/schema";
 import { eq, and } from "drizzle-orm";
 import { z } from "zod";
-import { logger } from "@/lib/logger";
+import { logger } from "@/custom/log/logger";
 
 const verifySchema = z.object({
   email: z.string().email(),

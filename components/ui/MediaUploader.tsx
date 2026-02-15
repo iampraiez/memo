@@ -22,7 +22,9 @@ interface MediaUploaderProps {
   maxFiles?: number;
   files: UploadedFile[];
   onFilesChange: (files: UploadedFile[]) => void;
-  onUpload?: (files: File[]) => Promise<void>;
+  onUpload?: (files: { file: File; id: string }[]) => Promise<void>;
+  onUploadStart?: () => void;
+  onUploadEnd?: () => void;
   className?: string;
 }
 
@@ -35,6 +37,8 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
   files,
   onFilesChange,
   onUpload,
+  onUploadStart,
+  onUploadEnd,
   className,
 }) => {
   const [isDragging, setIsDragging] = useState(false);
@@ -95,13 +99,9 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
     // Simulate upload progress
     if (onUpload) {
       setUploading(true);
+      onUploadStart?.();
       try {
-        await onUpload(validFiles);
-        // Update files to show completion
-        onFilesChange([
-          ...files,
-          ...fileObjects.map((f) => ({ ...f, progress: 100 })),
-        ]);
+        await onUpload(fileObjects.map((obj, i) => ({ file: validFiles[i], id: obj.id })));
       } catch (error) {
         // Update files to show error
         onFilesChange([
@@ -111,6 +111,7 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
         console.error("Upload failed", error);
       } finally {
         setUploading(false);
+        onUploadEnd?.();
       }
     }
   };

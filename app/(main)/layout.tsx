@@ -21,6 +21,7 @@ export default function DashboardLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const { unreadCount } = useNotifications();
   const { isOnline } = useSync();
   const pathname = usePathname();
@@ -30,6 +31,7 @@ export default function DashboardLayout({
   const updateMemoryMutation = useUpdateMemory();
 
   useEffect(() => {
+    setMounted(true);
     setSidebarOpen(false);
   }, [pathname]);
 
@@ -59,11 +61,7 @@ export default function DashboardLayout({
     }
   };
 
-  if (status === "loading") {
-    return null;
-  }
-
-  if (!session) return null;
+  if (!session && status !== "loading") return null;
 
   return (
     <div className="min-h-screen bg-neutral-50 selection:bg-primary-100 selection:text-primary-900">
@@ -71,11 +69,11 @@ export default function DashboardLayout({
         onCreateMemory={() => setCreateModalOpen(true)}
         onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
         onShowNotifications={() => setShowNotifications(!showNotifications)}
-        syncStatus={isOnline ? "online" : "offline"}
+        syncStatus={mounted ? (isOnline ? "online" : "offline") : "offline"}
         notificationCount={unreadCount}
         onNavigate={(page) => router.push(`/${page}`)}
       />
-      <OfflineBanner />
+      {mounted && <OfflineBanner />}
 
       <div className="flex">
         <Sidebar
@@ -94,16 +92,20 @@ export default function DashboardLayout({
         </main>
       </div>
 
-      <CreateMemoryModal
-        isOpen={createModalOpen}
-        onClose={() => setCreateModalOpen(false)}
-        onSave={handleSaveMemory}
-      />
+      {mounted && (
+        <>
+          <CreateMemoryModal
+            isOpen={createModalOpen}
+            onClose={() => setCreateModalOpen(false)}
+            onSave={handleSaveMemory}
+          />
 
-      <NotificationPanel
-        isOpen={showNotifications}
-        onClose={() => setShowNotifications(false)}
-      />
+          <NotificationPanel
+            isOpen={showNotifications}
+            onClose={() => setShowNotifications(false)}
+          />
+        </>
+      )}
     </div>
   );
 }
