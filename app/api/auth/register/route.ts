@@ -34,9 +34,7 @@ export async function POST(req: Request) {
         const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
 
         // Delete any existing tokens for this email
-        await db
-          .delete(verificationTokens)
-          .where(eq(verificationTokens.identifier, email));
+        await db.delete(verificationTokens).where(eq(verificationTokens.identifier, email));
 
         // Insert new verification token
         await db.insert(verificationTokens).values({
@@ -56,18 +54,16 @@ export async function POST(req: Request) {
 
         return NextResponse.json(
           {
-            message: "This email is already registered but not verified. A new verification code has been sent.",
+            message:
+              "This email is already registered but not verified. A new verification code has been sent.",
             requiresVerification: true,
             isExistingUnverified: true,
           },
-          { status: 200 }
+          { status: 200 },
         );
       }
 
-      return NextResponse.json(
-        { message: "Email already in use" },
-        { status: 409 },
-      );
+      return NextResponse.json({ message: "Email already in use" }, { status: 409 });
     }
 
     const hashedPassword = await hash(password, 12);
@@ -88,9 +84,7 @@ export async function POST(req: Request) {
     const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
 
     // Delete any existing tokens for this email
-    await db
-      .delete(verificationTokens)
-      .where(eq(verificationTokens.identifier, email));
+    await db.delete(verificationTokens).where(eq(verificationTokens.identifier, email));
 
     // Insert new verification token
     await db.insert(verificationTokens).values({
@@ -111,8 +105,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json(
       {
-        message:
-          "User created successfully. Please check your email for verification code.",
+        message: "User created successfully. Please check your email for verification code.",
         user: { id: newUser[0].id, email: newUser[0].email },
         requiresVerification: true,
       },
@@ -120,15 +113,9 @@ export async function POST(req: Request) {
     );
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { message: "Invalid input", errors: error.issues },
-        { status: 400 },
-      );
+      return NextResponse.json({ message: "Invalid input", errors: error.issues }, { status: 400 });
     }
     logger.error("Registration error:", error);
-    return NextResponse.json(
-      { message: "Internal Server Error" },
-      { status: 500 },
-    );
+    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }
 }

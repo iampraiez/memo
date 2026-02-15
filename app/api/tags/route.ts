@@ -29,10 +29,10 @@ export async function GET() {
       with: {
         memoryTags: {
           with: {
-            tag: true
-          }
-        }
-      }
+            tag: true,
+          },
+        },
+      },
     });
 
     // Calculate tag statistics
@@ -43,30 +43,31 @@ export async function GET() {
       if (memory.memoryTags) {
         memory.memoryTags.forEach(({ tag }) => {
           if (tag) {
-             const tagName = tag.name;
-             tagCounts[tagName] = (tagCounts[tagName] || 0) + 1;
-             tagColors[tagName] = tag.color ||  `hsl(${tagName.split('').reduce((acc, char) => char.charCodeAt(0) + acc, 0) % 360}, 70%, 60%)`;
+            const tagName = tag.name;
+            tagCounts[tagName] = (tagCounts[tagName] || 0) + 1;
+            tagColors[tagName] =
+              tag.color ||
+              `hsl(${tagName.split("").reduce((acc, char) => char.charCodeAt(0) + acc, 0) % 360}, 70%, 60%)`;
           }
         });
       }
     });
 
     // Create tag objects
-    const tags = Object.entries(tagCounts).map(([name, count]) => ({
-      id: `tag-${name.toLowerCase().replace(/\s+/g, '-')}`,
-      name,
-      count,
-      color: tagColors[name],
-    })).sort((a, b) => b.count - a.count);
+    const tags = Object.entries(tagCounts)
+      .map(([name, count]) => ({
+        id: `tag-${name.toLowerCase().replace(/\s+/g, "-")}`,
+        name,
+        count,
+        color: tagColors[name],
+      }))
+      .sort((a, b) => b.count - a.count);
 
     logger.info(`Fetched ${tags.length} tags for user ${user.id}`);
 
     return NextResponse.json({ tags }, { status: 200 });
   } catch (error) {
     logger.error("Error fetching tags:", error);
-    return NextResponse.json(
-      { message: "Internal Server Error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }
 }

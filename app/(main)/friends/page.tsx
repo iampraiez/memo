@@ -4,7 +4,7 @@ import FriendsClient from "./FriendsClient";
 import { getSocialTimeline } from "@/lib/social-ssr";
 
 async function FriendsContent() {
-  const initialMemories = await getSocialTimeline() || [];
+  const initialMemories = (await getSocialTimeline()) || [];
   return <FriendsClient initialMemories={initialMemories} />;
 }
 

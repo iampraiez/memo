@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import OfflineBanner from "@/components/ui/OfflineBanner";
-import NotificationPanel from "@/components/NotificationPanel"
+import NotificationPanel from "@/components/NotificationPanel";
 import { useNotifications } from "@/hooks/useNotifications";
 import { usePathname, useRouter } from "next/navigation";
 import { useSync } from "@/components/providers/SyncProvider";
@@ -13,11 +13,7 @@ import { useCreateMemory, useUpdateMemory } from "@/hooks/useMemories";
 import { Memory } from "@/types/types";
 import { toast } from "sonner";
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -44,8 +40,8 @@ export default function DashboardLayout({
   const handleSaveMemory = async (memory: Memory) => {
     try {
       // Check if it's a temp ID or existing ID
-      const isUpdate = memory.id && !memory.id.startsWith('memory-');
-      
+      const isUpdate = memory.id && !memory.id.startsWith("memory-");
+
       if (isUpdate) {
         // Extract only updateable data
         const { id, ...data } = memory;
@@ -64,7 +60,7 @@ export default function DashboardLayout({
   if (!session && status !== "loading") return null;
 
   return (
-    <div className="min-h-screen bg-neutral-50 selection:bg-primary-100 selection:text-primary-900">
+    <div className="selection:bg-primary-100 selection:text-primary-900 min-h-screen bg-neutral-50">
       <Header
         onCreateMemory={() => setCreateModalOpen(true)}
         onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
@@ -85,10 +81,8 @@ export default function DashboardLayout({
           onClick={() => setSidebarOpen(false)}
         />
 
-        <main className="flex-1 lg:ml-64 transition-all duration-300">
-          <div className="max-w-400 mx-auto min-h-[calc(100vh-80px)]">
-            {children}
-          </div>
+        <main className="flex-1 transition-all duration-300 lg:ml-64">
+          <div className="mx-auto min-h-[calc(100vh-80px)] max-w-400">{children}</div>
         </main>
       </div>
 

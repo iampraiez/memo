@@ -48,8 +48,7 @@ export class MemoryLaneDexie extends Dexie {
   constructor() {
     super("MemoryLaneDatabase");
     this.version(1).stores({
-      memories:
-        "id, title, date, mood, *tags, isAiGenerated, syncStatus, userId, createdAt", 
+      memories: "id, title, date, mood, *tags, isAiGenerated, syncStatus, userId, createdAt",
       offline_changes: "++id, type, collection, timestamp",
       likes: "id, memoryId, userId, timestamp, syncStatus",
       comments: "id, memoryId, userId, timestamp, syncStatus",

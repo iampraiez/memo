@@ -21,8 +21,8 @@ export const familyService = {
 
     // Read from Dexie
     let members = await db.familyMembers
-      .where('userId')
-      .equals(userId || '')
+      .where("userId")
+      .equals(userId || "")
       .toArray();
 
     // Background sync if online
@@ -35,20 +35,20 @@ export const familyService = {
           await db.familyMembers.put({
             ...member,
             userId: member.userId || "", // Ensure userId is a string
-            _syncStatus: 'synced',
+            _syncStatus: "synced",
             _lastSync: Date.now(),
           });
         }
 
         // Re-read
         members = await db.familyMembers
-          .where('userId')
-          .equals(userId || '')
+          .where("userId")
+          .equals(userId || "")
           .toArray();
 
         return response;
       } catch (error) {
-        console.error('[FamilyService] Sync failed, using cache:', error);
+        console.error("[FamilyService] Sync failed, using cache:", error);
       }
     }
 
@@ -62,13 +62,13 @@ export const familyService = {
 
     const newMember: LocalFamilyMember = {
       id: tempId,
-      userId: userId || '',
+      userId: userId || "",
       email: data.email,
       name: data.name || data.email,
       relationship: data.relationship,
-      status: 'pending',
-      role: 'member',
-      _syncStatus: 'pending',
+      status: "pending",
+      role: "member",
+      _syncStatus: "pending",
       _lastSync: Date.now(),
     };
 
@@ -77,8 +77,8 @@ export const familyService = {
 
     // Queue for sync
     await syncService.queueOperation({
-      operation: 'create',
-      entity: 'family',
+      operation: "create",
+      entity: "family",
       entityId: tempId,
       data: data as unknown as Record<string, unknown>,
     });
@@ -88,8 +88,8 @@ export const familyService = {
 
   // Helper
   getCurrentUserId: async (): Promise<string | null> => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('currentUserId');
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("currentUserId");
     }
     return null;
   },

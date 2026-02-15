@@ -9,43 +9,48 @@ interface OfflineBannerProps {
   className?: string;
 }
 
-const OfflineBanner: React.FC<OfflineBannerProps> = ({
-  isVisible: manualVisible,
-  className,
-}) => {
+const OfflineBanner: React.FC<OfflineBannerProps> = ({ isVisible: manualVisible, className }) => {
   const { isOnline, pendingSyncCount, isSyncing, manualSync } = useSync();
-  
+
   // Show if offline OR if we have pending syncs
-  const showBanner = manualVisible !== undefined ? manualVisible : (!isOnline || pendingSyncCount > 0);
+  const showBanner =
+    manualVisible !== undefined ? manualVisible : !isOnline || pendingSyncCount > 0;
 
   if (!showBanner) return null;
 
   return (
     <div
       className={cn(
-        "px-4 py-2 w-full z-50 transition-all duration-300",
-        !isOnline ? "bg-warning-50 border-b border-warning-200" : "bg-primary-50 border-b border-primary-100",
-        className
+        "z-50 w-full px-4 py-2 transition-all duration-300",
+        !isOnline
+          ? "bg-warning-50 border-warning-200 border-b"
+          : "bg-primary-50 border-primary-100 border-b",
+        className,
       )}
     >
-      <div className="flex items-center justify-between max-w-7xl mx-auto">
+      <div className="mx-auto flex max-w-7xl items-center justify-between">
         <div className="flex items-center space-x-3">
           {!isOnline ? (
-            <WifiOff className="w-4 h-4 text-warning-600" />
+            <WifiOff className="text-warning-600 h-4 w-4" />
           ) : (
-            <Loader2 className={cn("w-4 h-4 text-primary-600", isSyncing && "animate-spin")} />
+            <Loader2 className={cn("text-primary-600 h-4 w-4", isSyncing && "animate-spin")} />
           )}
           <div>
-            <p className={cn("text-xs font-medium", !isOnline ? "text-warning-800" : "text-primary-800")}>
-              {!isOnline 
-                ? "Working Offline" 
-                : isSyncing 
-                  ? "Syncing changes..." 
+            <p
+              className={cn(
+                "text-xs font-medium",
+                !isOnline ? "text-warning-800" : "text-primary-800",
+              )}
+            >
+              {!isOnline
+                ? "Working Offline"
+                : isSyncing
+                  ? "Syncing changes..."
                   : "All changes saved locally"}
             </p>
             {pendingSyncCount > 0 && (
-              <p className="text-[10px] text-warning-700">
-                {pendingSyncCount} {pendingSyncCount === 1 ? 'change' : 'changes'} waiting to sync
+              <p className="text-warning-700 text-[10px]">
+                {pendingSyncCount} {pendingSyncCount === 1 ? "change" : "changes"} waiting to sync
               </p>
             )}
           </div>
@@ -57,9 +62,9 @@ const OfflineBanner: React.FC<OfflineBannerProps> = ({
             size="sm"
             onClick={manualSync}
             disabled={isSyncing}
-            className="h-7 text-[10px] text-primary-700 hover:text-primary-800 hover:bg-primary-100"
+            className="text-primary-700 hover:text-primary-800 hover:bg-primary-100 h-7 text-[10px]"
           >
-            <RefreshCw className={cn("w-3 h-3 mr-1.5", isSyncing && "animate-spin")} />
+            <RefreshCw className={cn("mr-1.5 h-3 w-3", isSyncing && "animate-spin")} />
             Sync Now
           </Button>
         )}

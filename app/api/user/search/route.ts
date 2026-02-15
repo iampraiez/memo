@@ -21,10 +21,7 @@ export async function GET(req: Request) {
 
     // Search users by username or name, excluding the current user
     const foundUsers = await db.query.users.findMany({
-      where: and(
-        ne(users.id, session.user.id),
-        ilike(users.username, `%${query}%`)
-      ),
+      where: and(ne(users.id, session.user.id), ilike(users.username, `%${query}%`)),
       limit: 10,
     });
 
@@ -32,26 +29,20 @@ export async function GET(req: Request) {
     const userId = session.user.id as string;
 
     const usersWithFollowingStatus = await Promise.all(
-        foundUsers.map(async (u) => {
-            const follow = await db.query.follows.findFirst({
-                where: and(
-                    eq(follows.followerId, userId),
-                    eq(follows.followingId, u.id)
-                )
-            });
-            return {
-                ...u,
-                isFollowing: !!follow
-            };
-        })
+      foundUsers.map(async (u) => {
+        const follow = await db.query.follows.findFirst({
+          where: and(eq(follows.followerId, userId), eq(follows.followingId, u.id)),
+        });
+        return {
+          ...u,
+          isFollowing: !!follow,
+        };
+      }),
     );
 
     return NextResponse.json({ users: usersWithFollowingStatus }, { status: 200 });
   } catch (error) {
     logger.error("Error searching users:", error);
-    return NextResponse.json(
-      { message: "Internal Server Error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }
 }

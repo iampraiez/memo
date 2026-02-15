@@ -33,10 +33,7 @@ const Select: React.FC<SelectProps> = ({
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        selectRef.current &&
-        !selectRef.current.contains(event.target as Node)
-      ) {
+      if (selectRef.current && !selectRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
     };
@@ -49,44 +46,36 @@ const Select: React.FC<SelectProps> = ({
 
   return (
     <div className={cn("relative", className)} ref={selectRef}>
-      {label && (
-        <label className="block text-sm font-medium text-neutral-700 mb-1">
-          {label}
-        </label>
-      )}
+      {label && <label className="mb-1 block text-sm font-medium text-neutral-700">{label}</label>}
 
       <button
         type="button"
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
         className={cn(
-          "w-full px-3 py-2 text-left bg-white border border-neutral-300 rounded-lg shadow-sm",
-          "focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent",
+          "w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-left shadow-sm",
+          "focus:ring-primary-500 focus:border-transparent focus:ring-2 focus:outline-none",
           "transition-all duration-200",
-          disabled && "bg-neutral-50 text-neutral-400 cursor-not-allowed",
+          disabled && "cursor-not-allowed bg-neutral-50 text-neutral-400",
           error && "border-destructive-500 focus:ring-destructive-500",
-          isOpen && "ring-2 ring-primary-500 border-transparent",
+          isOpen && "ring-primary-500 border-transparent ring-2",
         )}
       >
         <div className="flex items-center justify-between">
-          <span
-            className={cn(
-              selectedOption ? "text-neutral-900" : "text-neutral-400",
-            )}
-          >
+          <span className={cn(selectedOption ? "text-neutral-900" : "text-neutral-400")}>
             {selectedOption ? selectedOption.label : placeholder}
           </span>
           <ChevronDown
             className={cn(
-              "w-4 h-4 text-neutral-400 transition-transform duration-200",
-              isOpen && "transform rotate-180",
+              "h-4 w-4 text-neutral-400 transition-transform duration-200",
+              isOpen && "rotate-180 transform",
             )}
           />
         </div>
       </button>
 
       {isOpen && (
-        <div className="absolute z-50 w-full mt-1 bg-white border border-neutral-200 rounded-lg shadow-soft-lg max-h-60 overflow-auto">
+        <div className="shadow-soft-lg absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-neutral-200 bg-white">
           {options.map((option) => (
             <button
               key={option.value}
@@ -96,21 +85,19 @@ const Select: React.FC<SelectProps> = ({
                 setIsOpen(false);
               }}
               className={cn(
-                "w-full px-3 py-2 text-left hover:bg-neutral-50 flex items-center justify-between",
+                "flex w-full items-center justify-between px-3 py-2 text-left hover:bg-neutral-50",
                 "first:rounded-t-lg last:rounded-b-lg",
                 value === option.value && "bg-primary-50 text-primary-900",
               )}
             >
               <span>{option.label}</span>
-              {value === option.value && (
-                <Check className="w-4 h-4 text-primary-600" />
-              )}
+              {value === option.value && <Check className="text-primary-600 h-4 w-4" />}
             </button>
           ))}
         </div>
       )}
 
-      {error && <p className="mt-1 text-sm text-destructive-600">{error}</p>}
+      {error && <p className="text-destructive-600 mt-1 text-sm">{error}</p>}
     </div>
   );
 };

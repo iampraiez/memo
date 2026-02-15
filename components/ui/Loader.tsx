@@ -7,11 +7,7 @@ interface LoaderProps {
   className?: string;
 }
 
-const Loader: React.FC<LoaderProps> = ({
-  variant = "spinner",
-  size = "md",
-  className,
-}) => {
+const Loader: React.FC<LoaderProps> = ({ variant = "spinner", size = "md", className }) => {
   const sizes = {
     sm: "w-4 h-4",
     md: "w-6 h-6",
@@ -25,8 +21,8 @@ const Loader: React.FC<LoaderProps> = ({
           <div
             key={i}
             className={cn(
-              "bg-primary-600 rounded-full animate-dots",
-              size === "sm" ? "w-1 h-1" : size === "md" ? "w-2 h-2" : "w-3 h-3",
+              "bg-primary-600 animate-dots rounded-full",
+              size === "sm" ? "h-1 w-1" : size === "md" ? "h-2 w-2" : "h-3 w-3",
             )}
             style={{
               animationDelay: `${i * 0.16}s`,
@@ -40,7 +36,7 @@ const Loader: React.FC<LoaderProps> = ({
   return (
     <div
       className={cn(
-        "animate-spin rounded-full border-2 border-neutral-200 border-t-primary-600",
+        "border-t-primary-600 animate-spin rounded-full border-2 border-neutral-200",
         sizes[size],
         className,
       )}

@@ -22,12 +22,15 @@ export async function POST(req: Request) {
 
     // Server-side file size validation (10MB limit)
     const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-    const oversizedFiles = files.filter(file => file.size > MAX_FILE_SIZE);
+    const oversizedFiles = files.filter((file) => file.size > MAX_FILE_SIZE);
 
     if (oversizedFiles.length > 0) {
-      return NextResponse.json({ 
-        message: `File size limit exceeded. The following files are too large: ${oversizedFiles.map(f => f.name).join(", ")}` 
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          message: `File size limit exceeded. The following files are too large: ${oversizedFiles.map((f) => f.name).join(", ")}`,
+        },
+        { status: 400 },
+      );
     }
 
     logger.info(`Uploading ${files.length} files for user ${session.user.id}`);
@@ -44,7 +47,8 @@ export async function POST(req: Request) {
   } catch (error: unknown) {
     const errorData = error instanceof Error ? error : new Error("Unknown error");
     const status = (error as { status?: number }).status || 500;
-    const details = (error as { error?: { error_summary?: string } }).error?.error_summary || errorData.message;
+    const details =
+      (error as { error?: { error_summary?: string } }).error?.error_summary || errorData.message;
 
     // Log the full error object for better debugging
     logger.error("Upload API Error:", {
@@ -53,14 +57,14 @@ export async function POST(req: Request) {
       status: status,
       error_details: (error as { error?: unknown }).error,
     });
-    
+
     return NextResponse.json(
-      { 
-        message: "Internal Server Error", 
+      {
+        message: "Internal Server Error",
         error: errorData.message,
-        details: details
+        details: details,
       },
-      { status: status as number }
+      { status: status as number },
     );
   }
 }

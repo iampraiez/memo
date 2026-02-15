@@ -24,18 +24,15 @@ const Input: React.FC<InputProps> = ({
   return (
     <div className="space-y-1">
       {label && (
-        <label
-          htmlFor={inputId}
-          className="block text-sm font-medium text-neutral-700"
-        >
+        <label htmlFor={inputId} className="block text-sm font-medium text-neutral-700">
           {label}
         </label>
       )}
       <input
         id={inputId}
         className={cn(
-          "w-full px-3 py-2 rounded-lg border border-neutral-300 bg-white text-neutral-900 placeholder-neutral-400",
-          "focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent",
+          "w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-neutral-900 placeholder-neutral-400",
+          "focus:ring-primary-500 focus:border-transparent focus:ring-2 focus:outline-none",
           "transition-all duration-200",
           error && "border-destructive-500 focus:ring-destructive-500",
           className,
@@ -44,7 +41,7 @@ const Input: React.FC<InputProps> = ({
         {...props}
         {...(require ? { required: true } : {})}
       />
-      {error && <p className="text-sm text-destructive-600">{error}</p>}
+      {error && <p className="text-destructive-600 text-sm">{error}</p>}
       {helper && !error && <p className="text-sm text-neutral-500">{helper}</p>}
     </div>
   );

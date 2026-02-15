@@ -12,17 +12,13 @@ export const authConfig = {
       const isApiRoute = nextUrl.pathname.startsWith("/api");
       const isLegalPage = nextUrl.pathname === "/privacy" || nextUrl.pathname === "/terms";
       const isOnboardingPage = nextUrl.pathname === "/onboarding";
-        const isStaticFile =
-          /\.(png|jpg|jpeg|gif|svg|ico|webp|css|js|woff|woff2|ttf)$/i.test(
-            nextUrl.pathname,
-          );
-      const isTechnicalRequest = nextUrl.pathname.startsWith("/.well-known") || nextUrl.pathname.endsWith(".json");
+      const isStaticFile = /\.(png|jpg|jpeg|gif|svg|ico|webp|css|js|woff|woff2|ttf)$/i.test(
+        nextUrl.pathname,
+      );
+      const isTechnicalRequest =
+        nextUrl.pathname.startsWith("/.well-known") || nextUrl.pathname.endsWith(".json");
       const isPublicPage =
-        isLandingPage ||
-        isApiRoute ||
-        isLegalPage ||
-        isStaticFile ||
-        isTechnicalRequest;
+        isLandingPage || isApiRoute || isLegalPage || isStaticFile || isTechnicalRequest;
 
       if (isAuthPage) {
         if (isLoggedIn) {

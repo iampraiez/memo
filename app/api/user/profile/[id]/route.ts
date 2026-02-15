@@ -4,10 +4,7 @@ import db from "@/drizzle/index";
 import { users, follows, memories } from "@/drizzle/db/schema";
 import { and, eq, sql } from "drizzle-orm";
 
-export async function GET(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
   const { id: targetUserId } = await params;
 
@@ -31,7 +28,7 @@ export async function GET(
       .select({ count: sql<number>`count(*)` })
       .from(follows)
       .where(eq(follows.followerId, targetUserId));
-    
+
     // Count memories
     const userMemories = await db
       .select({ count: sql<number>`count(*)` })
@@ -42,10 +39,7 @@ export async function GET(
     let isFollowing = false;
     if (session?.user?.id) {
       const followRecord = await db.query.follows.findFirst({
-        where: and(
-          eq(follows.followerId, session.user.id),
-          eq(follows.followingId, targetUserId)
-        ),
+        where: and(eq(follows.followerId, session.user.id), eq(follows.followingId, targetUserId)),
       });
       isFollowing = !!followRecord;
     }

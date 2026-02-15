@@ -42,11 +42,11 @@ export default function DeleteAccountModal({
     try {
       const res = await fetch("/api/user/delete/otp", { method: "POST" });
       if (!res.ok) throw new Error("Failed to send OTP");
-      
+
       setStep("otp");
       setTimeLeft(300);
       toast.success(`Verification code sent to ${userEmail}`);
-    } catch{
+    } catch {
       toast.error("Failed to send verification code. Please try again.");
     } finally {
       setIsLoading(false);
@@ -84,19 +84,19 @@ export default function DeleteAccountModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl transform transition-all">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white shadow-2xl transition-all">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-neutral-100 flex justify-between items-center bg-destructive-50">
-          <h3 className="text-lg font-bold text-destructive-900 flex items-center">
-            <Warning className="w-5 h-5 mr-2" />
+        <div className="bg-destructive-50 flex items-center justify-between border-b border-neutral-100 px-6 py-4">
+          <h3 className="text-destructive-900 flex items-center text-lg font-bold">
+            <Warning className="mr-2 h-5 w-5" />
             Delete Account
           </h3>
           <button
             onClick={onClose}
-            className="text-neutral-400 hover:text-neutral-600 transition-colors"
+            className="text-neutral-400 transition-colors hover:text-neutral-600"
           >
-            <X className="w-5 h-5" />
+            <X className="h-5 w-5" />
           </button>
         </div>
 
@@ -108,7 +108,7 @@ export default function DeleteAccountModal({
                 Are you sure you want to delete your account? This action is{" "}
                 <strong>irreversible</strong>.
               </p>
-              <ul className="text-sm text-neutral-500 list-disc list-inside space-y-1 bg-neutral-50 p-4 rounded-lg">
+              <ul className="list-inside list-disc space-y-1 rounded-lg bg-neutral-50 p-4 text-sm text-neutral-500">
                 <li>All your memories will be permanently deleted.</li>
                 <li>You will be unsubscribed from all emails.</li>
                 <li>Your username will be released.</li>
@@ -120,52 +120,61 @@ export default function DeleteAccountModal({
                   onClick={handleSendOTP}
                   disabled={isLoading}
                 >
-                  {isLoading ? <Spinner className="animate-spin w-5 h-5" /> : "Send Verification Code"}
+                  {isLoading ? (
+                    <Spinner className="h-5 w-5 animate-spin" />
+                  ) : (
+                    "Send Verification Code"
+                  )}
                 </Button>
               </div>
             </div>
           ) : (
             <div className="space-y-6">
-               <div className="text-center">
-                   <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                       <CheckCircle className="w-6 h-6 text-blue-600" />
-                   </div>
-                   <h4 className="font-bold text-neutral-900">Enter Verification Code</h4>
-                   <p className="text-sm text-neutral-500 mt-1">
-                       We sent a 6-digit code to <strong>{userEmail}</strong>
-                   </p>
-               </div>
+              <div className="text-center">
+                <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
+                  <CheckCircle className="h-6 w-6 text-blue-600" />
+                </div>
+                <h4 className="font-bold text-neutral-900">Enter Verification Code</h4>
+                <p className="mt-1 text-sm text-neutral-500">
+                  We sent a 6-digit code to <strong>{userEmail}</strong>
+                </p>
+              </div>
 
               <div>
                 <Input
                   value={otp}
                   onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
                   placeholder="000000"
-                  className="text-center text-2xl tracking-[0.5em] font-mono h-14"
+                  className="h-14 text-center font-mono text-2xl tracking-[0.5em]"
                   autoFocus
                 />
-                <div className="flex justify-between items-center mt-2 text-xs text-neutral-400">
-                    <span>Code expires in {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}</span>
-                    {timeLeft === 0 && (
-                        <button onClick={handleSendOTP} className="text-primary-600 hover:underline">Resend Code</button>
-                    )}
+                <div className="mt-2 flex items-center justify-between text-xs text-neutral-400">
+                  <span>
+                    Code expires in {Math.floor(timeLeft / 60)}:
+                    {(timeLeft % 60).toString().padStart(2, "0")}
+                  </span>
+                  {timeLeft === 0 && (
+                    <button onClick={handleSendOTP} className="text-primary-600 hover:underline">
+                      Resend Code
+                    </button>
+                  )}
                 </div>
               </div>
 
-              <div className="pt-2 space-y-3">
+              <div className="space-y-3 pt-2">
                 <Button
                   variant="destructive"
                   className="w-full justify-center"
                   onClick={handleVerifyAndDelete}
                   disabled={isLoading || otp.length !== 6}
                 >
-                  {isLoading ? <Spinner className="animate-spin w-5 h-5" /> : "Confirm Deletion"}
+                  {isLoading ? <Spinner className="h-5 w-5 animate-spin" /> : "Confirm Deletion"}
                 </Button>
-                <button 
-                    onClick={() => setStep("confirm")}
-                    className="w-full text-center text-sm text-neutral-500 hover:text-neutral-700"
+                <button
+                  onClick={() => setStep("confirm")}
+                  className="w-full text-center text-sm text-neutral-500 hover:text-neutral-700"
                 >
-                    Back
+                  Back
                 </button>
               </div>
             </div>

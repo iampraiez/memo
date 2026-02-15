@@ -20,12 +20,7 @@ export async function POST(req: Request) {
 
     await db
       .delete(follows)
-      .where(
-        and(
-          eq(follows.followerId, session.user.id),
-          eq(follows.followingId, followingId)
-        )
-      );
+      .where(and(eq(follows.followerId, session.user.id), eq(follows.followingId, followingId)));
 
     return NextResponse.json({ success: true });
   } catch (error) {

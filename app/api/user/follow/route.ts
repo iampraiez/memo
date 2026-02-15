@@ -25,10 +25,7 @@ export async function POST(req: Request) {
 
     // Check if already following
     const existing = await db.query.follows.findFirst({
-      where: and(
-        eq(follows.followerId, session.user.id),
-        eq(follows.followingId, followingId)
-      ),
+      where: and(eq(follows.followerId, session.user.id), eq(follows.followingId, followingId)),
     });
 
     if (existing) {

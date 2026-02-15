@@ -64,22 +64,13 @@ export async function getOrCreateGoogleUser(payload: TokenPayload) {
   const { email, sub: googleId, name, picture } = payload;
   if (!email) throw new Error("Google email is required");
 
-  const [user] = await db
-    .select()
-    .from(users)
-    .where(eq(users.email, email))
-    .limit(1);
+  const [user] = await db.select().from(users).where(eq(users.email, email)).limit(1);
 
   if (user) {
     const [existingAccount] = await db
       .select()
       .from(accounts)
-      .where(
-        and(
-          eq(accounts.provider, "google"),
-          eq(accounts.providerAccountId, googleId),
-        ),
-      )
+      .where(and(eq(accounts.provider, "google"), eq(accounts.providerAccountId, googleId)))
       .limit(1);
     if (existingAccount.provider === "google") {
       return user;
@@ -90,25 +81,25 @@ export async function getOrCreateGoogleUser(payload: TokenPayload) {
     }
   }
 
-    const userId = uuidv4();
-    const [newUser] = await db
-      .insert(users)
-      .values({
-        id: userId,
-        email: email as string,
-        name,
-        image: picture,
-        emailVerified: new Date(),
-      })
-      .returning();
+  const userId = uuidv4();
+  const [newUser] = await db
+    .insert(users)
+    .values({
+      id: userId,
+      email: email as string,
+      name,
+      image: picture,
+      emailVerified: new Date(),
+    })
+    .returning();
 
-    // Link account
-    await db.insert(accounts).values({
-      userId: newUser.id,
-      type: "oauth",
-      provider: "google",
-      providerAccountId: googleId as string,
-    });
+  // Link account
+  await db.insert(accounts).values({
+    userId: newUser.id,
+    type: "oauth",
+    provider: "google",
+    providerAccountId: googleId as string,
+  });
 
   return newUser;
 }

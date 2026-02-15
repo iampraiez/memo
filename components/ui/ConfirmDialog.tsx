@@ -31,10 +31,10 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
 }) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="sm">
-      <div className="text-center space-y-4">
+      <div className="space-y-4 text-center">
         {variant === "destructive" && (
-          <div className="w-12 h-12 bg-destructive-100 rounded-full flex items-center justify-center mx-auto">
-            <AlertTriangle className="w-6 h-6 text-destructive-600" />
+          <div className="bg-destructive-100 mx-auto flex h-12 w-12 items-center justify-center rounded-full">
+            <AlertTriangle className="text-destructive-600 h-6 w-6" />
           </div>
         )}
 
@@ -43,7 +43,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           <p className="text-neutral-600">{message}</p>
         </div>
 
-        <div className="flex space-x-3 justify-center pt-4">
+        <div className="flex justify-center space-x-3 pt-4">
           <Button variant="secondary" onClick={onClose} disabled={loading}>
             {cancelLabel}
           </Button>

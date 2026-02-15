@@ -21,10 +21,10 @@ export const storyService = {
 
     // Read from Dexie
     let stories = await db.stories
-      .where('userId')
-      .equals(userId || '')
+      .where("userId")
+      .equals(userId || "")
       .reverse()
-      .sortBy('createdAt');
+      .sortBy("createdAt");
 
     // Background sync if online
     if (syncService.getOnlineStatus()) {
@@ -35,21 +35,21 @@ export const storyService = {
         for (const story of response.stories) {
           await db.stories.put({
             ...story,
-            _syncStatus: 'synced',
+            _syncStatus: "synced",
             _lastSync: Date.now(),
           });
         }
 
         // Re-read
         stories = await db.stories
-          .where('userId')
-          .equals(userId || '')
+          .where("userId")
+          .equals(userId || "")
           .reverse()
-          .sortBy('createdAt');
+          .sortBy("createdAt");
 
         return response;
       } catch (error) {
-        console.error('[StoryService] Sync failed, using cache:', error);
+        console.error("[StoryService] Sync failed, using cache:", error);
       }
     }
 
@@ -62,15 +62,15 @@ export const storyService = {
 
     const newStory: LocalStory = {
       id: tempId,
-      userId: userId || '',
+      userId: userId || "",
       title: data.title,
       content: `${data.tone} story from ${data.dateRange.start} to ${data.dateRange.end}`,
       dateRange: data.dateRange,
       tone: data.tone,
       length: data.length,
-      status: 'generating',
+      status: "generating",
       createdAt: new Date().toISOString(),
-      _syncStatus: 'pending',
+      _syncStatus: "pending",
       _lastSync: Date.now(),
     };
 
@@ -78,8 +78,8 @@ export const storyService = {
 
     // Queue for sync
     await syncService.queueOperation({
-      operation: 'create',
-      entity: 'story',
+      operation: "create",
+      entity: "story",
       entityId: tempId,
       data: data as unknown as Record<string, unknown>,
     });
@@ -89,8 +89,8 @@ export const storyService = {
 
   // Helper
   getCurrentUserId: async (): Promise<string | null> => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('currentUserId');
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("currentUserId");
     }
     return null;
   },

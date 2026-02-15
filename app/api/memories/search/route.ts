@@ -18,14 +18,14 @@ export async function GET(req: Request) {
   const userId = session.user.id;
 
   if (!query || query.length < 2) {
-      return NextResponse.json({ memories: [] });
+    return NextResponse.json({ memories: [] });
   }
 
   try {
     let whereCondition;
     const searchCondition = or(
-        ilike(memories.title, `%${query}%`),
-        ilike(memories.content, `%${query}%`)
+      ilike(memories.title, `%${query}%`),
+      ilike(memories.content, `%${query}%`),
     );
 
     if (scope === "circle") {
@@ -41,18 +41,12 @@ export async function GET(req: Request) {
         searchCondition,
         or(
           eq(memories.userId, userId),
-          and(
-            inArray(memories.userId, followingIds),
-            eq(memories.isPublic, true),
-          ),
+          and(inArray(memories.userId, followingIds), eq(memories.isPublic, true)),
         ),
       );
     } else {
-        // Mine only
-        whereCondition = and(
-            eq(memories.userId, userId),
-            searchCondition
-        );
+      // Mine only
+      whereCondition = and(eq(memories.userId, userId), searchCondition);
     }
 
     const results = await db.query.memories.findMany({
@@ -64,25 +58,24 @@ export async function GET(req: Request) {
         memoryMedia: true,
         memoryTags: {
           with: {
-            tag: true
-          }
+            tag: true,
+          },
         },
         reactions: true,
-        comments: true
-      }
+        comments: true,
+      },
     });
 
     // Transform
     const searchResults = (results as unknown as Timeline[]).map((mem) => ({
       ...mem,
       tags: mem.memoryTags.map((t) => t.tag.name),
-      images: mem.memoryMedia.filter((m) => m.type.startsWith('image')).map((m) => m.url),
+      images: mem.memoryMedia.filter((m) => m.type.startsWith("image")).map((m) => m.url),
       reactionCount: mem.reactions.length,
       commentCount: mem.comments.length,
     }));
 
     return NextResponse.json({ memories: searchResults });
-
   } catch (error) {
     console.error("Error searching memories:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });

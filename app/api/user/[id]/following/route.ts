@@ -4,10 +4,7 @@ import db from "@/drizzle/index";
 import { follows } from "@/drizzle/db/schema";
 import { eq } from "drizzle-orm";
 
-export async function GET(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
 
   if (!session?.user?.id) {
@@ -33,10 +30,6 @@ export async function GET(
     return NextResponse.json({ following: results });
   } catch (error) {
     console.error("Error fetching following:", error);
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
- 

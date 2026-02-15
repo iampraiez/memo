@@ -4,10 +4,7 @@ import db from "@/drizzle/index";
 import { notifications } from "@/drizzle/db/schema";
 import { eq, and } from "drizzle-orm";
 
-export async function PATCH(
-  req: Request,
-  props: { params: Promise<{ id: string }> }
-) {
+export async function PATCH(req: Request, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   const session = await auth();
   if (!session?.user?.id) {

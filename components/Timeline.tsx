@@ -21,24 +21,27 @@ const Timeline: React.FC<TimelineProps> = ({
   onShareMemory,
 }) => {
   const [expandedYears, setExpandedYears] = useState<Set<number>>(
-    new Set([new Date().getFullYear()])
+    new Set([new Date().getFullYear()]),
   );
   const [expandedMonths, setExpandedMonths] = useState<Set<string>>(new Set());
 
   // Group memories by year, month, and day
-  const groupedMemories = memories.reduce((acc: Record<number, Record<number, Record<number, Memory[]>>>, memory: Memory) => {
-    const date = new Date(memory.date);
-    const year = date.getFullYear();
-    const month = date.getMonth();
-    const day = date.getDate();
+  const groupedMemories = memories.reduce(
+    (acc: Record<number, Record<number, Record<number, Memory[]>>>, memory: Memory) => {
+      const date = new Date(memory.date);
+      const year = date.getFullYear();
+      const month = date.getMonth();
+      const day = date.getDate();
 
-    if (!acc[year]) acc[year] = {};
-    if (!acc[year][month]) acc[year][month] = {};
-    if (!acc[year][month][day]) acc[year][month][day] = [];
+      if (!acc[year]) acc[year] = {};
+      if (!acc[year][month]) acc[year][month] = {};
+      if (!acc[year][month][day]) acc[year][month][day] = [];
 
-    acc[year][month][day].push(memory);
-    return acc;
-  }, {} as Record<number, Record<number, Record<number, Memory[]>>>);
+      acc[year][month][day].push(memory);
+      return acc;
+    },
+    {} as Record<number, Record<number, Record<number, Memory[]>>>,
+  );
 
   const monthNames = [
     "January",
@@ -86,29 +89,25 @@ const Timeline: React.FC<TimelineProps> = ({
             .map((year) => (
               <div key={year} className="space-y-4">
                 {/* Year Header */}
-                <div className="sticky top-16 bg-white/95 backdrop-blur-md z-10 py-3 border-b border-neutral-100 flex items-center justify-between">
+                <div className="sticky top-16 z-10 flex items-center justify-between border-b border-neutral-100 bg-white/95 py-3 backdrop-blur-md">
                   <button
                     onClick={() => toggleYear(year)}
-                    className="flex items-center space-x-3 text-xl sm:text-2xl font-display font-bold text-neutral-900 hover:text-primary-600 transition-colors group"
+                    className="font-display hover:text-primary-600 group flex items-center space-x-3 text-xl font-bold text-neutral-900 transition-colors sm:text-2xl"
                   >
-                    <div className="w-8 h-8 rounded-lg bg-neutral-100 flex items-center justify-center group-hover:bg-primary-50 transition-colors">
+                    <div className="group-hover:bg-primary-50 flex h-8 w-8 items-center justify-center rounded-lg bg-neutral-100 transition-colors">
                       {expandedYears.has(year) ? (
-                        <ChevronDown className="w-5 h-5 text-neutral-500 group-hover:text-primary-600" />
+                        <ChevronDown className="group-hover:text-primary-600 h-5 w-5 text-neutral-500" />
                       ) : (
-                        <ChevronRight className="w-5 h-5 text-neutral-500 group-hover:text-primary-600" />
+                        <ChevronRight className="group-hover:text-primary-600 h-5 w-5 text-neutral-500" />
                       )}
                     </div>
                     <span>{year}</span>
                   </button>
-                  <div className="text-xs font-medium px-2.5 py-1 bg-neutral-100 text-neutral-500 rounded-full">
+                  <div className="rounded-full bg-neutral-100 px-2.5 py-1 text-xs font-medium text-neutral-500">
                     {Object.values(groupedMemories[year]).reduce(
                       (acc, month) =>
-                        acc +
-                        Object.values(month).reduce(
-                          (acc2, day) => acc2 + day.length,
-                          0
-                        ),
-                      0
+                        acc + Object.values(month).reduce((acc2, day) => acc2 + day.length, 0),
+                      0,
                     )}{" "}
                     memories
                   </div>
@@ -127,46 +126,44 @@ const Timeline: React.FC<TimelineProps> = ({
                             {/* Month Header */}
                             <button
                               onClick={() => toggleMonth(yearMonth)}
-                              className="flex items-center space-x-2 text-base sm:text-lg font-semibold text-neutral-700 hover:text-primary-600 transition-colors pl-2"
+                              className="hover:text-primary-600 flex items-center space-x-2 pl-2 text-base font-semibold text-neutral-700 transition-colors sm:text-lg"
                             >
                               {expandedMonths.has(yearMonth) ? (
-                                <ChevronDown className="w-4 h-4 text-neutral-400" />
+                                <ChevronDown className="h-4 w-4 text-neutral-400" />
                               ) : (
-                                <ChevronRight className="w-4 h-4 text-neutral-400" />
+                                <ChevronRight className="h-4 w-4 text-neutral-400" />
                               )}
                               <span>{monthNames[month]}</span>
-                              <span className="text-xs font-normal text-neutral-400 ml-1 bg-neutral-50 px-2 py-0.5 rounded-full">
-                                {Object.values(
-                                  groupedMemories[year][month],
-                                ).reduce((acc, day) => acc + day.length, 0)}
+                              <span className="ml-1 rounded-full bg-neutral-50 px-2 py-0.5 text-xs font-normal text-neutral-400">
+                                {Object.values(groupedMemories[year][month]).reduce(
+                                  (acc, day) => acc + day.length,
+                                  0,
+                                )}
                               </span>
                             </button>
 
                             {/* Month Content */}
                             {expandedMonths.has(yearMonth) && (
-                              <div className="space-y-8 pl-4 sm:pl-6 border-l border-neutral-100 ml-4 pb-4">
+                              <div className="ml-4 space-y-8 border-l border-neutral-100 pb-4 pl-4 sm:pl-6">
                                 {Object.keys(groupedMemories[year][month])
                                   .map(Number)
                                   .sort((a, b) => b - a)
                                   .map((day) => (
-                                    <div
-                                      key={day}
-                                      className="space-y-4 relative"
-                                    >
+                                    <div key={day} className="relative space-y-4">
                                       {/* Day Bullet */}
-                                      <div className="absolute -left-5.25 sm:-left-7.25 top-2 w-2 h-2 rounded-full bg-primary-400 ring-4 ring-white" />
+                                      <div className="bg-primary-400 absolute top-2 -left-5.25 h-2 w-2 rounded-full ring-4 ring-white sm:-left-7.25" />
 
                                       {/* Day Header */}
-                                      <div className="flex items-center space-x-4 mb-4">
-                                        <h4 className="text-sm font-bold text-neutral-900 bg-neutral-100 px-3 py-1 rounded-full uppercase tracking-widest flex items-center">
-                                          <span className="w-1.5 h-1.5 rounded-full bg-primary-500 mr-2" />
+                                      <div className="mb-4 flex items-center space-x-4">
+                                        <h4 className="flex items-center rounded-full bg-neutral-100 px-3 py-1 text-sm font-bold tracking-widest text-neutral-900 uppercase">
+                                          <span className="bg-primary-500 mr-2 h-1.5 w-1.5 rounded-full" />
                                           {monthNames[month]} {day}
                                         </h4>
-                                        <div className="flex-1 h-px bg-neutral-100" />
+                                        <div className="h-px flex-1 bg-neutral-100" />
                                       </div>
 
                                       {/* Day Memories */}
-                                      <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-4">
+                                      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 2xl:grid-cols-3">
                                         {groupedMemories[year][month][day]
                                           .sort(
                                             (a, b) =>
@@ -180,15 +177,9 @@ const Timeline: React.FC<TimelineProps> = ({
                                               onClick={() => {
                                                 onMemoryClick(memory);
                                               }}
-                                              onEdit={() =>
-                                                onEditMemory(memory)
-                                              }
-                                              onDelete={() =>
-                                                onDeleteMemory(memory.id)
-                                              }
-                                              onShareMemory={() =>
-                                                onShareMemory(memory)
-                                              }
+                                              onEdit={() => onEditMemory(memory)}
+                                              onDelete={() => onDeleteMemory(memory.id)}
+                                              onShareMemory={() => onShareMemory(memory)}
                                             />
                                           ))}
                                       </div>

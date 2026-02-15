@@ -14,7 +14,7 @@ export async function GET() {
 
   try {
     const userId = session.user.id;
-    
+
     // Fetch family members where the current user is the owner
     const myFamily = await db.query.familyMembers.findMany({
       where: eq(familyMembers.ownerId, userId),
@@ -27,7 +27,7 @@ export async function GET() {
 
     // Combine and get user details for each member
     const allMemberRelationships = [...myFamily, ...partOfFamily];
-    
+
     const detailedMembers = await Promise.all(
       allMemberRelationships.map(async (rel) => {
         // If I'm owner, get details of memberId (if exists) or use the invitation email/name
@@ -91,24 +91,24 @@ export async function POST(req: Request) {
       status: "pending",
       role: "member",
     });
-    
+
     // Notification trigger
     if (existingUser) {
       await db.insert(notifications).values({
         id: uuidv4(),
         userId: existingUser.id,
-        type: 'family_invite',
-        title: 'Family Invitation',
-        message: `${session.user.name || 'Someone'} invited you to join their family circle as a ${relationship}.`,
+        type: "family_invite",
+        title: "Family Invitation",
+        message: `${session.user.name || "Someone"} invited you to join their family circle as a ${relationship}.`,
         relatedId: session.user.id,
         read: false,
       });
     }
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       memberId: newMemberId,
-      message: existingUser ? "Member added and invitation sent." : "Invitation sent to email."
+      message: existingUser ? "Member added and invitation sent." : "Invitation sent to email.",
     });
   } catch (error) {
     console.error("Error adding family member:", error);

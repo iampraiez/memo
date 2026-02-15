@@ -67,7 +67,7 @@ export async function GET() {
     };
 
     const jobQueue = [
-      ...pendingJobs.map(job => ({
+      ...pendingJobs.map((job) => ({
         id: job.id,
         type: job.type,
         status: job.status,
@@ -75,7 +75,7 @@ export async function GET() {
         completedAt: job.completedAt?.toISOString(),
         error: job.error,
       })),
-      ...processingJobs.map(job => ({
+      ...processingJobs.map((job) => ({
         id: job.id,
         type: job.type,
         status: job.status,
@@ -83,7 +83,7 @@ export async function GET() {
         completedAt: job.completedAt?.toISOString(),
         error: job.error,
       })),
-      ...failedJobs.map(job => ({
+      ...failedJobs.map((job) => ({
         id: job.id,
         type: job.type,
         status: job.status,
@@ -93,7 +93,7 @@ export async function GET() {
       })),
     ];
 
-    const logs = recentLogs.map(log => ({
+    const logs = recentLogs.map((log) => ({
       id: log.id,
       level: log.level,
       message: log.message,
@@ -106,9 +106,6 @@ export async function GET() {
     return NextResponse.json({ stats, jobQueue, logs }, { status: 200 });
   } catch (error) {
     logger.error("Error fetching admin stats:", error);
-    return NextResponse.json(
-      { message: "Internal Server Error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }
 }

@@ -6,7 +6,7 @@ import { HttpError } from "@/types/types";
 export interface Notification {
   id: string;
   userId: string;
-  type: 'comment' | 'reaction' | 'follow' | 'family_invite' | 'memory_share';
+  type: "comment" | "reaction" | "follow" | "family_invite" | "memory_share";
   title: string;
   message: string;
   relatedId?: string;
@@ -21,10 +21,10 @@ export const notificationService = {
 
     // Read from Dexie
     let notifications = await db.notifications
-      .where('userId')
-      .equals(userId || '')
+      .where("userId")
+      .equals(userId || "")
       .reverse()
-      .sortBy('createdAt');
+      .sortBy("createdAt");
 
     // Background sync if online
     if (syncService.getOnlineStatus()) {
@@ -37,21 +37,21 @@ export const notificationService = {
         for (const notification of response.notifications) {
           await db.notifications.put({
             ...notification,
-            _syncStatus: 'synced',
+            _syncStatus: "synced",
             _lastSync: Date.now(),
           } as LocalNotification);
         }
 
         // Re-read
         notifications = await db.notifications
-          .where('userId')
-          .equals(userId || '')
+          .where("userId")
+          .equals(userId || "")
           .reverse()
-          .sortBy('createdAt');
+          .sortBy("createdAt");
 
         return response;
       } catch (error) {
-        console.error('[NotificationService] Sync failed, using cache:', error);
+        console.error("[NotificationService] Sync failed, using cache:", error);
       }
     }
 
@@ -64,16 +64,16 @@ export const notificationService = {
 
     // Update Dexie
     await db.notifications
-      .where('userId')
-      .equals(userId || '')
+      .where("userId")
+      .equals(userId || "")
       .modify({ read: true });
 
     // Queue for sync
     await syncService.queueOperation({
-      operation: 'update',
-      entity: 'notification',
-      entityId: 'all',
-      data: { action: 'markAllRead' } as unknown as Record<string, unknown>,
+      operation: "update",
+      entity: "notification",
+      entityId: "all",
+      data: { action: "markAllRead" } as unknown as Record<string, unknown>,
     });
 
     return { success: true };
@@ -85,10 +85,10 @@ export const notificationService = {
 
     // Queue for sync
     await syncService.queueOperation({
-      operation: 'update',
-      entity: 'notification',
+      operation: "update",
+      entity: "notification",
       entityId: id,
-      data: { action: 'markRead' } as unknown as Record<string, unknown>,
+      data: { action: "markRead" } as unknown as Record<string, unknown>,
     });
 
     return { success: true };
@@ -96,8 +96,8 @@ export const notificationService = {
 
   // Helper
   getCurrentUserId: async (): Promise<string | null> => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('currentUserId');
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("currentUserId");
     }
     return null;
   },
@@ -142,10 +142,8 @@ export const sendNotificationToUser = async (
         );
       } catch (error: unknown) {
         if (error instanceof HttpError && (error.statusCode === 410 || error.statusCode === 404)) {
-          await drizzleDb
-            .delete(pushSubscriptions)
-            .where(eq(pushSubscriptions.id, sub.id));
-        } 
+          await drizzleDb.delete(pushSubscriptions).where(eq(pushSubscriptions.id, sub.id));
+        }
         console.error("Error sending push notification:", error);
       }
     });

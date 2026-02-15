@@ -1,12 +1,4 @@
-import {
-  pgTable,
-  text,
-  timestamp,
-  boolean,
-  integer,
-  unique,
-  json,
-} from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, integer, unique, json } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
 export const users = pgTable("users", {
@@ -43,9 +35,9 @@ export const accounts = pgTable(
   (account) => ({
     uniqueProviderAccount: unique("accounts_provider_account").on(
       account.provider,
-      account.providerAccountId
+      account.providerAccountId,
     ),
-  })
+  }),
 );
 
 export const verificationTokens = pgTable(
@@ -58,9 +50,9 @@ export const verificationTokens = pgTable(
   (verificationToken) => ({
     uniqueIdentifierToken: unique("verification_tokens_identifier_token").on(
       verificationToken.identifier,
-      verificationToken.token
+      verificationToken.token,
     ),
-  })
+  }),
 );
 
 export const authenticators = pgTable(
@@ -81,9 +73,9 @@ export const authenticators = pgTable(
   (authenticator) => ({
     uniqueUserCredential: unique("authenticators_user_credential").on(
       authenticator.userId,
-      authenticator.credentialID
+      authenticator.credentialID,
     ),
-  })
+  }),
 );
 
 export const userPreferences = pgTable("user_preferences", {
@@ -128,8 +120,8 @@ export const memoryMedia = pgTable("memory_media", {
   filename: text("filename").notNull(),
   size: integer("size"),
   metadata: json("metadata"),
-  storageProvider: text("storage_provider").notNull().default("cloudinary"), 
-  storageKey: text("storage_key"), 
+  storageProvider: text("storage_provider").notNull().default("cloudinary"),
+  storageKey: text("storage_key"),
 });
 
 export const tags = pgTable("tags", {

@@ -14,7 +14,7 @@ export async function POST() {
     }
 
     const email = session.user.email;
-    
+
     // Generate 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const expires = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
@@ -22,12 +22,12 @@ export async function POST() {
     // Store in verificationTokens table
     // First, delete any existing tokens for this action (optional but cleaner)
     await db.delete(verificationTokens).where(
-        and(
-            eq(verificationTokens.identifier, email),
-            // We might want to differentiate types if this table is shared, 
-            // but schema.ts only has identifier/token. 
-            // We'll rely on the specific token match.
-        )
+      and(
+        eq(verificationTokens.identifier, email),
+        // We might want to differentiate types if this table is shared,
+        // but schema.ts only has identifier/token.
+        // We'll rely on the specific token match.
+      ),
     );
 
     await db.insert(verificationTokens).values({
@@ -38,9 +38,9 @@ export async function POST() {
 
     // Send Email
     const emailRes = await sendDeletionOTP(email, otp);
-    
+
     if (!emailRes?.success) {
-        throw new Error("Failed to send email");
+      throw new Error("Failed to send email");
     }
 
     logger.info(`Deletion OTP sent to ${email}`);
@@ -48,9 +48,6 @@ export async function POST() {
     return NextResponse.json({ message: "OTP sent" }, { status: 200 });
   } catch (error) {
     logger.error("Error sending deletion OTP:", error);
-    return NextResponse.json(
-      { message: "Internal Server Error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }
 }

@@ -7,7 +7,7 @@ const SIGNIN_ERROR_URL = "/error";
 
 export async function handleSignIn(
   provider: string,
-  formData?: { email: string; password: string }
+  formData?: { email: string; password: string },
 ) {
   try {
     return await signIn(provider, formData);

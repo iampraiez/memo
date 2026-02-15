@@ -2,49 +2,21 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "./*"
-      ],
-      "@/components/*": [
-        "components/*"
-      ],
-      "@/lib/*": [
-        "lib/*"
-      ],
-      "@/types/*": [
-        "types/*"
-      ],
-      "@/services/*": [
-        "services/*"
-      ],
-      "@/hooks/*": [
-        "hooks/*"
-      ],
-      "@/utils/*": [
-        "lib/utils"
-      ],
-      "@/data/*": [
-        "app/_data/*"
-      ],
-      "@/pages/*": [
-        "app/_pages/*"
-      ],
-      "@/db/*": [
-        "drizzle/*"
-      ],
-      "@/libs/*": [
-        "lib/*"
-      ],
-      "@/config/*": [
-        "config/*"
-      ],
+      "@/*": ["./*"],
+      "@/components/*": ["components/*"],
+      "@/lib/*": ["lib/*"],
+      "@/types/*": ["types/*"],
+      "@/services/*": ["services/*"],
+      "@/hooks/*": ["hooks/*"],
+      "@/utils/*": ["lib/utils"],
+      "@/data/*": ["app/_data/*"],
+      "@/pages/*": ["app/_pages/*"],
+      "@/db/*": ["drizzle/*"],
+      "@/libs/*": ["lib/*"],
+      "@/config/*": ["config/*"]
     },
     "target": "ES2017",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -70,7 +42,5 @@
     "node_modules/layout.tsx",
     ".next/dev/types/**/*.ts"
   ],
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }

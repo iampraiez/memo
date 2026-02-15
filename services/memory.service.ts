@@ -21,13 +21,13 @@ export const memoryService = {
   // Fetch all memories (offline-first)
   getAll: async (isPublic?: boolean, limit = 100, offset = 0) => {
     const userId = await memoryService.getCurrentUserId();
-    
+
     // Read from Dexie first
     let memories = await db.memories
-      .where('userId')
-      .equals(userId || '')
+      .where("userId")
+      .equals(userId || "")
       .reverse()
-      .sortBy('createdAt');
+      .sortBy("createdAt");
 
     // Background sync with API if online
     if (syncService.getOnlineStatus()) {
@@ -36,7 +36,7 @@ export const memoryService = {
         if (isPublic !== undefined) params.append("isPublic", String(isPublic));
         params.append("limit", String(limit));
         params.append("offset", String(offset));
-        
+
         const response = await apiService.get<{ memories: Memory[] }>(
           `/memories?${params.toString()}`,
         );
@@ -45,19 +45,19 @@ export const memoryService = {
         for (const memory of response.memories) {
           await db.memories.put({
             ...memory,
-            syncStatus: 'synced',
+            syncStatus: "synced",
             lastSync: Date.now(),
           });
         }
 
         // Re-read from Dexie
         memories = await db.memories
-          .where('userId')
-          .equals(userId || '')
+          .where("userId")
+          .equals(userId || "")
           .reverse()
-          .sortBy('createdAt');
+          .sortBy("createdAt");
       } catch (error) {
-        console.error('[MemoryService] Sync failed, using cached data:', error);
+        console.error("[MemoryService] Sync failed, using cached data:", error);
       }
     }
 
@@ -73,17 +73,17 @@ export const memoryService = {
     if (syncService.getOnlineStatus()) {
       try {
         const response = await apiService.get<{ memory: Memory }>(`/memories/${id}`);
-        
+
         // Update cache
         await db.memories.put({
           ...response.memory,
-          syncStatus: 'synced',
+          syncStatus: "synced",
           lastSync: Date.now(),
         });
 
         return response;
       } catch (error) {
-        console.error('[MemoryService] Fetch failed, using cached data:', error);
+        console.error("[MemoryService] Fetch failed, using cached data:", error);
         if (cachedMemory) {
           return { memory: cachedMemory as Memory };
         }
@@ -92,7 +92,7 @@ export const memoryService = {
     }
 
     if (!cachedMemory) {
-      throw new Error('Memory not found offline');
+      throw new Error("Memory not found offline");
     }
 
     return { memory: cachedMemory as Memory };
@@ -105,7 +105,7 @@ export const memoryService = {
 
     const newMemory: LocalMemory = {
       id: tempId,
-      userId: userId || '',
+      userId: userId || "",
       title: data.title,
       content: data.content,
       date: data.date,
@@ -116,7 +116,7 @@ export const memoryService = {
       isPublic: data.isPublic || false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      syncStatus: 'pending',
+      syncStatus: "pending",
       lastSync: Date.now(),
     };
 
@@ -125,8 +125,8 @@ export const memoryService = {
 
     // Queue for sync
     await syncService.queueOperation({
-      operation: 'create',
-      entity: 'memory',
+      operation: "create",
+      entity: "memory",
       entityId: tempId,
       data: data as unknown as Record<string, unknown>,
     });
@@ -138,11 +138,11 @@ export const memoryService = {
   update: async (id: string, data: UpdateMemoryData) => {
     const existing = await db.memories.get(id);
     if (!existing) {
-      throw new Error('Memory not found');
+      throw new Error("Memory not found");
     }
 
     // Check if anything actually changed to prevent redundant syncs/updates
-    const hasChanges = Object.keys(data).some(key => {
+    const hasChanges = Object.keys(data).some((key) => {
       const k = key as keyof UpdateMemoryData;
       if (Array.isArray(data[k]) && Array.isArray(existing[k as keyof LocalMemory])) {
         return JSON.stringify(data[k]) !== JSON.stringify(existing[k as keyof LocalMemory]);
@@ -151,7 +151,7 @@ export const memoryService = {
     });
 
     if (!hasChanges) {
-      console.log('[MemoryService] No changes detected, skipping update');
+      console.log("[MemoryService] No changes detected, skipping update");
       return { memory: existing as Memory };
     }
 
@@ -159,7 +159,7 @@ export const memoryService = {
       ...existing,
       ...data,
       updatedAt: new Date().toISOString(),
-      syncStatus: 'pending',
+      syncStatus: "pending",
       lastSync: Date.now(),
     };
 
@@ -168,8 +168,8 @@ export const memoryService = {
 
     // Queue for sync
     await syncService.queueOperation({
-      operation: 'update',
-      entity: 'memory',
+      operation: "update",
+      entity: "memory",
       entityId: id,
       data: data as unknown as Record<string, unknown>,
     });
@@ -184,8 +184,8 @@ export const memoryService = {
 
     // Queue for sync
     await syncService.queueOperation({
-      operation: 'delete',
-      entity: 'memory',
+      operation: "delete",
+      entity: "memory",
       entityId: id,
       data: {},
     });
@@ -194,20 +194,21 @@ export const memoryService = {
   },
 
   // Search memories (offline-first)
-  search: async (query: string, scope: 'mine' | 'circle' = 'mine') => {
+  search: async (query: string, scope: "mine" | "circle" = "mine") => {
     const userId = await memoryService.getCurrentUserId();
 
     // Search in Dexie
     const allMemories = await db.memories
-      .where('userId')
-      .equals(userId || '')
+      .where("userId")
+      .equals(userId || "")
       .toArray();
 
     const lowerQuery = query.toLowerCase();
-    const filtered = allMemories.filter(memory => 
-      memory.title.toLowerCase().includes(lowerQuery) ||
-      memory.content.toLowerCase().includes(lowerQuery) ||
-      memory.tags?.some(tag => tag.toLowerCase().includes(lowerQuery))
+    const filtered = allMemories.filter(
+      (memory) =>
+        memory.title.toLowerCase().includes(lowerQuery) ||
+        memory.content.toLowerCase().includes(lowerQuery) ||
+        memory.tags?.some((tag) => tag.toLowerCase().includes(lowerQuery)),
     );
 
     // Background sync if online
@@ -221,14 +222,14 @@ export const memoryService = {
         for (const memory of response.memories) {
           await db.memories.put({
             ...memory,
-            syncStatus: 'synced',
+            syncStatus: "synced",
             lastSync: Date.now(),
           });
         }
 
         return response;
       } catch (error) {
-        console.error('[MemoryService] Search sync failed, using cached results:', error);
+        console.error("[MemoryService] Search sync failed, using cached results:", error);
       }
     }
 
@@ -239,8 +240,8 @@ export const memoryService = {
   getCurrentUserId: async (): Promise<string | null> => {
     // This should be replaced with actual session logic
     // For now, we'll store it in localStorage or session
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('currentUserId');
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("currentUserId");
     }
     return null;
   },

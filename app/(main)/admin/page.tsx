@@ -17,7 +17,7 @@ export default function AdminPage() {
 
   if (error) {
     return (
-      <div className="max-w-md mx-auto py-20 text-center">
+      <div className="mx-auto max-w-md py-20 text-center">
         <p className="text-destructive-600 mb-4">Failed to load admin data</p>
         <Button onClick={() => refetch()}>Retry</Button>
       </div>
@@ -33,17 +33,13 @@ export default function AdminPage() {
   const health = data?.health || { responseTime: "---", databaseLoad: "---" };
 
   return (
-    <div className="max-w-6xl mx-auto p-6 space-y-8">
+    <div className="mx-auto max-w-6xl space-y-8 p-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-display font-bold text-neutral-900">
-            Admin Center
-          </h1>
-          <p className="text-neutral-600 mt-1">
-            System intelligence and node management
-          </p>
+          <h1 className="font-display text-3xl font-bold text-neutral-900">Admin Center</h1>
+          <p className="mt-1 text-neutral-600">System intelligence and node management</p>
         </div>
-        <div className="bg-primary-900 text-secondary-400 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest">
+        <div className="bg-primary-900 text-secondary-400 rounded-full px-4 py-1 text-xs font-bold tracking-widest uppercase">
           Admin Authority
         </div>
       </div>
@@ -54,7 +50,7 @@ export default function AdminPage() {
             <button
               key={id}
               onClick={() => setActiveTab(id as "overview" | "jobs" | "logs")}
-              className={`py-4 border-b-2 font-bold text-sm uppercase tracking-widest transition-all ${
+              className={`border-b-2 py-4 text-sm font-bold tracking-widest uppercase transition-all ${
                 activeTab === id
                   ? "border-primary-900 text-primary-900"
                   : "border-transparent text-neutral-400 hover:text-neutral-600"
@@ -68,12 +64,8 @@ export default function AdminPage() {
 
       {activeTab === "overview" && (
         <div className="space-y-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <StatCard
-              title="Total Users"
-              value={stats.totalUsers.toLocaleString()}
-              icon={Users}
-            />
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+            <StatCard title="Total Users" value={stats.totalUsers.toLocaleString()} icon={Users} />
             <StatCard
               title="Active Users"
               value={stats.activeUsers.toLocaleString()}
@@ -84,33 +76,19 @@ export default function AdminPage() {
               value={stats.totalMemories.toLocaleString()}
               icon={Database}
             />
-            <StatCard
-              title="Storage Used"
-              value={stats.storageUsed}
-              icon={Database}
-            />
+            <StatCard title="Storage Used" value={stats.storageUsed} icon={Database} />
           </div>
 
-          <Card className="p-8 space-y-6">
-            <h2 className="text-xl font-display font-bold text-neutral-900">
-              System Health
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="flex justify-between items-center p-4 bg-neutral-50 rounded-2xl">
-                <span className="text-neutral-600 font-medium">
-                  API Response Time
-                </span>
-                <span className="text-primary-900 font-bold">
-                  {health.responseTime}
-                </span>
+          <Card className="space-y-6 p-8">
+            <h2 className="font-display text-xl font-bold text-neutral-900">System Health</h2>
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+              <div className="flex items-center justify-between rounded-2xl bg-neutral-50 p-4">
+                <span className="font-medium text-neutral-600">API Response Time</span>
+                <span className="text-primary-900 font-bold">{health.responseTime}</span>
               </div>
-              <div className="flex justify-between items-center p-4 bg-neutral-50 rounded-2xl">
-                <span className="text-neutral-600 font-medium">
-                  Database Load
-                </span>
-                <span className="text-primary-900 font-bold">
-                  {health.databaseLoad}
-                </span>
+              <div className="flex items-center justify-between rounded-2xl bg-neutral-50 p-4">
+                <span className="font-medium text-neutral-600">Database Load</span>
+                <span className="text-primary-900 font-bold">{health.databaseLoad}</span>
               </div>
             </div>
           </Card>
@@ -121,7 +99,7 @@ export default function AdminPage() {
       {activeTab !== "overview" && (
         <Card className="p-20 text-center">
           <Loading size="md" className="mb-4" text="" />
-          <p className="text-neutral-500 font-medium uppercase tracking-widest">
+          <p className="font-medium tracking-widest text-neutral-500 uppercase">
             Management tools coming to this route soon
           </p>
         </Card>

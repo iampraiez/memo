@@ -22,6 +22,7 @@ Please **do not** create a public GitHub issue for security vulnerabilities.
 Send details to: **himpraise571@gmail.com**
 
 Include:
+
 - Description of the vulnerability
 - Steps to reproduce
 - Potential impact
@@ -59,16 +60,19 @@ When using Memory Lane:
 ## Known Security Considerations
 
 ### Authentication
+
 - Sessions expire after 30 days of inactivity
 - Passwords are hashed with bcrypt (10 rounds)
 - OAuth tokens are encrypted at rest
 
 ### Data Protection
+
 - All API endpoints require authentication
 - User data is isolated by user ID
 - File uploads are validated and sanitized
 
 ### Infrastructure
+
 - Database connections use SSL/TLS
 - Environment variables are validated on startup
 - Rate limiting is applied to API endpoints

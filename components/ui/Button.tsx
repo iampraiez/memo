@@ -28,8 +28,7 @@ const Button: React.FC<ButtonProps> = ({
       "bg-primary-900 hover:bg-primary-800 text-white shadow-soft hover:shadow-soft-lg focus:ring-primary-500",
     secondary:
       "bg-white border border-neutral-300 hover:bg-neutral-50 text-neutral-700 shadow-soft hover:shadow-soft-lg focus:ring-primary-500",
-    ghost:
-      "hover:bg-neutral-100 text-neutral-600 hover:text-neutral-900 focus:ring-primary-500",
+    ghost: "hover:bg-neutral-100 text-neutral-600 hover:text-neutral-900 focus:ring-primary-500",
     destructive:
       "bg-destructive-600 hover:bg-destructive-700 text-white shadow-soft hover:shadow-soft-lg focus:ring-destructive-500",
   };
@@ -50,8 +49,8 @@ const Button: React.FC<ButtonProps> = ({
     >
       {loading && (
         <div className="mr-2">
-          <div className="w-4 h-4 rounded-md bg-white/20 flex items-center justify-center animate-pulse relative">
-            <div className="absolute inset-0 border-2 border-white/20 border-t-white rounded-md animate-spin" />
+          <div className="relative flex h-4 w-4 animate-pulse items-center justify-center rounded-md bg-white/20">
+            <div className="absolute inset-0 animate-spin rounded-md border-2 border-white/20 border-t-white" />
             <span className="text-[6px] font-bold">M</span>
           </div>
         </div>

@@ -15,8 +15,8 @@ export const tagService = {
 
     // Read from Dexie
     let tags = await db.tags
-      .where('userId')
-      .equals(userId || '')
+      .where("userId")
+      .equals(userId || "")
       .toArray();
 
     // Background sync if online
@@ -28,23 +28,23 @@ export const tagService = {
         for (const tag of response.tags) {
           await db.tags.put({
             ...tag,
-            userId: userId || '',
-            color: 'bg-neutral-200 text-neutral-800', // Default color
+            userId: userId || "",
+            color: "bg-neutral-200 text-neutral-800", // Default color
             usageCount: tag.count,
-            _syncStatus: 'synced',
+            _syncStatus: "synced",
             _lastSync: Date.now(),
           } as LocalTag);
         }
 
         // Re-read
         tags = await db.tags
-          .where('userId')
-          .equals(userId || '')
+          .where("userId")
+          .equals(userId || "")
           .toArray();
 
         return response;
       } catch (error) {
-        console.error('[TagService] Sync failed, using cache:', error);
+        console.error("[TagService] Sync failed, using cache:", error);
       }
     }
 
@@ -53,8 +53,8 @@ export const tagService = {
 
   // Helper
   getCurrentUserId: async (): Promise<string | null> => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('currentUserId');
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("currentUserId");
     }
     return null;
   },

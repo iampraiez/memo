@@ -52,8 +52,8 @@ const Lightbox: React.FC<LightboxProps> = ({
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-sm"
         >
           {/* Header */}
-          <div className="absolute top-0 inset-x-0 p-6 flex items-center justify-between z-10 bg-gradient-to-b from-black/50 to-transparent">
-            <span className="text-white/70 text-sm font-medium">
+          <div className="absolute inset-x-0 top-0 z-10 flex items-center justify-between bg-gradient-to-b from-black/50 to-transparent p-6">
+            <span className="text-sm font-medium text-white/70">
               {currentIndex + 1} / {images.length}
             </span>
             <div className="flex items-center space-x-2">
@@ -61,22 +61,22 @@ const Lightbox: React.FC<LightboxProps> = ({
                 variant="ghost"
                 size="icon"
                 onClick={onClose}
-                className="text-white hover:bg-white/10 rounded-full"
+                className="rounded-full text-white hover:bg-white/10"
               >
-                <X weight="bold" className="w-6 h-6" />
+                <X weight="bold" className="h-6 w-6" />
               </Button>
             </div>
           </div>
 
           {/* Main Image */}
-          <div className="relative w-full h-full flex items-center justify-center p-4 sm:p-12">
+          <div className="relative flex h-full w-full items-center justify-center p-4 sm:p-12">
             <motion.div
               key={currentIndex}
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: -20 }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="relative w-full h-full"
+              className="relative h-full w-full"
             >
               <Image
                 src={images[currentIndex]}
@@ -93,30 +93,36 @@ const Lightbox: React.FC<LightboxProps> = ({
             <>
               <button
                 onClick={() => onNavigate((currentIndex - 1 + images.length) % images.length)}
-                className="absolute left-6 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/5 hover:bg-white/10 text-white transition-all hover:scale-110 active:scale-95 group"
+                className="group absolute top-1/2 left-6 -translate-y-1/2 rounded-full bg-white/5 p-3 text-white transition-all hover:scale-110 hover:bg-white/10 active:scale-95"
               >
-                <CaretLeft weight="bold" className="w-8 h-8 group-hover:-translate-x-0.5 transition-transform" />
+                <CaretLeft
+                  weight="bold"
+                  className="h-8 w-8 transition-transform group-hover:-translate-x-0.5"
+                />
               </button>
               <button
                 onClick={() => onNavigate((currentIndex + 1) % images.length)}
-                className="absolute right-6 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/5 hover:bg-white/10 text-white transition-all hover:scale-110 active:scale-95 group"
+                className="group absolute top-1/2 right-6 -translate-y-1/2 rounded-full bg-white/5 p-3 text-white transition-all hover:scale-110 hover:bg-white/10 active:scale-95"
               >
-                <CaretRight weight="bold" className="w-8 h-8 group-hover:translate-x-0.5 transition-transform" />
+                <CaretRight
+                  weight="bold"
+                  className="h-8 w-8 transition-transform group-hover:translate-x-0.5"
+                />
               </button>
             </>
           )}
 
           {/* Thumbnails */}
           {images.length > 1 && (
-            <div className="absolute bottom-10 inset-x-0 flex justify-center px-6 overflow-x-auto">
-              <div className="flex space-x-3 p-2 bg-black/40 backdrop-blur-md rounded-2xl border border-white/10">
+            <div className="absolute inset-x-0 bottom-10 flex justify-center overflow-x-auto px-6">
+              <div className="flex space-x-3 rounded-2xl border border-white/10 bg-black/40 p-2 backdrop-blur-md">
                 {images.map((img, idx) => (
                   <button
                     key={idx}
                     onClick={() => onNavigate(idx)}
-                    className={`relative w-14 h-14 rounded-lg overflow-hidden transition-all duration-300 ${
-                      currentIndex === idx 
-                        ? "ring-2 ring-primary-500 scale-110" 
+                    className={`relative h-14 w-14 overflow-hidden rounded-lg transition-all duration-300 ${
+                      currentIndex === idx
+                        ? "ring-primary-500 scale-110 ring-2"
                         : "opacity-40 hover:opacity-100"
                     }`}
                   >

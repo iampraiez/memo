@@ -7,7 +7,7 @@ export const useTags = () => {
   const tags = useLiveQuery(async () => {
     const userId = await tagService.getCurrentUserId();
     if (!userId) return [];
-    return await db.tags.where('userId').equals(userId).toArray();
+    return await db.tags.where("userId").equals(userId).toArray();
   });
 
   const query = useQuery<{ tags: Tag[] }>({

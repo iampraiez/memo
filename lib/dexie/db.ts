@@ -1,4 +1,4 @@
-import Dexie, { type EntityTable } from 'dexie';
+import Dexie, { type EntityTable } from "dexie";
 
 // --- Shared Types ---
 
@@ -117,11 +117,10 @@ export interface LocalNotification {
   _lastSync?: number;
 }
 
-
 export interface SyncQueue {
   id?: number;
-  operation: 'create' | 'update' | 'delete';
-  entity: 'memory' | 'comment' | 'reaction' | 'notification' | 'family' | 'story' | 'tag' | 'user';
+  operation: "create" | "update" | "delete";
+  entity: "memory" | "comment" | "reaction" | "notification" | "family" | "story" | "tag" | "user";
   entityId: string;
   data: Record<string, unknown>;
   createdAt: number;
@@ -140,32 +139,32 @@ export interface OfflineChange {
 // --- Database Configuration ---
 
 class MemoDatabase extends Dexie {
-  memories!: EntityTable<Memory, 'id'>;
-  users!: EntityTable<LocalUser, 'id'>;
-  comments!: EntityTable<LocalComment, 'id'>;
-  reactions!: EntityTable<LocalReaction, 'id'>;
-  familyMembers!: EntityTable<LocalFamilyMember, 'id'>;
-  stories!: EntityTable<LocalStory, 'id'>;
-  tags!: EntityTable<LocalTag, 'id'>;
-  notifications!: EntityTable<LocalNotification, 'id'>;
+  memories!: EntityTable<Memory, "id">;
+  users!: EntityTable<LocalUser, "id">;
+  comments!: EntityTable<LocalComment, "id">;
+  reactions!: EntityTable<LocalReaction, "id">;
+  familyMembers!: EntityTable<LocalFamilyMember, "id">;
+  stories!: EntityTable<LocalStory, "id">;
+  tags!: EntityTable<LocalTag, "id">;
+  notifications!: EntityTable<LocalNotification, "id">;
 
-  syncQueue!: EntityTable<SyncQueue, 'id'>;
-  offline_changes!: EntityTable<OfflineChange, 'id'>;
+  syncQueue!: EntityTable<SyncQueue, "id">;
+  offline_changes!: EntityTable<OfflineChange, "id">;
 
   constructor() {
-    super('MemoDatabaseV2');
+    super("MemoDatabaseV2");
     this.version(2).stores({
-      memories: 'id, userId, createdAt, syncStatus, mood, *tags',
-      users: 'id, email, username, _syncStatus',
-      comments: 'id, memoryId, userId, createdAt, _syncStatus',
-      reactions: 'id, memoryId, userId, type, [memoryId+userId+type], _syncStatus',
-      familyMembers: 'id, userId, email, status, _syncStatus',
-      stories: 'id, userId, createdAt, status, _syncStatus',
-      tags: 'id, userId, name, usageCount, _syncStatus',
-      notifications: 'id, userId, read, createdAt, _syncStatus',
-      
-      syncQueue: '++id, entity, entityId, createdAt, retryCount',
-      offline_changes: '++id, type, collection, timestamp',
+      memories: "id, userId, createdAt, syncStatus, mood, *tags",
+      users: "id, email, username, _syncStatus",
+      comments: "id, memoryId, userId, createdAt, _syncStatus",
+      reactions: "id, memoryId, userId, type, [memoryId+userId+type], _syncStatus",
+      familyMembers: "id, userId, email, status, _syncStatus",
+      stories: "id, userId, createdAt, status, _syncStatus",
+      tags: "id, userId, name, usageCount, _syncStatus",
+      notifications: "id, userId, read, createdAt, _syncStatus",
+
+      syncQueue: "++id, entity, entityId, createdAt, retryCount",
+      offline_changes: "++id, type, collection, timestamp",
     });
   }
 }

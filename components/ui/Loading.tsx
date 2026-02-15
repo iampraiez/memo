@@ -1,18 +1,18 @@
-import React from 'react';
+import React from "react";
 import { cn } from "@/lib/utils";
 
 interface LoadingProps {
   fullPage?: boolean;
   className?: string;
-  size?: 'sm' | 'md' | 'lg';
+  size?: "sm" | "md" | "lg";
   text?: string;
 }
 
-export default function Loading({ 
-  fullPage = false, 
-  className, 
-  size = 'md',
-  text = "Loading..."
+export default function Loading({
+  fullPage = false,
+  className,
+  size = "md",
+  text = "Loading...",
 }: LoadingProps) {
   // const sizeClasses = {
   //   sm: "w-8 h-8 text-sm",
@@ -27,40 +27,33 @@ export default function Loading({
   };
 
   const content = (
-    <div className={cn("text-center space-y-4", className)}>
+    <div className={cn("space-y-4 text-center", className)}>
       <div className="relative">
         <div
           className={cn(
-            "bg-linear-to-br from-primary-600 to-secondary-600 rounded-2xl flex items-center justify-center mx-auto animate-pulse shadow-lg shadow-primary-600/20",
+            "from-primary-600 to-secondary-600 shadow-primary-600/20 mx-auto flex animate-pulse items-center justify-center rounded-2xl bg-linear-to-br shadow-lg",
             iconSizes[size],
           )}
         >
-          <span
-            className={cn(
-              "text-white font-bold",
-              size === "sm" ? "text-xs" : "text-xl",
-            )}
-          >
+          <span className={cn("font-bold text-white", size === "sm" ? "text-xs" : "text-xl")}>
             ML
           </span>
         </div>
         <div className={cn("absolute inset-0 mx-auto", iconSizes[size])}>
           <div
             className={cn(
-              "w-full h-full border-4 border-primary-200 border-t-primary-600 rounded-2xl animate-spin",
+              "border-primary-200 border-t-primary-600 h-full w-full animate-spin rounded-2xl border-4",
             )}
           ></div>
         </div>
       </div>
-      {text && (
-        <p className="text-neutral-500 font-medium animate-pulse">{text}</p>
-      )}
+      {text && <p className="animate-pulse font-medium text-neutral-500">{text}</p>}
     </div>
   );
 
   if (fullPage) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-80px)] w-full">
+      <div className="flex min-h-[calc(100vh-80px)] w-full flex-col items-center justify-center">
         {content}
       </div>
     );

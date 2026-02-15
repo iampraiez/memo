@@ -19,7 +19,7 @@ import Image from "next/image";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
-import DeleteAccountModal from "@/components/DeleteAccountModal"; 
+import DeleteAccountModal from "@/components/DeleteAccountModal";
 import { signOut, useSession } from "next-auth/react";
 import { useUserSettings, useUpdateUserSettings } from "@/hooks/useUserSettings";
 import Loading from "@/components/ui/Loading";
@@ -42,7 +42,7 @@ export default function SettingsPage() {
   const [localAvatar, setLocalAvatar] = useState("");
   const [localBio, setLocalBio] = useState("");
   const [localUsername, setLocalUsername] = useState("");
-  
+
   // Preference states
   const [localAiEnabled, setLocalAiEnabled] = useState(true);
   const [localPrivacyMode, setLocalPrivacyMode] = useState("private");
@@ -108,18 +108,21 @@ export default function SettingsPage() {
       const updatedPreferences = {
         ...settings.preferences,
         aiEnabled: key === "aiEnabled" ? (value as boolean) : localAiEnabled,
-        privacyMode: (key === "privacyMode" ? (value as string) : localPrivacyMode) as "private" | "selective" | "family",
+        privacyMode: (key === "privacyMode" ? (value as string) : localPrivacyMode) as
+          | "private"
+          | "selective"
+          | "family",
         autoBackup: key === "autoBackup" ? (value as boolean) : localAutoBackup,
       };
 
       await updateSettings.mutateAsync({
-        preferences: updatedPreferences
+        preferences: updatedPreferences,
       });
 
       if (key === "aiEnabled") setLocalAiEnabled(value as boolean);
       if (key === "privacyMode") setLocalPrivacyMode(value as "private" | "selective" | "family");
       if (key === "autoBackup") setLocalAutoBackup(value as boolean);
-      
+
       toast.success("Preferences updated");
     } catch {
       toast.error("Failed to update preferences");
@@ -145,10 +148,10 @@ export default function SettingsPage() {
 
   if (error || !settings) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6">
-        <Card className="max-w-md w-full p-8 text-center space-y-4">
-          <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto">
-            <X className="w-8 h-8 text-red-500" />
+      <div className="flex min-h-screen items-center justify-center p-6">
+        <Card className="w-full max-w-md space-y-4 p-8 text-center">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-50">
+            <X className="h-8 w-8 text-red-500" />
           </div>
           <h2 className="text-xl font-bold text-neutral-900">Connection Interrupted</h2>
           <p className="text-neutral-600">We couldn't reach your vault. Please try again later.</p>
@@ -161,26 +164,24 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-10 pb-20">
-      <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="mx-auto max-w-4xl space-y-10 p-6 pb-20">
+      <header className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h1 className="text-4xl font-display font-bold text-neutral-900 tracking-tight">
+          <h1 className="font-display text-4xl font-bold tracking-tight text-neutral-900">
             Settings
           </h1>
-          <p className="text-neutral-500 mt-1">
-            Personalize your Sanctuary experience.
-          </p>
+          <p className="mt-1 text-neutral-500">Personalize your Sanctuary experience.</p>
         </div>
         <Button
           variant="secondary"
           onClick={handleSignOut}
           disabled={isSigningOut}
-          className="h-11 px-6 rounded-xl border-neutral-200 hover:bg-neutral-50"
+          className="h-11 rounded-xl border-neutral-200 px-6 hover:bg-neutral-50"
         >
           {isSigningOut ? (
-            <Spinner className="w-4 h-4 mr-2 animate-spin" />
+            <Spinner className="mr-2 h-4 w-4 animate-spin" />
           ) : (
-            <SignOut className="w-4 h-4 mr-2" />
+            <SignOut className="mr-2 h-4 w-4" />
           )}
           <span>Sign Out</span>
         </Button>
@@ -190,19 +191,19 @@ export default function SettingsPage() {
         {/* Profile Section */}
         <section className="space-y-4">
           <div className="flex items-center space-x-2 px-1">
-            <UserIcon weight="duotone" className="w-5 h-5 text-primary-600" />
-            <h2 className="text-sm font-bold text-neutral-400 uppercase tracking-widest">
+            <UserIcon weight="duotone" className="text-primary-600 h-5 w-5" />
+            <h2 className="text-sm font-bold tracking-widest text-neutral-400 uppercase">
               Identity
             </h2>
           </div>
           <Card className="overflow-hidden">
-            <div className="p-8 space-y-8">
-              <div className="flex flex-col md:flex-row md:items-center gap-8">
-                <div className="relative group">
+            <div className="space-y-8 p-8">
+              <div className="flex flex-col gap-8 md:flex-row md:items-center">
+                <div className="group relative">
                   {/* Outer Frame with Gradient and Shadow */}
-                  <div className="p-1 rounded-full bg-linear-to-br from-primary-100 via-white to-secondary-100 shadow-2xl ring-1 ring-neutral-200/50">
-                    <div className="p-1 rounded-full bg-white/40 backdrop-blur-md">
-                      <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-white shadow-xl bg-primary-900 flex items-center justify-center relative">
+                  <div className="from-primary-100 to-secondary-100 rounded-full bg-linear-to-br via-white p-1 shadow-2xl ring-1 ring-neutral-200/50">
+                    <div className="rounded-full bg-white/40 p-1 backdrop-blur-md">
+                      <div className="bg-primary-900 relative flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-2 border-white shadow-xl">
                         {localAvatar ? (
                           <Image
                             src={localAvatar}
@@ -211,21 +212,21 @@ export default function SettingsPage() {
                             className="object-cover transition-transform duration-700 group-hover:scale-110"
                           />
                         ) : (
-                          <span className="text-3xl font-bold text-secondary-400">
+                          <span className="text-secondary-400 text-3xl font-bold">
                             {localName ? localName[0] : "U"}
                           </span>
                         )}
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* Enhanced Upload Button */}
                   <button
                     onClick={() => document.getElementById("avatar-upload")?.click()}
-                    className="absolute -bottom-1 -right-1 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-2xl border border-neutral-100 hover:scale-110 active:scale-95 transition-all text-primary-600 z-10"
+                    className="text-primary-600 absolute -right-1 -bottom-1 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-neutral-100 bg-white shadow-2xl transition-all hover:scale-110 active:scale-95"
                     title="Change Photo"
                   >
-                    <Camera weight="bold" className="w-5 h-5" />
+                    <Camera weight="bold" className="h-5 w-5" />
                   </button>
                   <input
                     type="file"
@@ -249,8 +250,12 @@ export default function SettingsPage() {
                 </div>
 
                 <div className="flex-1 space-y-1">
-                  <h3 className="text-2xl font-bold text-neutral-900">{localName || "Your Name"}</h3>
-                  <p className="text-primary-600 font-medium font-mono text-sm">@{localUsername || "username"}</p>
+                  <h3 className="text-2xl font-bold text-neutral-900">
+                    {localName || "Your Name"}
+                  </h3>
+                  <p className="text-primary-600 font-mono text-sm font-medium">
+                    @{localUsername || "username"}
+                  </p>
                 </div>
 
                 <div className="flex items-center space-x-2">
@@ -259,29 +264,29 @@ export default function SettingsPage() {
                       variant="secondary"
                       size="sm"
                       onClick={() => setIsEditingProfile(true)}
-                      className="rounded-lg h-10 px-4"
+                      className="h-10 rounded-lg px-4"
                     >
-                      <PencilSimple weight="bold" className="w-4 h-4 mr-2" />
+                      <PencilSimple weight="bold" className="mr-2 h-4 w-4" />
                       Edit Profile
                     </Button>
                   ) : (
                     <>
                       <button
                         onClick={() => setIsEditingProfile(false)}
-                        className="p-2 text-neutral-400 hover:text-neutral-600 transition-colors"
+                        className="p-2 text-neutral-400 transition-colors hover:text-neutral-600"
                       >
-                        <X weight="bold" className="w-5 h-5" />
+                        <X weight="bold" className="h-5 w-5" />
                       </button>
                       <Button
                         size="sm"
                         onClick={handleSaveProfile}
                         disabled={updateSettings.isPending}
-                        className="rounded-lg h-10 px-4 bg-primary-900 hover:bg-black"
+                        className="bg-primary-900 h-10 rounded-lg px-4 hover:bg-black"
                       >
                         {updateSettings.isPending ? (
-                          <Spinner className="w-4 h-4 animate-spin" />
+                          <Spinner className="h-4 w-4 animate-spin" />
                         ) : (
-                          <Check weight="bold" className="w-4 h-4 mr-2" />
+                          <Check weight="bold" className="mr-2 h-4 w-4" />
                         )}
                         Save Changes
                       </Button>
@@ -291,7 +296,7 @@ export default function SettingsPage() {
               </div>
 
               {isEditingProfile && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-neutral-100 animate-in fade-in slide-in-from-top-4 duration-300">
+                <div className="animate-in fade-in slide-in-from-top-4 grid grid-cols-1 gap-6 border-t border-neutral-100 pt-4 duration-300 md:grid-cols-2">
                   <Input
                     label="Display Name"
                     value={localName}
@@ -306,14 +311,14 @@ export default function SettingsPage() {
                     prefix="@"
                   />
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-bold text-neutral-700 mb-2">
+                    <label className="mb-2 block text-sm font-bold text-neutral-700">
                       Short Bio
                     </label>
                     <textarea
                       value={localBio}
                       onChange={(e) => setLocalBio(e.target.value)}
                       placeholder="Share a bit about your journey..."
-                      className="w-full px-4 py-3 rounded-xl border border-neutral-200 focus:ring-2 focus:ring-primary-500 focus:border-transparent min-h-25 resize-none transition-all outline-none"
+                      className="focus:ring-primary-500 min-h-25 w-full resize-none rounded-xl border border-neutral-200 px-4 py-3 transition-all outline-none focus:border-transparent focus:ring-2"
                     />
                   </div>
                 </div>
@@ -325,32 +330,34 @@ export default function SettingsPage() {
         {/* Preferences Section */}
         <section className="space-y-4">
           <div className="flex items-center space-x-2 px-1">
-            <Sparkle weight="duotone" className="w-5 h-5 text-primary-600" />
-            <h2 className="text-sm font-bold text-neutral-400 uppercase tracking-widest">
+            <Sparkle weight="duotone" className="text-primary-600 h-5 w-5" />
+            <h2 className="text-sm font-bold tracking-widest text-neutral-400 uppercase">
               Sanctuary Pulse
             </h2>
           </div>
           <Card>
             <div className="divide-y divide-neutral-100">
               {/* Privacy Mode */}
-              <div className="p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex flex-col justify-between gap-4 p-6 sm:flex-row sm:items-center">
                 <div className="space-y-1">
                   <div className="flex items-center space-x-2">
-                    <Shield weight="duotone" className="w-5 h-5 text-neutral-900" />
+                    <Shield weight="duotone" className="h-5 w-5 text-neutral-900" />
                     <h3 className="font-bold text-neutral-900">Privacy Mode</h3>
                   </div>
-                  <p className="text-sm text-neutral-500">Control who can discover and see your memories.</p>
+                  <p className="text-sm text-neutral-500">
+                    Control who can discover and see your memories.
+                  </p>
                 </div>
-                <div className="flex items-center p-1 bg-neutral-100 rounded-xl">
+                <div className="flex items-center rounded-xl bg-neutral-100 p-1">
                   {["private", "sanctuary"].map((mode) => (
                     <button
                       key={mode}
                       onClick={() => handleUpdatePreference("privacyMode", mode)}
                       className={cn(
-                        "px-4 py-2 text-xs font-bold rounded-lg transition-all capitalize",
+                        "rounded-lg px-4 py-2 text-xs font-bold capitalize transition-all",
                         localPrivacyMode === mode
-                          ? "bg-white text-primary-900 shadow-sm"
-                          : "text-neutral-500 hover:text-neutral-900"
+                          ? "text-primary-900 bg-white shadow-sm"
+                          : "text-neutral-500 hover:text-neutral-900",
                       )}
                     >
                       {mode === "sanctuary" ? "Sanctuary Circle" : "Private"}
@@ -360,50 +367,54 @@ export default function SettingsPage() {
               </div>
 
               {/* AI Features */}
-              <div className="p-6 flex items-center justify-between">
+              <div className="flex items-center justify-between p-6">
                 <div className="space-y-1">
                   <div className="flex items-center space-x-2">
-                    <Sparkle weight="duotone" className="w-5 h-5 text-neutral-900" />
+                    <Sparkle weight="duotone" className="h-5 w-5 text-neutral-900" />
                     <h3 className="font-bold text-neutral-900">AI Enhancement</h3>
                   </div>
-                  <p className="text-sm text-neutral-500">Let AI help organize and summarize your moments.</p>
+                  <p className="text-sm text-neutral-500">
+                    Let AI help organize and summarize your moments.
+                  </p>
                 </div>
                 <button
                   onClick={() => handleUpdatePreference("aiEnabled", !localAiEnabled)}
                   className={cn(
                     "relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
-                    localAiEnabled ? "bg-primary-900" : "bg-neutral-200"
+                    localAiEnabled ? "bg-primary-900" : "bg-neutral-200",
                   )}
                 >
                   <span
                     className={cn(
                       "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
-                      localAiEnabled ? "translate-x-5" : "translate-x-0"
+                      localAiEnabled ? "translate-x-5" : "translate-x-0",
                     )}
                   />
                 </button>
               </div>
 
               {/* Auto Backup */}
-              <div className="p-6 flex items-center justify-between">
+              <div className="flex items-center justify-between p-6">
                 <div className="space-y-1">
                   <div className="flex items-center space-x-2">
-                    <Database weight="duotone" className="w-5 h-5 text-neutral-900" />
+                    <Database weight="duotone" className="h-5 w-5 text-neutral-900" />
                     <h3 className="font-bold text-neutral-900">Auto Preservation</h3>
                   </div>
-                  <p className="text-sm text-neutral-500">Automatically sync your media to secure cloud storage.</p>
+                  <p className="text-sm text-neutral-500">
+                    Automatically sync your media to secure cloud storage.
+                  </p>
                 </div>
                 <button
                   onClick={() => handleUpdatePreference("autoBackup", !localAutoBackup)}
                   className={cn(
                     "relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
-                    localAutoBackup ? "bg-primary-900" : "bg-neutral-200"
+                    localAutoBackup ? "bg-primary-900" : "bg-neutral-200",
                   )}
                 >
                   <span
                     className={cn(
                       "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
-                      localAutoBackup ? "translate-x-5" : "translate-x-0"
+                      localAutoBackup ? "translate-x-5" : "translate-x-0",
                     )}
                   />
                 </button>
@@ -415,20 +426,22 @@ export default function SettingsPage() {
         {/* Data Section */}
         <section className="space-y-4">
           <div className="flex items-center space-x-2 px-1">
-            <Cloud weight="duotone" className="w-5 h-5 text-primary-600" />
-            <h2 className="text-sm font-bold text-neutral-400 uppercase tracking-widest">
+            <Cloud weight="duotone" className="text-primary-600 h-5 w-5" />
+            <h2 className="text-sm font-bold tracking-widest text-neutral-400 uppercase">
               Vault Data
             </h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Card className="p-6 flex flex-col justify-between group hover:border-primary-200 transition-colors">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <Card className="group hover:border-primary-200 flex flex-col justify-between p-6 transition-colors">
               <div className="space-y-4">
-                <div className="w-12 h-12 bg-primary-50 rounded-2xl flex items-center justify-center text-primary-600 group-hover:bg-primary-900 group-hover:text-white transition-all">
-                  <Download weight="bold" className="w-6 h-6" />
+                <div className="bg-primary-50 text-primary-600 group-hover:bg-primary-900 flex h-12 w-12 items-center justify-center rounded-2xl transition-all group-hover:text-white">
+                  <Download weight="bold" className="h-6 w-6" />
                 </div>
                 <div className="space-y-1">
                   <h3 className="font-bold text-neutral-900">Export All Memories</h3>
-                  <p className="text-sm text-neutral-500">Download your entire journey in a portable JSON format.</p>
+                  <p className="text-sm text-neutral-500">
+                    Download your entire journey in a portable JSON format.
+                  </p>
                 </div>
               </div>
               <Button
@@ -437,24 +450,26 @@ export default function SettingsPage() {
                 onClick={handleExportData}
                 className="mt-6 w-full rounded-xl border-neutral-200 font-bold"
               >
-                {isExporting ? <Spinner className="w-4 h-4 animate-spin" /> : "Initiate Export"}
+                {isExporting ? <Spinner className="h-4 w-4 animate-spin" /> : "Initiate Export"}
               </Button>
             </Card>
 
-            <Card className="p-6 flex flex-col justify-between border-red-100 bg-red-50/10 hover:border-red-200 transition-colors">
+            <Card className="flex flex-col justify-between border-red-100 bg-red-50/10 p-6 transition-colors hover:border-red-200">
               <div className="space-y-4">
-                <div className="w-12 h-12 bg-red-100 rounded-2xl flex items-center justify-center text-red-600">
-                  <Trash weight="bold" className="w-6 h-6" />
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-100 text-red-600">
+                  <Trash weight="bold" className="h-6 w-6" />
                 </div>
                 <div className="space-y-1">
                   <h3 className="font-bold text-red-900">Dissolve Sanctuary</h3>
-                  <p className="text-sm text-neutral-500">Permanently remove your account and all associated memories.</p>
+                  <p className="text-sm text-neutral-500">
+                    Permanently remove your account and all associated memories.
+                  </p>
                 </div>
               </div>
               <Button
                 variant="destructive"
                 onClick={() => setShowDeleteModal(true)}
-                className="mt-6 w-full rounded-xl font-bold bg-red-600 hover:bg-red-700"
+                className="mt-6 w-full rounded-xl bg-red-600 font-bold hover:bg-red-700"
               >
                 Delete Account
               </Button>

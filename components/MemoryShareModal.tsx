@@ -11,14 +11,8 @@ interface MemoryShareModalProps {
   memory: Memory;
 }
 
-const MemoryShareModal: React.FC<MemoryShareModalProps> = ({
-  isOpen,
-  onClose,
-  memory,
-}) => {
-  const [shareMethod, setShareMethod] = useState<"family" | "email" | "link">(
-    "family"
-  );
+const MemoryShareModal: React.FC<MemoryShareModalProps> = ({ isOpen, onClose, memory }) => {
+  const [shareMethod, setShareMethod] = useState<"family" | "email" | "link">("family");
   const [emailList, setEmailList] = useState("");
   const [message, setMessage] = useState("");
   const [linkCopied, setLinkCopied] = useState(false);
@@ -36,10 +30,8 @@ const MemoryShareModal: React.FC<MemoryShareModalProps> = ({
   const handleFamilyToggle = (memberId: string) => {
     setSelectedFamily((members) =>
       members.map((member) =>
-        member.id === memberId
-          ? { ...member, selected: !member.selected }
-          : member
-      )
+        member.id === memberId ? { ...member, selected: !member.selected } : member,
+      ),
     );
   };
 
@@ -62,19 +54,17 @@ const MemoryShareModal: React.FC<MemoryShareModalProps> = ({
     <Modal isOpen={isOpen} onClose={onClose} title="Share Memory" size="md">
       <div className="space-y-6">
         {/* Memory Preview */}
-        <div className="bg-neutral-50 rounded-lg p-4">
-          <h3 className="font-medium text-neutral-900 mb-2">{memory.title}</h3>
-          <p className="text-sm text-neutral-600 line-clamp-2">
+        <div className="rounded-lg bg-neutral-50 p-4">
+          <h3 className="mb-2 font-medium text-neutral-900">{memory.title}</h3>
+          <p className="line-clamp-2 text-sm text-neutral-600">
             {memory.summary || memory.content}
           </p>
-          <div className="flex items-center space-x-2 mt-2">
+          <div className="mt-2 flex items-center space-x-2">
             <span className="text-xs text-neutral-500">
               {new Date(memory.date).toLocaleDateString()}
             </span>
             {memory.location && (
-              <span className="text-xs text-neutral-500">
-                • {memory.location}
-              </span>
+              <span className="text-xs text-neutral-500">• {memory.location}</span>
             )}
           </div>
         </div>
@@ -91,16 +81,14 @@ const MemoryShareModal: React.FC<MemoryShareModalProps> = ({
               return (
                 <button
                   key={method.id}
-                  onClick={() =>
-                    setShareMethod(method.id as "family" | "email" | "link")
-                  }
-                  className={`py-2 px-1 border-b-2 font-medium text-sm flex items-center space-x-2 ${
+                  onClick={() => setShareMethod(method.id as "family" | "email" | "link")}
+                  className={`flex items-center space-x-2 border-b-2 px-1 py-2 text-sm font-medium ${
                     shareMethod === method.id
                       ? "border-primary-500 text-primary-600"
-                      : "border-transparent text-neutral-500 hover:text-neutral-700 hover:border-neutral-300"
+                      : "border-transparent text-neutral-500 hover:border-neutral-300 hover:text-neutral-700"
                   }`}
                 >
-                  <Icon className="w-4 h-4" />
+                  <Icon className="h-4 w-4" />
                   <span>{method.label}</span>
                 </button>
               );
@@ -111,30 +99,24 @@ const MemoryShareModal: React.FC<MemoryShareModalProps> = ({
         {/* Share Content */}
         {shareMethod === "family" && (
           <div className="space-y-4">
-            <h4 className="font-medium text-neutral-900">
-              Select family members
-            </h4>
+            <h4 className="font-medium text-neutral-900">Select family members</h4>
             <div className="space-y-2">
               {selectedFamily.map((member) => (
                 <label
                   key={member.id}
-                  className="flex items-center space-x-3 p-3 hover:bg-neutral-50 rounded-lg cursor-pointer"
+                  className="flex cursor-pointer items-center space-x-3 rounded-lg p-3 hover:bg-neutral-50"
                 >
                   <input
                     type="checkbox"
                     checked={member.selected}
                     onChange={() => handleFamilyToggle(member.id)}
-                    className="w-4 h-4 text-primary-600 border-neutral-300 rounded focus:ring-primary-500"
+                    className="text-primary-600 focus:ring-primary-500 h-4 w-4 rounded border-neutral-300"
                   />
-                  <div className="w-8 h-8 bg-neutral-200 rounded-full flex items-center justify-center">
-                    <span className="text-sm font-medium text-neutral-600">
-                      {member.name[0]}
-                    </span>
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-neutral-200">
+                    <span className="text-sm font-medium text-neutral-600">{member.name[0]}</span>
                   </div>
                   <div>
-                    <p className="font-medium text-neutral-900">
-                      {member.name}
-                    </p>
+                    <p className="font-medium text-neutral-900">{member.name}</p>
                     <p className="text-sm text-neutral-600">{member.email}</p>
                   </div>
                 </label>
@@ -158,9 +140,7 @@ const MemoryShareModal: React.FC<MemoryShareModalProps> = ({
         {shareMethod === "link" && (
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-2">
-                Share link
-              </label>
+              <label className="mb-2 block text-sm font-medium text-neutral-700">Share link</label>
               <div className="flex space-x-2">
                 <Input value={shareUrl} readOnly className="flex-1" />
                 <Button
@@ -170,22 +150,22 @@ const MemoryShareModal: React.FC<MemoryShareModalProps> = ({
                 >
                   {linkCopied ? (
                     <>
-                      <Check className="w-4 h-4" />
+                      <Check className="h-4 w-4" />
                       <span>Copied!</span>
                     </>
                   ) : (
                     <>
-                      <Copy className="w-4 h-4" />
+                      <Copy className="h-4 w-4" />
                       <span>Copy</span>
                     </>
                   )}
                 </Button>
               </div>
             </div>
-            <div className="bg-warning-50 border border-warning-200 rounded-lg p-3">
-              <p className="text-sm text-warning-800">
-                Anyone with this link will be able to view this memory. Make
-                sure you trust the people you share it with.
+            <div className="bg-warning-50 border-warning-200 rounded-lg border p-3">
+              <p className="text-warning-800 text-sm">
+                Anyone with this link will be able to view this memory. Make sure you trust the
+                people you share it with.
               </p>
             </div>
           </div>
@@ -194,7 +174,7 @@ const MemoryShareModal: React.FC<MemoryShareModalProps> = ({
         {/* Optional Message */}
         {(shareMethod === "family" || shareMethod === "email") && (
           <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-2">
+            <label className="mb-2 block text-sm font-medium text-neutral-700">
               Add a message (optional)
             </label>
             <textarea
@@ -202,18 +182,18 @@ const MemoryShareModal: React.FC<MemoryShareModalProps> = ({
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Add a personal message..."
               rows={3}
-              className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className="focus:ring-primary-500 w-full rounded-lg border border-neutral-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:outline-none"
             />
           </div>
         )}
 
         {/* Actions */}
-        <div className="flex justify-end space-x-3 pt-4 border-t border-neutral-200">
+        <div className="flex justify-end space-x-3 border-t border-neutral-200 pt-4">
           <Button variant="secondary" onClick={onClose}>
             Cancel
           </Button>
           <Button onClick={handleShare}>
-            <Share className="w-4 h-4 mr-2" />
+            <Share className="mr-2 h-4 w-4" />
             Share Memory
           </Button>
         </div>

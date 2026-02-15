@@ -1,8 +1,8 @@
 "use client";
 
-import React, { Component, ReactNode } from 'react';
-import Button from './ui/Button';
-import { ArrowsClockwise, Warning } from '@phosphor-icons/react';
+import React, { Component, ReactNode } from "react";
+import Button from "./ui/Button";
+import { ArrowsClockwise, Warning } from "@phosphor-icons/react";
 
 interface Props {
   children: ReactNode;
@@ -25,7 +25,7 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
+    console.error("ErrorBoundary caught an error:", error, errorInfo);
   }
 
   render() {
@@ -35,25 +35,22 @@ class ErrorBoundary extends Component<Props, State> {
       }
 
       return (
-        <div className="min-h-screen bg-linear-to-br from-primary-50 via-white to-secondary-50 flex items-center justify-center p-6">
-          <div className="max-w-md w-full bg-white rounded-2xl shadow-lg border border-neutral-200 p-8 text-center space-y-6">
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto">
-              <Warning className="w-8 h-8 text-red-600" weight="fill" />
+        <div className="from-primary-50 to-secondary-50 flex min-h-screen items-center justify-center bg-linear-to-br via-white p-6">
+          <div className="w-full max-w-md space-y-6 rounded-2xl border border-neutral-200 bg-white p-8 text-center shadow-lg">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
+              <Warning className="h-8 w-8 text-red-600" weight="fill" />
             </div>
 
             <div className="space-y-2">
-              <h2 className="text-2xl font-bold text-neutral-900">
-                Something went wrong
-              </h2>
+              <h2 className="text-2xl font-bold text-neutral-900">Something went wrong</h2>
               <p className="text-neutral-600">
-                We encountered an unexpected error. Don't worry, your data is
-                safe.
+                We encountered an unexpected error. Don't worry, your data is safe.
               </p>
             </div>
 
             {process.env.NODE_ENV === "development" && this.state.error && (
-              <div className="bg-neutral-50 rounded-lg p-4 text-left">
-                <p className="text-xs font-mono text-red-600 break-all">
+              <div className="rounded-lg bg-neutral-50 p-4 text-left">
+                <p className="font-mono text-xs break-all text-red-600">
                   {this.state.error.message}
                 </p>
               </div>
@@ -67,11 +64,8 @@ class ErrorBoundary extends Component<Props, State> {
               >
                 Go Home
               </Button>
-              <Button
-                className="flex-1"
-                onClick={() => window.location.reload()}
-              >
-                <ArrowsClockwise className="w-4 h-4 mr-2" />
+              <Button className="flex-1" onClick={() => window.location.reload()}>
+                <ArrowsClockwise className="mr-2 h-4 w-4" />
                 Reload Page
               </Button>
             </div>

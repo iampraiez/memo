@@ -25,9 +25,7 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
   editingMemory,
 }) => {
   const isOnline = useNetworkStatus();
-  const [activeTab, setActiveTab] = useState<"content" | "media" | "metadata">(
-    "content",
-  );
+  const [activeTab, setActiveTab] = useState<"content" | "media" | "metadata">("content");
   const [formData, setFormData] = useState({
     title: editingMemory?.title || "",
     content: editingMemory?.content || "",
@@ -191,7 +189,7 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
     }
 
     // Critical: Ensure no blob URLs are being saved
-    const blobImages = formData.images.filter(img => img.url.startsWith('blob:'));
+    const blobImages = formData.images.filter((img) => img.url.startsWith("blob:"));
     if (blobImages.length > 0) {
       toast.error("Some images failed to upload. Please remove or re-upload them.");
       return;
@@ -203,7 +201,7 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
 
       const newMemory = {
         ...formData,
-        images: formData.images.map((file) => file.url), 
+        images: formData.images.map((file) => file.url),
         id: editingMemory?.id || `memory-${Date.now()}`,
         createdAt: editingMemory?.createdAt || new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -233,11 +231,11 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
       }
 
       await db.memories.put(newMemory);
-      await onSave(newMemory); 
+      await onSave(newMemory);
       onClose();
     } catch (error) {
       console.error("Save failed:", error);
-      toast.error("Failed to save memory"); 
+      toast.error("Failed to save memory");
     } finally {
       setIsSaving(false);
     }
@@ -288,6 +286,7 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
       onClose={onClose}
       title={editingMemory ? "Edit Memory" : "Create New Memory"}
       size="lg"
+      closeOnOverlayClick={false}
     >
       <div className="space-y-6">
         {/* Tabs */}
@@ -298,17 +297,15 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
               return (
                 <button
                   key={tab.id}
-                  onClick={() =>
-                    setActiveTab(tab.id as "content" | "media" | "metadata")
-                  }
-                  className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                  onClick={() => setActiveTab(tab.id as "content" | "media" | "metadata")}
+                  className={`border-b-2 px-1 py-2 text-sm font-medium ${
                     activeTab === tab.id
                       ? "border-primary-500 text-primary-600"
-                      : "border-transparent text-neutral-500 hover:text-neutral-700 hover:border-neutral-300"
+                      : "border-transparent text-neutral-500 hover:border-neutral-300 hover:text-neutral-700"
                   }`}
                 >
                   <div className="flex items-center space-x-2">
-                    <Icon className="w-4 h-4" />
+                    <Icon className="h-4 w-4" />
                     <span>{tab.label}</span>
                   </div>
                 </button>
@@ -323,29 +320,23 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
             <Input
               label="Title"
               value={formData.title}
-              onChange={(e) =>
-                setFormData({ ...formData, title: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               placeholder="What happened?"
               require={true}
               error={formErrors.title}
             />
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">
-                Content
-              </label>
+              <label className="mb-1 block text-sm font-medium text-neutral-700">Content</label>
               <textarea
                 value={formData.content}
-                onChange={(e) =>
-                  setFormData({ ...formData, content: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                 placeholder="Tell your story..."
                 rows={8}
-                className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                className="focus:ring-primary-500 w-full rounded-lg border border-neutral-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:outline-none"
               />
             </div>
             {showAiButtons && (
-              <div className="flex space-x-2 mt-2">
+              <div className="mt-2 flex space-x-2">
                 <Button
                   onClick={() => {
                     setFormData((prev) => ({
@@ -376,24 +367,23 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
                 </Button>
               </div>
             )}
-            {(formData.title.trim() || formData.content.trim()) &&
-              !showAiButtons && (
-                <Button
-                  onClick={handleGenerateWithAI}
-                  disabled={aiLoading}
-                  variant="secondary"
-                  className="w-full"
-                >
-                  {aiLoading ? (
-                    <span className="flex items-center">
-                      <Loader className="w-4 h-4 mr-2 animate-spin" />
-                      Generating...
-                    </span>
-                  ) : (
-                    "Generate content with AI"
-                  )}
-                </Button>
-              )}
+            {(formData.title.trim() || formData.content.trim()) && !showAiButtons && (
+              <Button
+                onClick={handleGenerateWithAI}
+                disabled={aiLoading}
+                variant="secondary"
+                className="w-full"
+              >
+                {aiLoading ? (
+                  <span className="flex items-center">
+                    <Loader className="mr-2 h-4 w-4 animate-spin" />
+                    Generating...
+                  </span>
+                ) : (
+                  "Generate content with AI"
+                )}
+              </Button>
+            )}
           </div>
         )}
 
@@ -420,21 +410,17 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
 
         {activeTab === "metadata" && (
           <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <Input
                 label="Date"
                 type="date"
                 value={formData.date}
-                onChange={(e) =>
-                  setFormData({ ...formData, date: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
               />
               <Input
                 label="Location"
                 value={formData.location}
-                onChange={(e) =>
-                  setFormData({ ...formData, location: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                 placeholder="Where did this happen?"
                 require={true} // Make location required
                 error={formErrors.location} // Display error for location
@@ -443,17 +429,13 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
 
             {/* Mood Selection */}
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-2">
-                Mood
-              </label>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+              <label className="mb-2 block text-sm font-medium text-neutral-700">Mood</label>
+              <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
                 {moods.map((mood) => (
                   <button
                     key={mood.value}
-                    onClick={() =>
-                      setFormData({ ...formData, mood: mood.value as string })
-                    }
-                    className={`p-2 rounded-lg border-2 text-sm font-medium transition-colors ${
+                    onClick={() => setFormData({ ...formData, mood: mood.value as string })}
+                    className={`rounded-lg border-2 p-2 text-sm font-medium transition-colors ${
                       formData.mood === mood.value
                         ? "border-primary-500 bg-primary-50"
                         : "border-neutral-200 hover:border-neutral-300"
@@ -464,18 +446,14 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
                 ))}
               </div>
               {formErrors.mood && (
-                <p className="text-sm text-destructive-600 mt-1">
-                  {formErrors.mood}
-                </p>
+                <p className="text-destructive-600 mt-1 text-sm">{formErrors.mood}</p>
               )}
             </div>
 
             {/* Tags */}
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-2">
-                Tags
-              </label>
-              <div className="flex space-x-2 mb-2">
+              <label className="mb-2 block text-sm font-medium text-neutral-700">Tags</label>
+              <div className="mb-2 flex space-x-2">
                 <Input
                   value={newTag}
                   onChange={(e) => setNewTag(e.target.value)}
@@ -499,10 +477,10 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
         )}
 
         {/* Actions */}
-        <div className="flex flex-col sm:flex-row justify-between items-center space-y-3 sm:space-y-0 pt-4 border-t border-neutral-200">
+        <div className="flex flex-col items-center justify-between space-y-3 border-t border-neutral-200 pt-4 sm:flex-row sm:space-y-0">
           <p className="text-sm text-neutral-500">
-            <span className="font-medium">Recommendation:</span> Fill in all
-            fields for a richer memory!
+            <span className="font-medium">Recommendation:</span> Fill in all fields for a richer
+            memory!
           </p>
           <div className="flex justify-end space-x-3">
             <Button
@@ -521,10 +499,22 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
             >
               Clear
             </Button>
-            <Button onClick={handleSave} loading={isSaving || imageUploading} disabled={isSaving || imageUploading}>
-              {editingMemory 
-                ? (isSaving ? "Saving..." : (imageUploading ? "Uploading..." : "Save Changes")) 
-                : (isSaving ? "Creating..." : (imageUploading ? "Uploading..." : "Create Memory"))}
+            <Button
+              onClick={handleSave}
+              loading={isSaving || imageUploading}
+              disabled={isSaving || imageUploading}
+            >
+              {editingMemory
+                ? isSaving
+                  ? "Saving..."
+                  : imageUploading
+                    ? "Uploading..."
+                    : "Save Changes"
+                : isSaving
+                  ? "Creating..."
+                  : imageUploading
+                    ? "Uploading..."
+                    : "Create Memory"}
             </Button>
           </div>
         </div>

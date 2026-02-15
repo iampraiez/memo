@@ -7,21 +7,21 @@ export const cn = (...inputs: ClassValue[]) => {
 
 export function is404Error(error: unknown): boolean {
   if (!error) return false;
-  
+
   if (error instanceof Error && error.message.includes("404")) {
     return true;
   }
-  
-  if (typeof error === 'object') {
+
+  if (typeof error === "object") {
     const err = error as Record<string, unknown>;
-    
+
     if (err.status === 404) return true;
-    
-    if (err.response && typeof err.response === 'object') {
+
+    if (err.response && typeof err.response === "object") {
       const response = err.response as Record<string, unknown>;
       if (response.status === 404) return true;
     }
   }
-  
+
   return false;
 }

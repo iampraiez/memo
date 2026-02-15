@@ -4,10 +4,10 @@ import { config } from "../config";
 
 export async function checkHealth(logger: Logger) {
   if (!config.telegram.enabled) return "Telegram disabled in config";
-  
+
   const telegram = new TelegramTransport();
   const stats = logger.tracker.getDailyStats();
-  
+
   let status = "🏥 <b>SYSTEM HEALTH</b>\n";
   status += "━━━━━━━━━━━━━━━━━━━━\n\n";
   status += `🟢 <b>Status:</b> Online\n`;

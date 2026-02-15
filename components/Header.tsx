@@ -1,4 +1,4 @@
-import React from 'react'
+import React from "react";
 import { Plus, Cloud, CloudSlash, List, Bell } from "@phosphor-icons/react";
 import Button from "./ui/Button";
 import { cn } from "@/lib/utils";
@@ -33,12 +33,12 @@ const Header: React.FC<HeaderProps> = ({
   return (
     <header
       className={cn(
-        "bg-white/90 backdrop-blur-xl border-b border-neutral-200/60 sticky top-0 z-40 transition-all duration-300 shadow-[0_1px_3px_rgba(0,0,0,0.02)]",
-        className
+        "sticky top-0 z-40 border-b border-neutral-200/60 bg-white/90 shadow-[0_1px_3px_rgba(0,0,0,0.02)] backdrop-blur-xl transition-all duration-300",
+        className,
       )}
     >
       <div className="px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 sm:h-20">
+        <div className="flex h-16 items-center justify-between sm:h-20">
           {/* Left Section */}
           <div className="flex items-center space-x-3">
             {/* Mobile Menu Button - Refined */}
@@ -46,11 +46,11 @@ const Header: React.FC<HeaderProps> = ({
               variant="ghost"
               size="icon"
               onClick={onToggleSidebar}
-              className="lg:hidden w-10 h-10 hover:bg-neutral-100 rounded-xl transition-all"
+              className="h-10 w-10 rounded-xl transition-all hover:bg-neutral-100 lg:hidden"
             >
-              <List weight="bold" className="w-5 h-5 text-neutral-900" />
+              <List weight="bold" className="h-5 w-5 text-neutral-900" />
             </Button>
-...
+            ...
           </div>
 
           {/* Right Section */}
@@ -58,24 +58,22 @@ const Header: React.FC<HeaderProps> = ({
             {/* Sync Status - Refined Pill */}
             <div
               className={cn(
-                "hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all",
-                syncStatus === "online" && "text-emerald-700 bg-emerald-50 border border-emerald-100/50",
-                syncStatus === "offline" && "text-neutral-500 bg-neutral-100 border border-neutral-200/50",
-                syncStatus === "syncing" && "text-primary-700 bg-primary-50 border border-primary-100/50"
+                "hidden items-center space-x-2 rounded-full px-3 py-1.5 text-[10px] font-bold tracking-widest uppercase transition-all sm:flex",
+                syncStatus === "online" &&
+                  "border border-emerald-100/50 bg-emerald-50 text-emerald-700",
+                syncStatus === "offline" &&
+                  "border border-neutral-200/50 bg-neutral-100 text-neutral-500",
+                syncStatus === "syncing" &&
+                  "text-primary-700 bg-primary-50 border-primary-100/50 border",
               )}
             >
-              <SyncIcon
-                className={cn(
-                  "w-3 h-3",
-                  syncStatus === "syncing" && "animate-spin"
-                )}
-              />
+              <SyncIcon className={cn("h-3 w-3", syncStatus === "syncing" && "animate-spin")} />
               <span className="hidden lg:inline">
                 {syncStatus === "online"
                   ? "Cloud Active"
                   : syncStatus === "offline"
-                  ? "Local Mode"
-                  : "Syncing"}
+                    ? "Local Mode"
+                    : "Syncing"}
               </span>
             </div>
 
@@ -83,15 +81,15 @@ const Header: React.FC<HeaderProps> = ({
             <Button
               variant="ghost"
               size="icon"
-              className="relative w-10 h-10 hover:bg-neutral-100 rounded-xl transition-all"
+              className="relative h-10 w-10 rounded-xl transition-all hover:bg-neutral-100"
               onClick={onShowNotifications}
             >
-              <Bell weight="bold" className="w-5 h-5 text-neutral-700" />
+              <Bell weight="bold" className="h-5 w-5 text-neutral-700" />
               {notificationCount > 0 && (
                 <>
-                  <span className="absolute top-2 right-2 w-2 h-2 bg-destructive-500 rounded-full ring-2 ring-white" />
-                  <span className="absolute top-2 right-2 w-2 h-2 bg-destructive-500 rounded-full animate-ping" />
-                  <span className="absolute -top-1 -right-1 flex items-center justify-center bg-destructive-500 text-white text-[8px] font-bold min-w-[14px] h-[14px] px-1 rounded-full border border-white">
+                  <span className="bg-destructive-500 absolute top-2 right-2 h-2 w-2 rounded-full ring-2 ring-white" />
+                  <span className="bg-destructive-500 absolute top-2 right-2 h-2 w-2 animate-ping rounded-full" />
+                  <span className="bg-destructive-500 absolute -top-1 -right-1 flex h-[14px] min-w-[14px] items-center justify-center rounded-full border border-white px-1 text-[8px] font-bold text-white">
                     {notificationCount > 9 ? "9+" : notificationCount}
                   </span>
                 </>
@@ -102,14 +100,14 @@ const Header: React.FC<HeaderProps> = ({
             <Button
               variant="primary"
               onClick={onCreateMemory}
-              className="h-10 px-4 sm:px-5 rounded-xl bg-primary-900 shadow-md shadow-primary-900/10 hover:shadow-lg hover:shadow-primary-900/20 active:scale-95 transition-all group"
+              className="bg-primary-900 shadow-primary-900/10 hover:shadow-primary-900/20 group h-10 rounded-xl px-4 shadow-md transition-all hover:shadow-lg active:scale-95 sm:px-5"
             >
-              <Plus weight="bold" className="w-4 h-4 sm:mr-2" />
-              <span className="hidden sm:inline font-bold text-xs tracking-tight">New Memory</span>
+              <Plus weight="bold" className="h-4 w-4 sm:mr-2" />
+              <span className="hidden text-xs font-bold tracking-tight sm:inline">New Memory</span>
             </Button>
 
             {/* Profile - Integrated Separator */}
-            <div className="pl-1 sm:pl-2 ml-1 sm:ml-2 border-l border-neutral-200/50">
+            <div className="ml-1 border-l border-neutral-200/50 pl-1 sm:ml-2 sm:pl-2">
               <UserDropdown />
             </div>
           </div>

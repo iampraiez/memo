@@ -1,7 +1,7 @@
 "use client";
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { syncService } from '@/services/sync.service';
-import { useSession } from 'next-auth/react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { syncService } from "@/services/sync.service";
+import { useSession } from "next-auth/react";
 
 interface SyncContextValue {
   isOnline: boolean;
@@ -20,8 +20,8 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
 
   // Sync session user ID to localStorage for offline access
   useEffect(() => {
-    if (session?.user?.id && typeof window !== 'undefined') {
-      localStorage.setItem('currentUserId', session.user.id);
+    if (session?.user?.id && typeof window !== "undefined") {
+      localStorage.setItem("currentUserId", session.user.id);
     }
   }, [session]);
 
@@ -73,7 +73,7 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
 export function useSync() {
   const context = useContext(SyncContext);
   if (!context) {
-    throw new Error('useSync must be used within SyncProvider');
+    throw new Error("useSync must be used within SyncProvider");
   }
   return context;
 }

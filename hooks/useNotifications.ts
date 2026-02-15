@@ -7,11 +7,7 @@ export const useNotifications = () => {
   const notifications = useLiveQuery(async () => {
     const userId = await notificationService.getCurrentUserId();
     if (!userId) return [];
-    return await db.notifications
-      .where('userId')
-      .equals(userId)
-      .reverse()
-      .sortBy('createdAt');
+    return await db.notifications.where("userId").equals(userId).reverse().sortBy("createdAt");
   });
 
   const query = useQuery<{ notifications: Notification[] }>({
@@ -19,7 +15,7 @@ export const useNotifications = () => {
     queryFn: () => notificationService.getAll(),
   });
 
-  const unreadCount = notifications?.filter(n => !n.read).length || 0;
+  const unreadCount = notifications?.filter((n) => !n.read).length || 0;
 
   return {
     ...query,

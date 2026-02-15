@@ -27,14 +27,14 @@ export async function DELETE(req: Request) {
         and(
           eq(verificationTokens.identifier, email),
           eq(verificationTokens.token, otp),
-          gt(verificationTokens.expires, new Date())
-        )
+          gt(verificationTokens.expires, new Date()),
+        ),
       );
 
     if (!tokenRecord) {
       return NextResponse.json(
         { message: "Invalid or expired verification code" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -42,21 +42,15 @@ export async function DELETE(req: Request) {
     await db.delete(users).where(eq(users.email, email));
 
     // Cleanup token
-    await db.delete(verificationTokens).where(
-        and(
-            eq(verificationTokens.identifier, email),
-            eq(verificationTokens.token, otp)
-        )
-    );
+    await db
+      .delete(verificationTokens)
+      .where(and(eq(verificationTokens.identifier, email), eq(verificationTokens.token, otp)));
 
     logger.info(`User ${email} deleted account`);
 
     return NextResponse.json({ message: "Account deleted" }, { status: 200 });
   } catch (error) {
     logger.error("Error deleting account:", error);
-    return NextResponse.json(
-      { message: "Internal Server Error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }
 }

@@ -11,10 +11,10 @@ export async function GET(req: Request) {
     }
 
     await reporters.sendDailyReport();
-    
-    return NextResponse.json({ 
+
+    return NextResponse.json({
       message: "Daily report sent successfully",
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   } catch (error) {
     console.error("[DailyReportAPI] Error:", error);

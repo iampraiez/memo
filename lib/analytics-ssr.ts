@@ -60,20 +60,15 @@ export async function getAnalyticsData(timeRange: string = "year") {
   const memoriesThisMonth = userMemories.filter((memory) => {
     const memoryDate = new Date(memory.date);
     return (
-      memoryDate.getMonth() === now.getMonth() &&
-      memoryDate.getFullYear() === now.getFullYear()
+      memoryDate.getMonth() === now.getMonth() && memoryDate.getFullYear() === now.getFullYear()
     );
   }).length;
 
   const weeksSinceStart = Math.max(
     1,
-    Math.ceil(
-      (now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 7),
-    ),
+    Math.ceil((now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 7)),
   );
-  const averagePerWeek = parseFloat(
-    (totalMemories / weeksSinceStart).toFixed(1),
-  );
+  const averagePerWeek = parseFloat((totalMemories / weeksSinceStart).toFixed(1));
 
   const moodCounts: Record<string, number> = {};
   userMemories.forEach((memory) => {
@@ -86,8 +81,7 @@ export async function getAnalyticsData(timeRange: string = "year") {
     .map(([mood, count]) => ({
       mood,
       count,
-      percentage:
-        totalMemories > 0 ? Math.round((count / totalMemories) * 100) : 0,
+      percentage: totalMemories > 0 ? Math.round((count / totalMemories) * 100) : 0,
     }))
     .sort((a, b) => b.count - a.count)
     .slice(0, 5);
@@ -107,13 +101,25 @@ export async function getAnalyticsData(timeRange: string = "year") {
     .map(([tag, count]) => ({
       tag,
       count,
-      percentage:
-        totalMemories > 0 ? Math.round((count / totalMemories) * 100) : 0,
+      percentage: totalMemories > 0 ? Math.round((count / totalMemories) * 100) : 0,
     }))
     .sort((a, b) => b.count - a.count)
     .slice(0, 5);
 
-  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const monthNames = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
   const monthlyCounts: Record<string, number> = {};
 
   userMemories.forEach((memory) => {
@@ -141,9 +147,7 @@ export async function getAnalyticsData(timeRange: string = "year") {
     memories: weeklyCounts[day] || 0,
   }));
 
-  const sortedDates = userMemories
-    .map((m) => new Date(m.date).toDateString())
-    .sort();
+  const sortedDates = userMemories.map((m) => new Date(m.date).toDateString()).sort();
 
   let currentStreak = 0;
   let longestStreak = 0;
@@ -169,31 +173,34 @@ export async function getAnalyticsData(timeRange: string = "year") {
   longestStreak = Math.max(longestStreak, currentStreak);
 
   const heatmap: Record<string, number> = {};
-  userMemories.forEach(memory => {
-      const dateKey = new Date(memory.date).toISOString().split('T')[0];
-      heatmap[dateKey] = (heatmap[dateKey] || 0) + 1;
+  userMemories.forEach((memory) => {
+    const dateKey = new Date(memory.date).toISOString().split("T")[0];
+    heatmap[dateKey] = (heatmap[dateKey] || 0) + 1;
   });
 
   const tagCooccurrence: Record<string, Record<string, number>> = {};
-  userMemories.forEach(memory => {
-      const tags = memory.memoryTags.map(t => t.tag.name);
-      tags.forEach(t1 => {
-          if (!tagCooccurrence[t1]) tagCooccurrence[t1] = {};
-          tags.forEach(t2 => {
-            if (t1 !== t2) {
-              tagCooccurrence[t1][t2] = (tagCooccurrence[t1][t2] || 0) + 1;
-            }
-          });
+  userMemories.forEach((memory) => {
+    const tags = memory.memoryTags.map((t) => t.tag.name);
+    tags.forEach((t1) => {
+      if (!tagCooccurrence[t1]) tagCooccurrence[t1] = {};
+      tags.forEach((t2) => {
+        if (t1 !== t2) {
+          tagCooccurrence[t1][t2] = (tagCooccurrence[t1][t2] || 0) + 1;
+        }
       });
+    });
   });
 
-  const tagClusters = Object.entries(tagCooccurrence).map(([tag, relations]) => ({
+  const tagClusters = Object.entries(tagCooccurrence)
+    .map(([tag, relations]) => ({
       tag,
       related: Object.entries(relations)
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 3)
-          .map(([name, count]) => ({ name, count }))
-  })).sort((a, b) => b.related.length - a.related.length).slice(0, 10);
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 3)
+        .map(([name, count]) => ({ name, count })),
+    }))
+    .sort((a, b) => b.related.length - a.related.length)
+    .slice(0, 10);
 
   return {
     totalMemories,
@@ -205,6 +212,6 @@ export async function getAnalyticsData(timeRange: string = "year") {
     monthlyActivity,
     weeklyPattern,
     heatmap,
-    tagClusters
+    tagClusters,
   } as Analytics;
 }

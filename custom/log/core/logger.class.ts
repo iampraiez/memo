@@ -14,14 +14,14 @@ export class Logger {
 
   constructor() {
     this.tracker = new ErrorTracker();
-    
+
     // Initialize standard processors
     this.processors.push(new ContextCollector());
     this.processors.push(new Deduplicator());
 
     // Initialize transports
     this.transports.push(new ConsoleTransport());
-    
+
     if (config.isServer) {
       this.transports.push(new FileTransport());
       this.transports.push(new TelegramTransport());
@@ -33,8 +33,8 @@ export class Logger {
       level,
       message,
       timestamp: new Date().toISOString(),
-      args: args.filter(a => !(a instanceof Error)),
-      error: args.find(a => a instanceof Error),
+      args: args.filter((a) => !(a instanceof Error)),
+      error: args.find((a) => a instanceof Error),
     };
 
     // Run processors
@@ -48,9 +48,12 @@ export class Logger {
       this.tracker.track(entry);
     }
 
-    // Run transports
-    const sendPromises = this.transports.map(t => t.send(entry!));
-    await Promise.allSettled(sendPromises);
+    // Run transports - Fire and forget (non-blocking)
+    this.transports.forEach((t) => {
+      t.send(entry!).catch((err) => {
+        console.error(`[Logger] Transport ${t.constructor.name} failed:`, err);
+      });
+    });
   }
 
   info<T>(message: string, ...args: T[]) {

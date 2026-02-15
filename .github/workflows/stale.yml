@@ -2,7 +2,7 @@ name: Stale Issues and PRs
 
 on:
   schedule:
-    - cron: '0 0 * * *'  # Daily at midnight UTC
+    - cron: "0 0 * * *" # Daily at midnight UTC
 
 permissions:
   issues: write
@@ -15,23 +15,23 @@ jobs:
       - uses: actions/stale@v10
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-          
+
           # Issues
-          stale-issue-message: 'This issue has been automatically marked as stale because it has not had recent activity. It will be closed if no further activity occurs. Thank you for your contributions.'
-          close-issue-message: 'This issue was automatically closed due to inactivity. Feel free to reopen if needed.'
+          stale-issue-message: "This issue has been automatically marked as stale because it has not had recent activity. It will be closed if no further activity occurs. Thank you for your contributions."
+          close-issue-message: "This issue was automatically closed due to inactivity. Feel free to reopen if needed."
           days-before-issue-stale: 60
           days-before-issue-close: 14
-          stale-issue-label: 'stale'
-          exempt-issue-labels: 'pinned,security,bug'
-          
+          stale-issue-label: "stale"
+          exempt-issue-labels: "pinned,security,bug"
+
           # Pull Requests
-          stale-pr-message: 'This pull request has been automatically marked as stale because it has not had recent activity. It will be closed if no further activity occurs.'
-          close-pr-message: 'This pull request was automatically closed due to inactivity.'
+          stale-pr-message: "This pull request has been automatically marked as stale because it has not had recent activity. It will be closed if no further activity occurs."
+          close-pr-message: "This pull request was automatically closed due to inactivity."
           days-before-pr-stale: 30
           days-before-pr-close: 14
-          stale-pr-label: 'stale'
-          exempt-pr-labels: 'pinned,security'
-          
+          stale-pr-label: "stale"
+          exempt-pr-labels: "pinned,security"
+
           # General
           operations-per-run: 30
           remove-stale-when-updated: true

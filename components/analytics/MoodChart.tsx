@@ -12,7 +12,11 @@ const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8"];
 export default function MoodChart({ data }: MoodChartProps) {
   // If no data, show empty state or handle gracefully
   if (!data || data.length === 0) {
-      return <div className="h-[300px] flex items-center justify-center text-neutral-400">No mood data yet</div>;
+    return (
+      <div className="flex h-[300px] items-center justify-center text-neutral-400">
+        No mood data yet
+      </div>
+    );
   }
 
   return (
@@ -32,11 +36,16 @@ export default function MoodChart({ data }: MoodChartProps) {
               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
             ))}
           </Pie>
-          <Tooltip 
-            formatter={(value: number | string | undefined) => [`${value ?? 0} memories`, 'Count']}
+          <Tooltip
+            formatter={(value: number | string | undefined) => [`${value ?? 0} memories`, "Count"]}
             contentStyle={{ borderRadius: "8px", border: "none" }}
           />
-          <Legend layout="vertical" verticalAlign="middle" align="right" wrapperStyle={{ fontSize: "12px" }} />
+          <Legend
+            layout="vertical"
+            verticalAlign="middle"
+            align="right"
+            wrapperStyle={{ fontSize: "12px" }}
+          />
         </PieChart>
       </ResponsiveContainer>
     </div>

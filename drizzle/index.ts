@@ -43,7 +43,7 @@ async function testDbConnection() {
 // Only log connection success on initial load or if explicitly needed
 // to avoid flooding logs during HMR
 if (!globalForDb.pool) {
-    testDbConnection();
+  testDbConnection();
 }
 
 export default db;

@@ -78,7 +78,6 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
       return true;
     });
 
-
     if (files.length + validFiles.length > maxFiles) {
       console.error(`Cannot upload more than ${maxFiles} files`);
       return;
@@ -104,10 +103,7 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
         await onUpload(fileObjects.map((obj, i) => ({ file: validFiles[i], id: obj.id })));
       } catch (error) {
         // Update files to show error
-        onFilesChange([
-          ...files,
-          ...fileObjects.map((f) => ({ ...f, error: "Upload failed" })),
-        ]);
+        onFilesChange([...files, ...fileObjects.map((f) => ({ ...f, error: "Upload failed" }))]);
         console.error("Upload failed", error);
       } finally {
         setUploading(false);
@@ -131,11 +127,7 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
 
   return (
     <div className={cn("space-y-4", className)}>
-      {label && (
-        <label className="block text-sm font-medium text-neutral-700">
-          {label}
-        </label>
-      )}
+      {label && <label className="block text-sm font-medium text-neutral-700">{label}</label>}
 
       {/* Upload Area */}
       <div
@@ -143,17 +135,15 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         className={cn(
-          "border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer",
+          "cursor-pointer rounded-lg border-2 border-dashed p-8 text-center transition-colors",
           isDragging
             ? "border-primary-400 bg-primary-50"
-            : "border-neutral-300 hover:border-primary-400 hover:bg-primary-50"
+            : "hover:border-primary-400 hover:bg-primary-50 border-neutral-300",
         )}
         onClick={() => fileInputRef.current?.click()}
       >
-        <Upload className="w-8 h-8 text-neutral-400 mx-auto mb-2" />
-        <p className="text-neutral-600 mb-2">
-          Drag & drop files here, or click to browse
-        </p>
+        <Upload className="mx-auto mb-2 h-8 w-8 text-neutral-400" />
+        <p className="mb-2 text-neutral-600">Drag & drop files here, or click to browse</p>
         <p className="text-sm text-neutral-500">
           {accept.includes("image") ? "images" : "Files"} up to {maxSize}MB each
         </p>
@@ -172,40 +162,29 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
       {files.length > 0 && (
         <div className="space-y-2">
           {files.map((file) => (
-            <div
-              key={file.id}
-              className="flex items-center space-x-3 p-3 bg-neutral-50 rounded-lg"
-            >
+            <div key={file.id} className="flex items-center space-x-3 rounded-lg bg-neutral-50 p-3">
               {/* File Icon/Thumbnail */}
               <div className="flex-shrink-0">
                 {file.type.startsWith("image/") ? (
-                  <div className="w-10 h-10 bg-neutral-200 rounded overflow-hidden">
-                    <img
-                      src={file.url}
-                      alt={file.name}
-                      className="w-full h-full object-cover"
-                    />
+                  <div className="h-10 w-10 overflow-hidden rounded bg-neutral-200">
+                    <img src={file.url} alt={file.name} className="h-full w-full object-cover" />
                   </div>
                 ) : (
-                  <div className="w-10 h-10 bg-neutral-200 rounded flex items-center justify-center">
-                    <File className="w-5 h-5 text-neutral-500" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded bg-neutral-200">
+                    <File className="h-5 w-5 text-neutral-500" />
                   </div>
                 )}
               </div>
 
               {/* File Info */}
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-neutral-900 truncate">
-                  {file.name}
-                </p>
-                <p className="text-xs text-neutral-500">
-                  {formatFileSize(file.size)}
-                </p>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium text-neutral-900">{file.name}</p>
+                <p className="text-xs text-neutral-500">{formatFileSize(file.size)}</p>
 
                 {/* Progress Bar */}
                 {typeof file.progress === "number" && file.progress < 100 && (
                   <div className="mt-1">
-                    <div className="w-full bg-neutral-200 rounded-full h-1">
+                    <div className="h-1 w-full rounded-full bg-neutral-200">
                       <div
                         className="bg-primary-600 h-1 rounded-full transition-all duration-300"
                         style={{ width: `${file.progress}%` }}
@@ -216,21 +195,21 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
 
                 {/* Error Message */}
                 {file.error && (
-                  <div className="flex items-center space-x-1 mt-1">
-                    <AlertCircle className="w-3 h-3 text-destructive-500" />
-                    <p className="text-xs text-destructive-600">{file.error}</p>
+                  <div className="mt-1 flex items-center space-x-1">
+                    <AlertCircle className="text-destructive-500 h-3 w-3" />
+                    <p className="text-destructive-600 text-xs">{file.error}</p>
                   </div>
                 )}
               </div>
 
               {/* Status/Actions */}
               <div className="flex-shrink-0">
-                {typeof file.progress === "number" &&
-                  file.progress < 100 &&
-                  !file.error && <Loader size="sm" />}
+                {typeof file.progress === "number" && file.progress < 100 && !file.error && (
+                  <Loader size="sm" />
+                )}
                 {file.progress === 100 && (
-                  <div className="w-5 h-5 bg-success-100 rounded-full flex items-center justify-center">
-                    <div className="w-2 h-2 bg-success-600 rounded-full" />
+                  <div className="bg-success-100 flex h-5 w-5 items-center justify-center rounded-full">
+                    <div className="bg-success-600 h-2 w-2 rounded-full" />
                   </div>
                 )}
                 <Button
@@ -240,9 +219,9 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
                     e.stopPropagation();
                     removeFile(file.id);
                   }}
-                  className="w-8 h-8 text-neutral-400 hover:text-neutral-600"
+                  className="h-8 w-8 text-neutral-400 hover:text-neutral-600"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="h-4 w-4" />
                 </Button>
               </div>
             </div>
@@ -252,7 +231,7 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
 
       {/* Upload Status */}
       {uploading && (
-        <div className="flex items-center space-x-2 text-sm text-primary-600">
+        <div className="text-primary-600 flex items-center space-x-2 text-sm">
           <Loader size="sm" />
           <span>Uploading files...</span>
         </div>

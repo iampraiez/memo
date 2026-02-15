@@ -1,18 +1,18 @@
-import React from 'react';
+import React from "react";
 
 export default function Loading() {
   return (
-    <div className="min-h-screen bg-linear-to-br from-primary-50 via-white to-secondary-50 flex items-center justify-center">
-      <div className="text-center space-y-4">
+    <div className="from-primary-50 to-secondary-50 flex min-h-screen items-center justify-center bg-linear-to-br via-white">
+      <div className="space-y-4 text-center">
         <div className="relative">
-          <div className="w-16 h-16 bg-linear-to-br from-primary-600 to-secondary-600 rounded-2xl flex items-center justify-center mx-auto animate-pulse">
-            <span className="text-white font-bold text-xl">ML</span>
+          <div className="from-primary-600 to-secondary-600 mx-auto flex h-16 w-16 animate-pulse items-center justify-center rounded-2xl bg-linear-to-br">
+            <span className="text-xl font-bold text-white">ML</span>
           </div>
-          <div className="absolute inset-0 w-16 h-16 mx-auto">
-            <div className="w-full h-full border-4 border-primary-200 border-t-primary-600 rounded-2xl animate-spin"></div>
+          <div className="absolute inset-0 mx-auto h-16 w-16">
+            <div className="border-primary-200 border-t-primary-600 h-full w-full animate-spin rounded-2xl border-4"></div>
           </div>
         </div>
-        <p className="text-neutral-600 font-medium">Loading...</p>
+        <p className="font-medium text-neutral-600">Loading...</p>
       </div>
     </div>
   );

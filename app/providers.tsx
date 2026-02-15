@@ -9,10 +9,10 @@ import { SessionProvider } from "next-auth/react";
 import { Session } from "next-auth";
 import { SyncProvider } from "@/components/providers/SyncProvider";
 
-export function Providers({ 
-  children, 
-  session 
-}: { 
+export function Providers({
+  children,
+  session,
+}: {
   children: React.ReactNode;
   session: Session | null;
 }) {
@@ -32,7 +32,7 @@ export function Providers({
             retry: 1,
           },
         },
-      })
+      }),
   );
 
   useEffect(() => {
@@ -65,9 +65,7 @@ export function Providers({
       <QueryClientProvider client={queryClient}>
         <SyncProvider>
           {children}
-          {process.env.NODE_ENV === 'development' && (
-            <ReactQueryDevtools initialIsOpen={false} />
-          )}
+          {process.env.NODE_ENV === "development" && <ReactQueryDevtools initialIsOpen={false} />}
         </SyncProvider>
       </QueryClientProvider>
     </SessionProvider>

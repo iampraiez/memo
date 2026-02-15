@@ -134,9 +134,7 @@ const OnboardingFlow: React.FC = () => {
       console.error("Upload error details:", error);
 
       const message =
-        error instanceof Error
-          ? error.message
-          : "Failed to upload image. Please try again.";
+        error instanceof Error ? error.message : "Failed to upload image. Please try again.";
       toast.error(message);
 
       // Clear the file input so the user can try the same file again
@@ -182,9 +180,7 @@ const OnboardingFlow: React.FC = () => {
         return;
       }
       if (!/^[a-zA-Z0-9_]+$/.test(profileData.username)) {
-        toast.error(
-          "Username can only contain letters, numbers, and underscores",
-        );
+        toast.error("Username can only contain letters, numbers, and underscores");
         return;
       }
     }
@@ -244,9 +240,7 @@ const OnboardingFlow: React.FC = () => {
     } catch (error: unknown) {
       console.error("Onboarding error:", error);
       const message =
-        error instanceof Error
-          ? error.message
-          : "Failed to complete setup. Please try again.";
+        error instanceof Error ? error.message : "Failed to complete setup. Please try again.";
       toast.error(message);
     } finally {
       setIsSubmitting(false);
@@ -276,17 +270,17 @@ const OnboardingFlow: React.FC = () => {
     switch (steps[currentStep].id) {
       case "welcome":
         return (
-          <div className="text-center space-y-6">
-            <div className="w-20 h-20 bg-primary-900 rounded-2xl flex items-center justify-center mx-auto shadow-xl">
-              <Sparkle weight="fill" className="w-10 h-10 text-white" />
+          <div className="space-y-6 text-center">
+            <div className="bg-primary-900 mx-auto flex h-20 w-20 items-center justify-center rounded-2xl shadow-xl">
+              <Sparkle weight="fill" className="h-10 w-10 text-white" />
             </div>
             <div className="space-y-3">
-              <h1 className="text-3xl font-display font-bold text-neutral-900">
+              <h1 className="font-display text-3xl font-bold text-neutral-900">
                 Welcome to Memory Lane
               </h1>
-              <p className="text-lg text-neutral-600 max-w-md mx-auto">
-                Let&apos;s set up your personal timeline to start capturing and
-                preserving your life&apos;s most precious moments.
+              <p className="mx-auto max-w-md text-lg text-neutral-600">
+                Let&apos;s set up your personal timeline to start capturing and preserving your
+                life&apos;s most precious moments.
               </p>
             </div>
           </div>
@@ -295,46 +289,46 @@ const OnboardingFlow: React.FC = () => {
       case "profile":
         return (
           <div className="space-y-6">
-            <div className="text-center space-y-3">
-              <h2 className="text-2xl font-display font-bold text-neutral-900">
+            <div className="space-y-3 text-center">
+              <h2 className="font-display text-2xl font-bold text-neutral-900">
                 Create Your Profile
               </h2>
               <p className="text-neutral-600">Tell us about yourself</p>
             </div>
 
-            <div className="space-y-6 max-w-md mx-auto">
+            <div className="mx-auto max-w-md space-y-6">
               {/* Profile Picture Upload */}
               <div className="flex flex-col items-center space-y-3">
                 <div className="relative">
-                  <div className="w-24 h-24 rounded-full overflow-hidden bg-neutral-100 border-2 border-neutral-200">
+                  <div className="h-24 w-24 overflow-hidden rounded-full border-2 border-neutral-200 bg-neutral-100">
                     {imagePreview ? (
                       <Image
                         src={imagePreview}
                         alt="Profile preview"
                         width={96}
                         height={96}
-                        className="w-full h-full object-cover"
+                        className="h-full w-full object-cover"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <User className="w-12 h-12 text-neutral-400" />
+                      <div className="flex h-full w-full items-center justify-center">
+                        <User className="h-12 w-12 text-neutral-400" />
                       </div>
                     )}
                   </div>
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="absolute bottom-0 right-0 w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center text-white hover:bg-primary-700 transition-colors shadow-lg"
+                    className="bg-primary-600 hover:bg-primary-700 absolute right-0 bottom-0 flex h-8 w-8 items-center justify-center rounded-full text-white shadow-lg transition-colors"
                   >
-                    <Camera className="w-4 h-4" />
+                    <Camera className="h-4 w-4" />
                   </button>
                   {imagePreview && imagePreview !== session?.user?.image && (
                     <button
                       type="button"
                       onClick={removeImage}
-                      className="absolute -top-1 -right-1 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white hover:bg-red-600 transition-colors shadow-lg"
+                      className="absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white shadow-lg transition-colors hover:bg-red-600"
                     >
-                      <X className="w-4 h-4" />
+                      <X className="h-4 w-4" />
                     </button>
                   )}
                 </div>
@@ -345,7 +339,7 @@ const OnboardingFlow: React.FC = () => {
                   onChange={handleImageSelect}
                   className="hidden"
                 />
-                <p className="text-xs text-neutral-500 text-center">
+                <p className="text-center text-xs text-neutral-500">
                   {session?.user?.image && !selectedFile
                     ? "Using your Google profile picture. Click to change."
                     : "Upload a profile picture (optional, max 5MB)"}
@@ -357,13 +351,11 @@ const OnboardingFlow: React.FC = () => {
                 <Input
                   label="Name"
                   value={profileData.name}
-                  onChange={(e) =>
-                    setProfileData({ ...profileData, name: e.target.value })
-                  }
+                  onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
                   placeholder="Your full name"
                   required
                 />
-                <p className="text-xs text-neutral-500 mt-1">
+                <p className="mt-1 text-xs text-neutral-500">
                   {session?.user?.name
                     ? "Pre-filled from your Google account. You can change it."
                     : "How should we address you?"}
@@ -375,33 +367,27 @@ const OnboardingFlow: React.FC = () => {
                 <Input
                   label="Username"
                   value={profileData.username}
-                  onChange={(e) =>
-                    setProfileData({ ...profileData, username: e.target.value })
-                  }
+                  onChange={(e) => setProfileData({ ...profileData, username: e.target.value })}
                   placeholder="e.g. memorykeeper"
                   required
                 />
-                <p className="text-xs text-neutral-500 mt-1">
+                <p className="mt-1 text-xs text-neutral-500">
                   Unique identifier for social discovery.
                 </p>
               </div>
 
               {/* Bio Textarea */}
               <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-1">
-                  Bio
-                </label>
+                <label className="mb-1 block text-sm font-medium text-neutral-700">Bio</label>
                 <textarea
                   value={profileData.bio}
-                  onChange={(e) =>
-                    setProfileData({ ...profileData, bio: e.target.value })
-                  }
+                  onChange={(e) => setProfileData({ ...profileData, bio: e.target.value })}
                   placeholder="Tell us a bit about yourself..."
                   rows={4}
                   maxLength={500}
-                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                  className="focus:ring-primary-500 w-full rounded-lg border border-neutral-300 px-3 py-2 transition-all focus:border-transparent focus:ring-2 focus:outline-none"
                 />
-                <p className="text-xs text-neutral-500 mt-1">
+                <p className="mt-1 text-xs text-neutral-500">
                   Optional. Visible on your profile. ({profileData.bio.length}
                   /500)
                 </p>
@@ -413,55 +399,46 @@ const OnboardingFlow: React.FC = () => {
       case "import":
         return (
           <div className="space-y-6">
-            <div className="text-center space-y-3">
-              <h2 className="text-2xl font-display font-bold text-neutral-900">
+            <div className="space-y-3 text-center">
+              <h2 className="font-display text-2xl font-bold text-neutral-900">
                 Import Your Existing Data
               </h2>
               <p className="text-neutral-600">
-                Bring your memories from other platforms or files to get started
-                quickly.
+                Bring your memories from other platforms or files to get started quickly.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Card className="p-4 text-center space-y-3 hover:border-primary-300 cursor-pointer transition-colors">
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto">
-                  <span className="text-blue-600 font-bold text-lg">f</span>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <Card className="hover:border-primary-300 cursor-pointer space-y-3 p-4 text-center transition-colors">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100">
+                  <span className="text-lg font-bold text-blue-600">f</span>
                 </div>
                 <h3 className="font-medium">Facebook</h3>
-                <p className="text-sm text-neutral-500">
-                  Import photos and posts
-                </p>
+                <p className="text-sm text-neutral-500">Import photos and posts</p>
               </Card>
 
-              <Card className="p-4 text-center space-y-3 hover:border-primary-300 cursor-pointer transition-colors">
-                <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mx-auto">
-                  <span className="text-red-600 font-bold text-lg">G</span>
+              <Card className="hover:border-primary-300 cursor-pointer space-y-3 p-4 text-center transition-colors">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-lg bg-red-100">
+                  <span className="text-lg font-bold text-red-600">G</span>
                 </div>
                 <h3 className="font-medium">Google Photos</h3>
-                <p className="text-sm text-neutral-500">
-                  Import your photo library
-                </p>
+                <p className="text-sm text-neutral-500">Import your photo library</p>
               </Card>
 
-              <Card className="p-4 text-center space-y-3 hover:border-neutral-900 cursor-pointer transition-colors group">
-                <div className="w-12 h-12 bg-neutral-100 rounded-lg flex items-center justify-center mx-auto transition-colors group-hover:bg-neutral-200">
-                  <UploadSimple className="w-6 h-6 text-neutral-600" />
+              <Card className="group cursor-pointer space-y-3 p-4 text-center transition-colors hover:border-neutral-900">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-lg bg-neutral-100 transition-colors group-hover:bg-neutral-200">
+                  <UploadSimple className="h-6 w-6 text-neutral-600" />
                 </div>
-                <h3 className="font-bold text-sm">Upload Files</h3>
-                <p className="text-xs text-neutral-500">
-                  Import from your device
-                </p>
+                <h3 className="text-sm font-bold">Upload Files</h3>
+                <p className="text-xs text-neutral-500">Import from your device</p>
               </Card>
 
-              <Card className="p-4 text-center space-y-3 hover:border-primary-300 cursor-pointer transition-colors">
-                <div className="w-12 h-12 bg-neutral-100 rounded-lg flex items-center justify-center mx-auto">
-                  <span className="text-neutral-600 font-bold text-lg">✓</span>
+              <Card className="hover:border-primary-300 cursor-pointer space-y-3 p-4 text-center transition-colors">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-lg bg-neutral-100">
+                  <span className="text-lg font-bold text-neutral-600">✓</span>
                 </div>
                 <h3 className="font-medium">Start Fresh</h3>
-                <p className="text-sm text-neutral-500">
-                  Begin with a clean slate
-                </p>
+                <p className="text-sm text-neutral-500">Begin with a clean slate</p>
               </Card>
             </div>
           </div>
@@ -470,10 +447,8 @@ const OnboardingFlow: React.FC = () => {
       case "privacy":
         return (
           <div className="space-y-6">
-            <div className="text-center space-y-3">
-              <h2 className="text-2xl font-display font-bold text-neutral-900">
-                Privacy Settings
-              </h2>
+            <div className="space-y-3 text-center">
+              <h2 className="font-display text-2xl font-bold text-neutral-900">Privacy Settings</h2>
               <p className="text-neutral-600">
                 Choose how you want to protect and share your memories.
               </p>
@@ -482,9 +457,8 @@ const OnboardingFlow: React.FC = () => {
             <div className="space-y-4">
               <Card
                 className={cn(
-                  "p-4 cursor-pointer transition-all",
-                  preferences.privacyMode === "private" &&
-                    "border-primary-300 bg-primary-50",
+                  "cursor-pointer p-4 transition-all",
+                  preferences.privacyMode === "private" && "border-primary-300 bg-primary-50",
                 )}
                 onClick={() =>
                   setPreferences((prev) => ({
@@ -494,18 +468,15 @@ const OnboardingFlow: React.FC = () => {
                 }
               >
                 <div className="flex items-start space-x-3">
-                  <div className="w-6 h-6 rounded-full border-2 border-primary-600 flex items-center justify-center mt-0.5">
+                  <div className="border-primary-600 mt-0.5 flex h-6 w-6 items-center justify-center rounded-full border-2">
                     {preferences.privacyMode === "private" && (
-                      <div className="w-3 h-3 bg-primary-600 rounded-full" />
+                      <div className="bg-primary-600 h-3 w-3 rounded-full" />
                     )}
                   </div>
                   <div>
-                    <h3 className="font-medium text-neutral-900">
-                      Private (Recommended)
-                    </h3>
+                    <h3 className="font-medium text-neutral-900">Private (Recommended)</h3>
                     <p className="text-sm text-neutral-600">
-                      Only you can see your memories. Full encryption and
-                      privacy protection.
+                      Only you can see your memories. Full encryption and privacy protection.
                     </p>
                   </div>
                 </div>
@@ -513,9 +484,8 @@ const OnboardingFlow: React.FC = () => {
 
               <Card
                 className={cn(
-                  "p-4 cursor-pointer transition-all",
-                  preferences.privacyMode === "selective" &&
-                    "border-primary-300 bg-primary-50",
+                  "cursor-pointer p-4 transition-all",
+                  preferences.privacyMode === "selective" && "border-primary-300 bg-primary-50",
                 )}
                 onClick={() =>
                   setPreferences((prev) => ({
@@ -525,15 +495,13 @@ const OnboardingFlow: React.FC = () => {
                 }
               >
                 <div className="flex items-start space-x-3">
-                  <div className="w-6 h-6 rounded-full border-2 border-primary-600 flex items-center justify-center mt-0.5">
+                  <div className="border-primary-600 mt-0.5 flex h-6 w-6 items-center justify-center rounded-full border-2">
                     {preferences.privacyMode === "selective" && (
-                      <div className="w-3 h-3 bg-primary-600 rounded-full" />
+                      <div className="bg-primary-600 h-3 w-3 rounded-full" />
                     )}
                   </div>
                   <div>
-                    <h3 className="font-medium text-neutral-900">
-                      Selective Sharing
-                    </h3>
+                    <h3 className="font-medium text-neutral-900">Selective Sharing</h3>
                     <p className="text-sm text-neutral-600">
                       Choose which memories to share with family and friends.
                     </p>
@@ -543,24 +511,19 @@ const OnboardingFlow: React.FC = () => {
 
               <Card
                 className={cn(
-                  "p-4 cursor-pointer transition-all",
-                  preferences.privacyMode === "family" &&
-                    "border-primary-300 bg-primary-50",
+                  "cursor-pointer p-4 transition-all",
+                  preferences.privacyMode === "family" && "border-primary-300 bg-primary-50",
                 )}
-                onClick={() =>
-                  setPreferences((prev) => ({ ...prev, privacyMode: "family" }))
-                }
+                onClick={() => setPreferences((prev) => ({ ...prev, privacyMode: "family" }))}
               >
                 <div className="flex items-start space-x-3">
-                  <div className="w-6 h-6 rounded-full border-2 border-primary-600 flex items-center justify-center mt-0.5">
+                  <div className="border-primary-600 mt-0.5 flex h-6 w-6 items-center justify-center rounded-full border-2">
                     {preferences.privacyMode === "family" && (
-                      <div className="w-3 h-3 bg-primary-600 rounded-full" />
+                      <div className="bg-primary-600 h-3 w-3 rounded-full" />
                     )}
                   </div>
                   <div>
-                    <h3 className="font-medium text-neutral-900">
-                      Family Timeline
-                    </h3>
+                    <h3 className="font-medium text-neutral-900">Family Timeline</h3>
                     <p className="text-sm text-neutral-600">
                       Share memories automatically with family members.
                     </p>
@@ -574,13 +537,12 @@ const OnboardingFlow: React.FC = () => {
       case "ai":
         return (
           <div className="space-y-6">
-            <div className="text-center space-y-3">
-              <h2 className="text-2xl font-display font-bold text-neutral-900">
+            <div className="space-y-3 text-center">
+              <h2 className="font-display text-2xl font-bold text-neutral-900">
                 AI-Powered Features
               </h2>
               <p className="text-neutral-600">
-                Let AI help you organize, discover patterns, and create stories
-                from your memories.
+                Let AI help you organize, discover patterns, and create stories from your memories.
               </p>
             </div>
 
@@ -595,25 +557,20 @@ const OnboardingFlow: React.FC = () => {
                       }))
                     }
                     className={cn(
-                      "w-6 h-6 rounded border-2 flex items-center justify-center",
+                      "flex h-6 w-6 items-center justify-center rounded border-2",
                       preferences.aiEnabled
                         ? "bg-primary-600 border-primary-600"
                         : "border-neutral-300",
                     )}
                   >
-                    {preferences.aiEnabled && (
-                      <Check className="w-4 h-4 text-white" />
-                    )}
+                    {preferences.aiEnabled && <Check className="h-4 w-4 text-white" />}
                   </button>
                   <div>
-                    <h3 className="font-medium text-neutral-900">
-                      Enable AI Features
-                    </h3>
-                    <p className="text-sm text-neutral-600 mb-3">
-                      Get automatic summaries, smart tagging, and pattern
-                      discovery.
+                    <h3 className="font-medium text-neutral-900">Enable AI Features</h3>
+                    <p className="mb-3 text-sm text-neutral-600">
+                      Get automatic summaries, smart tagging, and pattern discovery.
                     </p>
-                    <ul className="text-sm text-neutral-500 space-y-1">
+                    <ul className="space-y-1 text-sm text-neutral-500">
                       <li>• Automatic photo recognition and tagging</li>
                       <li>• Smart content summaries</li>
                       <li>• Pattern discovery in your memories</li>
@@ -624,16 +581,14 @@ const OnboardingFlow: React.FC = () => {
               </Card>
 
               {preferences.aiEnabled && (
-                <div className="bg-primary-50 border border-primary-200 rounded-lg p-4">
+                <div className="bg-primary-50 border-primary-200 rounded-lg border p-4">
                   <div className="flex items-start space-x-2">
-                    <Shield className="w-5 h-5 text-primary-600 mt-0.5" />
+                    <Shield className="text-primary-600 mt-0.5 h-5 w-5" />
                     <div className="text-sm">
-                      <p className="text-primary-800 font-medium mb-1">
-                        Privacy Protected
-                      </p>
+                      <p className="text-primary-800 mb-1 font-medium">Privacy Protected</p>
                       <p className="text-primary-700">
-                        AI processing happens securely and privately. Your data
-                        never leaves our encrypted servers.
+                        AI processing happens securely and privately. Your data never leaves our
+                        encrypted servers.
                       </p>
                     </div>
                   </div>
@@ -646,13 +601,10 @@ const OnboardingFlow: React.FC = () => {
       case "tags":
         return (
           <div className="space-y-6">
-            <div className="text-center space-y-3">
-              <h2 className="text-2xl font-display font-bold text-neutral-900">
-                Choose Your Tags
-              </h2>
+            <div className="space-y-3 text-center">
+              <h2 className="font-display text-2xl font-bold text-neutral-900">Choose Your Tags</h2>
               <p className="text-neutral-600">
-                Select categories that matter to you. You can always add more
-                later.
+                Select categories that matter to you. You can always add more later.
               </p>
             </div>
 
@@ -663,10 +615,10 @@ const OnboardingFlow: React.FC = () => {
                     key={tag}
                     onClick={() => toggleTag(tag)}
                     className={cn(
-                      "px-3 py-2 rounded-full text-sm font-medium border transition-colors",
+                      "rounded-full border px-3 py-2 text-sm font-medium transition-colors",
                       preferences.selectedTags.includes(tag)
                         ? "bg-primary-100 border-primary-300 text-primary-800"
-                        : "bg-white border-neutral-300 text-neutral-600 hover:border-neutral-400",
+                        : "border-neutral-300 bg-white text-neutral-600 hover:border-neutral-400",
                     )}
                   >
                     {tag}
@@ -683,11 +635,11 @@ const OnboardingFlow: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-primary-50 to-secondary-50 flex items-center justify-center px-4 py-8">
+    <div className="from-primary-50 to-secondary-50 flex min-h-screen items-center justify-center bg-linear-to-br px-4 py-8">
       <div className="w-full max-w-2xl">
         {/* Progress Bar */}
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-2">
+          <div className="mb-2 flex items-center justify-between">
             <span className="text-sm text-neutral-600">
               Step {currentStep + 1} of {steps.length}
             </span>
@@ -695,7 +647,7 @@ const OnboardingFlow: React.FC = () => {
               {Math.round(((currentStep + 1) / steps.length) * 100)}% complete
             </span>
           </div>
-          <div className="w-full bg-neutral-200 rounded-full h-2">
+          <div className="h-2 w-full rounded-full bg-neutral-200">
             <div
               className="bg-primary-600 h-2 rounded-full transition-all duration-300"
               style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
@@ -704,18 +656,18 @@ const OnboardingFlow: React.FC = () => {
         </div>
 
         {/* Content Card */}
-        <Card className="p-8 space-y-8">
+        <Card className="space-y-8 p-8">
           {renderStep()}
 
           {/* Navigation */}
-          <div className="flex items-center justify-between pt-6 border-t border-neutral-200">
+          <div className="flex items-center justify-between border-t border-neutral-200 pt-6">
             <Button
               variant="secondary"
               onClick={prevStep}
               disabled={currentStep === 0 || isSubmitting}
               className="flex items-center"
             >
-              <CaretLeft className="w-4 h-4 mr-2" />
+              <CaretLeft className="mr-2 h-4 w-4" />
               Back
             </Button>
 
@@ -726,15 +678,13 @@ const OnboardingFlow: React.FC = () => {
             >
               {isSubmitting || isUploadingImage ? (
                 <>
-                  <Spinner className="w-4 h-4 mr-2 animate-spin" />
+                  <Spinner className="mr-2 h-4 w-4 animate-spin" />
                   {isUploadingImage ? "Uploading..." : "Saving..."}
                 </>
               ) : (
                 <>
-                  {currentStep === steps.length - 1
-                    ? "Complete Setup"
-                    : "Continue"}
-                  <CaretRight className="w-4 h-4 ml-2" />
+                  {currentStep === steps.length - 1 ? "Complete Setup" : "Continue"}
+                  <CaretRight className="ml-2 h-4 w-4" />
                 </>
               )}
             </Button>

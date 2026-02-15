@@ -1,11 +1,11 @@
-import { v2 as cloudinary } from 'cloudinary';
-import { env } from '@/config/env';
+import { v2 as cloudinary } from "cloudinary";
+import { env } from "@/config/env";
 
 cloudinary.config({
   cloud_name: env.CLOUDINARY_CLOUD_NAME,
   api_key: env.CLOUDINARY_API_KEY,
   api_secret: env.CLOUDINARY_API_SECRET,
-  secure: true
+  secure: true,
 });
 
 export interface CloudinaryUploadResult {
@@ -30,27 +30,31 @@ export class CloudinaryService {
   static async uploadFile(
     fileBuffer: Buffer | string,
     fileName: string,
-    folder: string = 'memo'
+    folder: string = "memo",
   ): Promise<string> {
     try {
       // Validate inputs
       if (!fileBuffer) {
-        throw new Error('File buffer is required');
+        throw new Error("File buffer is required");
       }
 
       if (!fileName) {
-        throw new Error('File name is required');
+        throw new Error("File name is required");
       }
 
       // Check if Cloudinary is configured
-      if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
-        throw new Error('Cloudinary credentials not configured. Please set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET');
+      if (
+        !process.env.CLOUDINARY_CLOUD_NAME ||
+        !process.env.CLOUDINARY_API_KEY ||
+        !process.env.CLOUDINARY_API_SECRET
+      ) {
+        throw new Error(
+          "Cloudinary credentials not configured. Please set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET",
+        );
       }
 
       // Clean filename for public_id
-      const cleanFileName = fileName
-        .replace(/[^a-zA-Z0-9.-]/g, '_')
-        .replace(/\.[^/.]+$/, ''); // Remove extension
+      const cleanFileName = fileName.replace(/[^a-zA-Z0-9.-]/g, "_").replace(/\.[^/.]+$/, ""); // Remove extension
 
       const timestamp = Date.now();
       const publicId = `${folder}/${timestamp}_${cleanFileName}`;
@@ -62,69 +66,62 @@ export class CloudinaryService {
             {
               public_id: publicId,
               folder: folder,
-              resource_type: 'auto',
-              transformation: [
-                { quality: 'auto:good' },
-                { fetch_format: 'auto' }
-              ],
-              overwrite: false
+              resource_type: "auto",
+              transformation: [{ quality: "auto:good" }, { fetch_format: "auto" }],
+              overwrite: false,
             },
             (error, result) => {
               if (error) {
-                console.error('Cloudinary stream upload error:', error);
+                console.error("Cloudinary stream upload error:", error);
                 return reject(error);
               }
               if (!result) {
-                return reject(new Error('Cloudinary upload result is undefined'));
+                return reject(new Error("Cloudinary upload result is undefined"));
               }
               resolve(result.secure_url);
-            }
+            },
           );
           uploadStream.end(fileBuffer);
         });
       }
 
-      const result = await cloudinary.uploader.upload(fileBuffer as string, {
+      const result = (await cloudinary.uploader.upload(fileBuffer as string, {
         public_id: publicId,
         folder: folder,
-        resource_type: 'auto',
-        transformation: [
-          { quality: 'auto:good' },
-          { fetch_format: 'auto' }
-        ],
-        overwrite: false
-      }) as CloudinaryUploadResult;
+        resource_type: "auto",
+        transformation: [{ quality: "auto:good" }, { fetch_format: "auto" }],
+        overwrite: false,
+      })) as CloudinaryUploadResult;
 
       return result.secure_url;
-
     } catch (error: unknown) {
-      
       interface CloudinaryErrorDetail {
         message?: string;
         http_code?: number;
         status?: number;
       }
-      
-      const cloudinaryError = (error as { error?: CloudinaryErrorDetail })?.error || (error as CloudinaryErrorDetail);
+
+      const cloudinaryError =
+        (error as { error?: CloudinaryErrorDetail })?.error || (error as CloudinaryErrorDetail);
       const err = cloudinaryError as CloudinaryErrorDetail;
-      
-      console.error('Cloudinary upload failed details:', {
+
+      console.error("Cloudinary upload failed details:", {
         message: err.message,
         code: err.http_code || err.status,
         name: (error as Error).name || (cloudinaryError as { name?: string }).name,
       });
 
       if (err.http_code === 401) {
-        throw new Error('Cloudinary authentication failed - check your API credentials');
+        throw new Error("Cloudinary authentication failed - check your API credentials");
       }
       if (err.http_code === 403) {
-        throw new Error('Cloudinary permission denied - check your API key permissions');
+        throw new Error("Cloudinary permission denied - check your API key permissions");
       }
       if (err.http_code === 420) {
-        throw new Error('Rate limited by Cloudinary. Please wait and try again.');
+        throw new Error("Rate limited by Cloudinary. Please wait and try again.");
       }
 
-      throw new Error(`Cloudinary upload failed: ${err.message || 'unknown error'}`);
+      throw new Error(`Cloudinary upload failed: ${err.message || "unknown error"}`);
     }
   }
 
@@ -136,23 +133,23 @@ export class CloudinaryService {
   static async deleteFile(publicId: string): Promise<boolean> {
     try {
       if (!publicId) {
-        throw new Error('Public ID is required');
+        throw new Error("Public ID is required");
       }
 
       const result = await cloudinary.uploader.destroy(publicId);
-      
-      if (result.result === 'ok') {
+
+      if (result.result === "ok") {
         return true;
       }
 
-      if (result.result === 'not found') {
+      if (result.result === "not found") {
         return false;
       }
 
       return false;
     } catch (error: unknown) {
       const err = error as { message?: string };
-      console.error('Cloudinary delete failed:', err.message);
+      console.error("Cloudinary delete failed:", err.message);
       return false;
     }
   }
@@ -169,14 +166,11 @@ export class CloudinaryService {
     publicId: string,
     width?: number,
     height?: number,
-    crop: string = 'fill'
+    crop: string = "fill",
   ): string {
     return cloudinary.url(publicId, {
-      transformation: [
-        { width, height, crop, quality: 'auto:good' },
-        { fetch_format: 'auto' }
-      ],
-      secure: true
+      transformation: [{ width, height, crop, quality: "auto:good" }, { fetch_format: "auto" }],
+      secure: true,
     });
   }
 
@@ -189,12 +183,12 @@ export class CloudinaryService {
     cloudName?: string;
   }> {
     try {
-     await cloudinary.api.usage();
-      
+      await cloudinary.api.usage();
+
       return {
         ok: true,
-        message: 'Cloudinary connection successful',
-        cloudName: process.env.CLOUDINARY_CLOUD_NAME
+        message: "Cloudinary connection successful",
+        cloudName: process.env.CLOUDINARY_CLOUD_NAME,
       };
     } catch (error: unknown) {
       const err = error as { message?: string; http_code?: number };

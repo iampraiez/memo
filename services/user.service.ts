@@ -27,15 +27,15 @@ export interface UserSettings {
 export const userService = {
   getSettings: async () => {
     const userId = await userService.getCurrentUserId();
-    const cachedUser = await db.users.get(userId || '');
+    const cachedUser = await db.users.get(userId || "");
     if (syncService.getOnlineStatus()) {
       try {
         const res = await apiService.get<UserSettings>("/user/settings");
-        
+
         await db.users.put({
           ...res,
-          isOnboarded: true, 
-          _syncStatus: 'synced',
+          isOnboarded: true,
+          _syncStatus: "synced",
           _lastSync: Date.now(),
         } as unknown as LocalUser);
 
@@ -58,30 +58,30 @@ export const userService = {
 
   // Update settings (optimistic)
   updateSettings: async (data: Partial<UserSettings>) => {
-    console.log('[UserService] updateSettings called with:', data);
+    console.log("[UserService] updateSettings called with:", data);
     const userId = await userService.getCurrentUserId();
-    const existing = await db.users.get(userId || '');
+    const existing = await db.users.get(userId || "");
 
     if (existing) {
       const updated: LocalUser = {
         ...existing,
         ...data, // data is Partial<UserSettings>, spreading it is fine
-        _syncStatus: 'pending',
+        _syncStatus: "pending",
         _lastSync: Date.now(),
       };
       await db.users.put(updated);
     }
 
     await syncService.queueOperation({
-      operation: 'update',
-      entity: 'user',
-      entityId: userId || 'current',
+      operation: "update",
+      entity: "user",
+      entityId: userId || "current",
       data: data as unknown as Record<string, unknown>,
     });
 
     return data as UserSettings; // Cast to UserSettings is appropriate here
   },
-  
+
   // Profile is usually dynamic, but we can cache viewed profiles
   getProfile: async (userId: string) => {
     // Try cache first
@@ -101,21 +101,21 @@ export const userService = {
         await db.users.put({
           ...res,
           isOnboarded: true,
-          _syncStatus: 'synced',
+          _syncStatus: "synced",
           _lastSync: Date.now(),
         } as unknown as LocalUser);
 
         return res;
       } catch (error) {
-        if ((error instanceof AxiosError) && error.status === 404) {
-           throw error;
+        if (error instanceof AxiosError && error.status === 404) {
+          throw error;
         }
         console.error("[UserService] Get profile failed:", error);
       }
     }
 
     if (cached) {
-      return cached
+      return cached;
     }
 
     throw new Error("Profile not available offline");
@@ -123,8 +123,8 @@ export const userService = {
 
   // Helper
   getCurrentUserId: async (): Promise<string | null> => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('currentUserId');
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("currentUserId");
     }
     return null;
   },

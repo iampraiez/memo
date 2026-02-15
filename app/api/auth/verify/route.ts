@@ -17,17 +17,11 @@ export async function POST(req: Request) {
 
     // Find the verification token
     const token = await db.query.verificationTokens.findFirst({
-      where: and(
-        eq(verificationTokens.identifier, email),
-        eq(verificationTokens.token, code),
-      ),
+      where: and(eq(verificationTokens.identifier, email), eq(verificationTokens.token, code)),
     });
 
     if (!token) {
-      return NextResponse.json(
-        { message: "Invalid verification code" },
-        { status: 400 },
-      );
+      return NextResponse.json({ message: "Invalid verification code" }, { status: 400 });
     }
 
     // Check if token is expired
@@ -35,12 +29,7 @@ export async function POST(req: Request) {
       // Delete expired token
       await db
         .delete(verificationTokens)
-        .where(
-          and(
-            eq(verificationTokens.identifier, email),
-            eq(verificationTokens.token, code),
-          ),
-        );
+        .where(and(eq(verificationTokens.identifier, email), eq(verificationTokens.token, code)));
 
       return NextResponse.json(
         { message: "Verification code has expired. Please request a new one." },
@@ -49,38 +38,21 @@ export async function POST(req: Request) {
     }
 
     // Update user's emailVerified field
-    await db
-      .update(users)
-      .set({ emailVerified: new Date() })
-      .where(eq(users.email, email));
+    await db.update(users).set({ emailVerified: new Date() }).where(eq(users.email, email));
 
     // Delete the verification token
     await db
       .delete(verificationTokens)
-      .where(
-        and(
-          eq(verificationTokens.identifier, email),
-          eq(verificationTokens.token, code),
-        ),
-      );
+      .where(and(eq(verificationTokens.identifier, email), eq(verificationTokens.token, code)));
 
     logger.info(`Email verified for user: ${email}`);
 
-    return NextResponse.json(
-      { message: "Email verified successfully" },
-      { status: 200 },
-    );
+    return NextResponse.json({ message: "Email verified successfully" }, { status: 200 });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { message: "Invalid input", errors: error.issues },
-        { status: 400 },
-      );
+      return NextResponse.json({ message: "Invalid input", errors: error.issues }, { status: 400 });
     }
     logger.error("Verification error:", error);
-    return NextResponse.json(
-      { message: "Internal Server Error" },
-      { status: 500 },
-    );
+    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }
 }

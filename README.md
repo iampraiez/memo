@@ -32,53 +32,59 @@ Memory Lane is a modern, AI-powered personal timeline application that helps you
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/iampraiez/memo.git
    cd memo
    ```
 
 2. **Install dependencies**
+
    ```bash
    pnpm install
    ```
 
 3. **Set up environment variables**
+
    ```bash
    cp .env.example .env
    ```
-   
+
    Edit `.env` with your configuration:
+
    ```env
    # Database
    DATABASE_URL=postgresql://user:password@localhost:5432/memo
-   
+
    # Authentication
    AUTH_SECRET=your-secret-key-here
    AUTH_URL=http://localhost:3000
    AUTH_GOOGLE_ID=your-google-client-id
    AUTH_GOOGLE_SECRET=your-google-client-secret
-   
+
    # Email (Gmail SMTP)
    EMAIL_USER=your-email@gmail.com
    EMAIL_PASS=your-app-specific-password
-   
+
    # AI
    GEMINI_API_KEY=your-gemini-api-key
-   
+
    # Optional
    DROPBOX_ACCESS_TOKEN=your-dropbox-token
-   
+
    # App
    NODE_ENV=development
    NEXT_PUBLIC_APP_URL=http://localhost:3000
    ```
 
 4. **Set up the database**
+
    ```bash
    pnpm drizzle-kit push
    ```
 
 5. **Run the development server**
+
    ```bash
    pnpm dev
    ```
@@ -89,33 +95,39 @@ Memory Lane is a modern, AI-powered personal timeline application that helps you
 ## 🏗️ Tech Stack
 
 ### Core
+
 - **[Next.js 16](https://nextjs.org/)** - React framework with App Router
 - **[TypeScript](https://www.typescriptlang.org/)** - Type-safe development
 - **[React 19](https://react.dev/)** - UI library
 - **[Tailwind CSS 4](https://tailwindcss.com/)** - Utility-first styling
 
 ### Backend & Database
+
 - **[PostgreSQL](https://www.postgresql.org/)** - Primary database
 - **[Drizzle ORM](https://orm.drizzle.team/)** - Type-safe database toolkit
 - **[NextAuth.js 5](https://next-auth.js.org/)** - Authentication
 - **[Nodemailer](https://nodemailer.com/)** - Email delivery
 
 ### State & Data
+
 - **[TanStack Query](https://tanstack.com/query)** - Server state management
 - **[Zustand](https://zustand-demo.pmnd.rs/)** - Client state management
 - **[Dexie.js](https://dexie.org/)** - IndexedDB wrapper for offline support
 
 ### AI & Integrations
+
 - **[Google Gemini AI](https://ai.google.dev/)** - Story generation
 - **[Axios](https://axios-http.com/)** - HTTP client
 
 ### UI Components
+
 - **[Phosphor Icons](https://phosphoricons.com/)** - Icon library
 - **[Lucide React](https://lucide.dev/)** - Additional icons
 - **[Sonner](https://sonner.emilkowal.ski/)** - Toast notifications
 - **[Framer Motion](https://www.framer.com/motion/)** - Animations
 
 ### Development
+
 - **[ESLint](https://eslint.org/)** - Code linting
 - **[Drizzle Kit](https://orm.drizzle.team/kit-docs/overview)** - Database migrations
 - **[tsx](https://github.com/privatenumber/tsx)** - TypeScript execution
@@ -183,6 +195,7 @@ pnpm drizzle-kit studio      # Open Drizzle Studio
 ### Email Authentication
 
 For Gmail SMTP:
+
 1. Enable 2-factor authentication on your Google account
 2. Generate an [App Password](https://myaccount.google.com/apppasswords)
 3. Add credentials to `.env` as `EMAIL_USER` and `EMAIL_PASS`
@@ -199,23 +212,24 @@ Memory Lane uses Google's Gemini AI to generate personalized stories from your m
 
 ## 🌍 Environment Variables
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `DATABASE_URL` | ✅ | PostgreSQL connection string |
-| `AUTH_SECRET` | ✅ | Random string for session encryption |
-| `AUTH_URL` | ⚠️ | Base URL (auto-detected in dev) |
-| `AUTH_GOOGLE_ID` | ❌ | Google OAuth client ID |
-| `AUTH_GOOGLE_SECRET` | ❌ | Google OAuth client secret |
-| `EMAIL_USER` | ❌ | SMTP email address |
-| `EMAIL_PASS` | ❌ | SMTP password/app password |
-| `GEMINI_API_KEY` | ✅ | Google Gemini API key |
-| `DROPBOX_ACCESS_TOKEN` | ❌ | Dropbox integration token |
-| `NODE_ENV` | ✅ | Environment (development/production) |
-| `NEXT_PUBLIC_APP_URL` | ✅ | Public app URL |
+| Variable               | Required | Description                          |
+| ---------------------- | -------- | ------------------------------------ |
+| `DATABASE_URL`         | ✅       | PostgreSQL connection string         |
+| `AUTH_SECRET`          | ✅       | Random string for session encryption |
+| `AUTH_URL`             | ⚠️       | Base URL (auto-detected in dev)      |
+| `AUTH_GOOGLE_ID`       | ❌       | Google OAuth client ID               |
+| `AUTH_GOOGLE_SECRET`   | ❌       | Google OAuth client secret           |
+| `EMAIL_USER`           | ❌       | SMTP email address                   |
+| `EMAIL_PASS`           | ❌       | SMTP password/app password           |
+| `GEMINI_API_KEY`       | ✅       | Google Gemini API key                |
+| `DROPBOX_ACCESS_TOKEN` | ❌       | Dropbox integration token            |
+| `NODE_ENV`             | ✅       | Environment (development/production) |
+| `NEXT_PUBLIC_APP_URL`  | ✅       | Public app URL                       |
 
 ## 📊 Database Schema
 
 Key tables:
+
 - **users** - User accounts and profiles
 - **memories** - Memory entries with content
 - **memoryMedia** - Attached images and files

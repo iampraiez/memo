@@ -1,4 +1,4 @@
-import React from 'react'
+import React from "react";
 import { X } from "lucide-react";
 import { cn } from "../../lib/utils";
 
@@ -20,7 +20,6 @@ const Tag: React.FC<TagProps> = ({
   onRemove,
   className,
   onClick,
-
 }) => {
   const baseStyles = "inline-flex items-center rounded-full font-medium";
 
@@ -36,20 +35,17 @@ const Tag: React.FC<TagProps> = ({
   };
 
   return (
-    <span
-      className={cn(baseStyles, variants[variant], sizes[size], className)}
-      onClick={onClick} 
-    >
+    <span className={cn(baseStyles, variants[variant], sizes[size], className)} onClick={onClick}>
       {children}
       {removable && (
         <button
           onClick={(e) => {
-            e.stopPropagation(); 
+            e.stopPropagation();
             onRemove?.();
           }}
-          className="ml-1 hover:bg-black/10 rounded-full p-0.5"
+          className="ml-1 rounded-full p-0.5 hover:bg-black/10"
         >
-          <X className="w-3 h-3" />
+          <X className="h-3 w-3" />
         </button>
       )}
     </span>

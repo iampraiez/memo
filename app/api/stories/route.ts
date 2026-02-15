@@ -49,26 +49,31 @@ export async function POST(req: Request) {
       where: and(
         eq(memoriesTable.userId, session.user.id),
         gte(memoriesTable.date, startDate),
-        lte(memoriesTable.date, endDate)
+        lte(memoriesTable.date, endDate),
       ),
       orderBy: [desc(memoriesTable.date)],
     });
 
     if (!userMemories || userMemories.length === 0) {
-      return NextResponse.json({ error: "No memories found for this period to generate a story." }, { status: 400 });
+      return NextResponse.json(
+        { error: "No memories found for this period to generate a story." },
+        { status: 400 },
+      );
     }
 
     // 2. Prepare the prompt
-    const memoryContext = userMemories.map(m => {
-      const dateStr = new Date(m.date).toLocaleDateString();
-      return `Date: ${dateStr}\nTitle: ${m.title}\nContent: ${m.content}\nMood: ${m.mood || "N/A"}`;
-    }).join("\n---\n");
+    const memoryContext = userMemories
+      .map((m) => {
+        const dateStr = new Date(m.date).toLocaleDateString();
+        return `Date: ${dateStr}\nTitle: ${m.title}\nContent: ${m.content}\nMood: ${m.mood || "N/A"}`;
+      })
+      .join("\n---\n");
 
     const prompt = `You are an expert storyteller and personal historian. 
 Based on the following personal memories from ${dateRange.start} to ${dateRange.end}, write a beautiful and cohesive narrative.
 
 Tone: ${tone}
-Length: ${length === 'short' ? 'about 300 words' : length === 'long' ? 'about 1500 words' : 'about 700 words'}
+Length: ${length === "short" ? "about 300 words" : length === "long" ? "about 1500 words" : "about 700 words"}
 
 Memories:
 ${memoryContext}
@@ -107,4 +112,3 @@ Guidelines:
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
-

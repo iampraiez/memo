@@ -6,7 +6,7 @@ export async function handleSignIn(
   provider?: string,
   options?: { redirectTo?: string },
   formData?: { email: string; password: string },
-  emailFromForm?: string
+  emailFromForm?: string,
 ) {
   try {
     if (provider === "nodemailer" && emailFromForm) {
@@ -37,7 +37,7 @@ export async function handleSignIn(
       options || {
         email: emailFromForm,
         callbackUrl: "/timeline",
-      }
+      },
     );
   } catch (error) {
     if (error instanceof AuthError) {

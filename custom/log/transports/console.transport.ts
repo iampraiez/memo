@@ -4,7 +4,7 @@ import { Formatter } from "../processors/formatter";
 export class ConsoleTransport implements ITransport {
   async send(entry: LogEntry): Promise<void> {
     const formatted = Formatter.formatForConsole(entry);
-    
+
     switch (entry.level) {
       case "info":
         console.log(formatted, ...(entry.args || []));

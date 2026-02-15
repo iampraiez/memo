@@ -19,10 +19,7 @@ const updateMemorySchema = z.object({
 });
 
 // GET - Fetch single memory
-export async function GET(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await auth();
     const id = (await params).id;
@@ -48,27 +45,18 @@ export async function GET(
     });
 
     if (!memory) {
-      return NextResponse.json(
-        { message: "Memory not found" },
-        { status: 404 },
-      );
+      return NextResponse.json({ message: "Memory not found" }, { status: 404 });
     }
 
     return NextResponse.json({ memory }, { status: 200 });
   } catch (error) {
     logger.error("Error fetching memory:", error);
-    return NextResponse.json(
-      { message: "Internal Server Error" },
-      { status: 500 },
-    );
+    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }
 }
 
 // PATCH - Update memory
-export async function PATCH(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await auth();
     const id = (await params).id;
@@ -107,24 +95,21 @@ export async function PATCH(
       .returning();
 
     if (!updatedMemory) {
-      return NextResponse.json(
-        { message: "Memory not found" },
-        { status: 404 },
-      );
+      return NextResponse.json({ message: "Memory not found" }, { status: 404 });
     }
 
     // Handle Tags (replace existing)
     if (validatedData.tags !== undefined) {
       // Remove old associations
       await db.delete(memoryTags).where(eq(memoryTags.memoryId, id));
-      
+
       if (validatedData.tags.length > 0) {
         for (const tagName of validatedData.tags) {
           let tagId;
           const existingTag = await db.query.tags.findFirst({
-            where: eq(tags.name, tagName)
+            where: eq(tags.name, tagName),
           });
-          
+
           if (existingTag) {
             tagId = existingTag.id;
           } else {
@@ -135,11 +120,11 @@ export async function PATCH(
               color: "#3B82F6",
             });
           }
-          
+
           await db.insert(memoryTags).values({
             id: uuidv4(),
             memoryId: id,
-            tagId: tagId
+            tagId: tagId,
           });
         }
       }
@@ -149,7 +134,7 @@ export async function PATCH(
     if (validatedData.images !== undefined) {
       // Remove old media
       await db.delete(memoryMedia).where(eq(memoryMedia.memoryId, id));
-      
+
       if (validatedData.images.length > 0) {
         for (const url of validatedData.images) {
           await db.insert(memoryMedia).values({
@@ -158,7 +143,7 @@ export async function PATCH(
             url: url,
             type: "image",
             filename: "unknown",
-            storageProvider: "cloudinary"
+            storageProvider: "cloudinary",
           });
         }
       }
@@ -166,34 +151,28 @@ export async function PATCH(
 
     logger.info(`Updated memory ${id} for user ${user.id}`);
 
-    return NextResponse.json({ 
-      memory: {
-        ...updatedMemory,
-        tags: validatedData.tags || [],
-        images: validatedData.images || []
-      } 
-    }, { status: 200 });
+    return NextResponse.json(
+      {
+        memory: {
+          ...updatedMemory,
+          tags: validatedData.tags || [],
+          images: validatedData.images || [],
+        },
+      },
+      { status: 200 },
+    );
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { message: "Invalid input", errors: error.issues },
-        { status: 400 },
-      );
+      return NextResponse.json({ message: "Invalid input", errors: error.issues }, { status: 400 });
     }
 
     logger.error("Error updating memory:", error);
-    return NextResponse.json(
-      { message: "Internal Server Error" },
-      { status: 500 },
-    );
+    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }
 }
 
 // DELETE - Delete memory
-export async function DELETE(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await auth();
     const id = (await params).id;
@@ -219,10 +198,7 @@ export async function DELETE(
       .returning();
 
     if (!deletedMemory) {
-      return NextResponse.json(
-        { message: "Memory not found" },
-        { status: 404 },
-      );
+      return NextResponse.json({ message: "Memory not found" }, { status: 404 });
     }
 
     logger.info(`Deleted memory ${id} for user ${user.id}`);
@@ -230,9 +206,6 @@ export async function DELETE(
     return NextResponse.json({ message: "Memory deleted" }, { status: 200 });
   } catch (error) {
     logger.error("Error deleting memory:", error);
-    return NextResponse.json(
-      { message: "Internal Server Error" },
-      { status: 500 },
-    );
+    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }
 }

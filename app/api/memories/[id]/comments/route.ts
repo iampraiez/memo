@@ -5,10 +5,7 @@ import { comments, memories, notifications } from "@/drizzle/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 
-export async function GET(
-  req: Request,
-  props: { params: Promise<{ id: string }> }
-) {
+export async function GET(req: Request, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   const session = await auth();
   const memoryId = params.id;
@@ -33,10 +30,7 @@ export async function GET(
   }
 }
 
-export async function POST(
-  req: Request,
-  props: { params: Promise<{ id: string }> }
-) {
+export async function POST(req: Request, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   const session = await auth();
   const memoryId = params.id;
@@ -66,16 +60,16 @@ export async function POST(
     // Notification trigger
     const memory = await db.query.memories.findFirst({
       where: eq(memories.id, memoryId),
-      columns: { userId: true, title: true }
+      columns: { userId: true, title: true },
     });
 
     if (memory && memory.userId !== session.user.id) {
-       await db.insert(notifications).values({
+      await db.insert(notifications).values({
         id: uuidv4(),
         userId: memory.userId,
-        type: 'comment',
-        title: 'New Comment',
-        message: `${session.user.name || 'Someone'} commented on your memory "${memory.title}"`,
+        type: "comment",
+        title: "New Comment",
+        message: `${session.user.name || "Someone"} commented on your memory "${memory.title}"`,
         relatedId: memoryId,
         read: false,
       });

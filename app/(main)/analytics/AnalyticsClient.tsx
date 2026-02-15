@@ -1,13 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  TrendUp,
-  Calendar,
-  Tag as TagIcon,
-  Clock,
-  ChartBar,
-} from "@phosphor-icons/react";
+import { TrendUp, Calendar, Tag as TagIcon, Clock, ChartBar } from "@phosphor-icons/react";
 import Card from "@/components/ui/Card";
 import StatCard from "@/components/ui/StatCard";
 import Button from "@/components/ui/Button";
@@ -37,9 +31,9 @@ export default function AnalyticsClient({ initialAnalytics }: AnalyticsClientPro
 
   // Use initial data if available and timeRange matches default (year), otherwise use fetched data
   // thorough implementation would check if initial data matches the current timeRange
-  // For now, we'll rely on the hook which will hydrate or fetch. 
+  // For now, we'll rely on the hook which will hydrate or fetch.
   // Ideally, useQuery initialData could be used if we passed the range down.
-  
+
   const analytics = analyticsData || initialAnalytics;
 
   if (isLoading && !analytics) {
@@ -47,23 +41,30 @@ export default function AnalyticsClient({ initialAnalytics }: AnalyticsClientPro
   }
 
   if (error && !analytics) {
-      return null;
+    return null;
   }
 
   if (!analytics) return null;
 
   if (analytics.totalMemories === 0) {
     return (
-      <div className="max-w-4xl mx-auto p-6 space-y-8 flex flex-col items-center justify-center min-h-[70vh] text-center">
-        <div className="w-24 h-24 bg-neutral-50 rounded-[2.5rem] flex items-center justify-center mb-6 border border-neutral-100 shadow-inner">
-          <ChartBar className="w-12 h-12 text-neutral-300" />
+      <div className="mx-auto flex min-h-[70vh] max-w-4xl flex-col items-center justify-center space-y-8 p-6 text-center">
+        <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-[2.5rem] border border-neutral-100 bg-neutral-50 shadow-inner">
+          <ChartBar className="h-12 w-12 text-neutral-300" />
         </div>
-        <h1 className="text-3xl font-display font-bold text-neutral-900 tracking-tight">Your Sanctuary is Quiet</h1>
-        <p className="text-neutral-500 max-w-md mx-auto leading-relaxed mt-2">
-          Your personal growth and emotional patterns will bloom here once you start capturing your memories.
+        <h1 className="font-display text-3xl font-bold tracking-tight text-neutral-900">
+          Your Sanctuary is Quiet
+        </h1>
+        <p className="mx-auto mt-2 max-w-md leading-relaxed text-neutral-500">
+          Your personal growth and emotional patterns will bloom here once you start capturing your
+          memories.
         </p>
         <div className="pt-8">
-          <Button variant="primary" onClick={() => router.push("/timeline")} className="h-12 px-8 rounded-2xl shadow-lg shadow-primary-900/20">
+          <Button
+            variant="primary"
+            onClick={() => router.push("/timeline")}
+            className="shadow-primary-900/20 h-12 rounded-2xl px-8 shadow-lg"
+          >
             Start Your Archive
           </Button>
         </div>
@@ -72,26 +73,18 @@ export default function AnalyticsClient({ initialAnalytics }: AnalyticsClientPro
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-6 space-y-8">
+    <div className="mx-auto max-w-6xl space-y-8 p-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-display font-bold text-neutral-900">
-            Analytics & Insights
-          </h1>
-          <p className="text-neutral-600 mt-1">
-            Discover patterns and insights from your memories
-          </p>
+          <h1 className="font-display text-3xl font-bold text-neutral-900">Analytics & Insights</h1>
+          <p className="mt-1 text-neutral-600">Discover patterns and insights from your memories</p>
         </div>
         <div className="w-48">
-          <Select
-            options={timeRangeOptions}
-            value={timeRange}
-            onChange={setTimeRange}
-          />
+          <Select options={timeRangeOptions} value={timeRange} onChange={setTimeRange} />
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Total memories"
           value={analytics.totalMemories.toLocaleString()}
@@ -107,28 +100,20 @@ export default function AnalyticsClient({ initialAnalytics }: AnalyticsClientPro
           value={analytics.averagePerWeek.toString()}
           icon={ChartBar}
         />
-        <StatCard
-          title="Longest Streak"
-          value={`${analytics.longestStreak} days`}
-          icon={Clock}
-        />
+        <StatCard title="Longest Streak" value={`${analytics.longestStreak} days`} icon={Clock} />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <Card className="p-8 space-y-6">
-          <h2 className="text-xl font-display font-bold text-neutral-900">
-            Activity Patterns
-          </h2>
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+        <Card className="space-y-6 p-8">
+          <h2 className="font-display text-xl font-bold text-neutral-900">Activity Patterns</h2>
           <div className="w-full">
             <ActivityChart data={analytics.monthlyActivity} />
           </div>
         </Card>
 
-        <Card className="p-8 space-y-6">
-          <h2 className="text-xl font-display font-bold text-neutral-900">
-            Emotional Balance
-          </h2>
-          <div className="w-full flex justify-center">
+        <Card className="space-y-6 p-8">
+          <h2 className="font-display text-xl font-bold text-neutral-900">Emotional Balance</h2>
+          <div className="flex w-full justify-center">
             <MoodChart
               data={analytics.topMoods.map((m) => ({
                 mood: m.mood,
@@ -140,10 +125,10 @@ export default function AnalyticsClient({ initialAnalytics }: AnalyticsClientPro
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <Card className="p-8 space-y-6">
-          <h2 className="text-xl font-display font-bold text-neutral-900 flex items-center">
-            <Clock className="w-5 h-5 mr-2 text-primary-900" />
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+        <Card className="space-y-6 p-8">
+          <h2 className="font-display flex items-center text-xl font-bold text-neutral-900">
+            <Clock className="text-primary-900 mr-2 h-5 w-5" />
             Weekly Rhythm
           </h2>
           <div className="w-full">
@@ -151,57 +136,50 @@ export default function AnalyticsClient({ initialAnalytics }: AnalyticsClientPro
           </div>
         </Card>
 
-        <Card className="p-8 space-y-6">
-          <h2 className="text-xl font-display font-bold text-neutral-900 flex items-center">
-            <TagIcon className="w-5 h-5 mr-2 text-primary-900" />
+        <Card className="space-y-6 p-8">
+          <h2 className="font-display flex items-center text-xl font-bold text-neutral-900">
+            <TagIcon className="text-primary-900 mr-2 h-5 w-5" />
             Relationship Clusters
           </h2>
           <p className="text-sm text-neutral-500">
             Discover which aspects of your life are most connected.
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {analytics.tagClusters?.map(
-              (cluster: { tag: string; related: { name: string }[] }) => (
-                <div
-                  key={cluster.tag}
-                  className="p-4 rounded-2xl bg-neutral-50 border border-neutral-100 space-y-3"
-                >
-                  <p className="font-bold text-neutral-900 capitalize text-sm">
-                    {cluster.tag}
-                  </p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {cluster.related.map((rel) => (
-                      <span
-                        key={rel.name}
-                        className="px-2 py-0.5 rounded-full bg-white text-[10px] font-bold text-neutral-500 border border-neutral-100"
-                      >
-                        {rel.name}
-                      </span>
-                    ))}
-                  </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {analytics.tagClusters?.map((cluster: { tag: string; related: { name: string }[] }) => (
+              <div
+                key={cluster.tag}
+                className="space-y-3 rounded-2xl border border-neutral-100 bg-neutral-50 p-4"
+              >
+                <p className="text-sm font-bold text-neutral-900 capitalize">{cluster.tag}</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {cluster.related.map((rel) => (
+                    <span
+                      key={rel.name}
+                      className="rounded-full border border-neutral-100 bg-white px-2 py-0.5 text-[10px] font-bold text-neutral-500"
+                    >
+                      {rel.name}
+                    </span>
+                  ))}
                 </div>
-              ),
-            )}
+              </div>
+            ))}
           </div>
         </Card>
       </div>
 
       <div className="grid grid-cols-1 gap-8">
-        <Card className="p-8 space-y-6 flex flex-col justify-center bg-linear-to-br from-white to-neutral-50">
-          <div className="text-center space-y-4">
-            <div className="w-16 h-16 bg-primary-900 rounded-full flex items-center justify-center mx-auto shadow-lg">
-              <TrendUp className="w-8 h-8 text-secondary-400" />
+        <Card className="flex flex-col justify-center space-y-6 bg-linear-to-br from-white to-neutral-50 p-8">
+          <div className="space-y-4 text-center">
+            <div className="bg-primary-900 mx-auto flex h-16 w-16 items-center justify-center rounded-full shadow-lg">
+              <TrendUp className="text-secondary-400 h-8 w-8" />
             </div>
-            <h2 className="text-2xl font-display font-bold text-neutral-900">
-              Personal Growth
-            </h2>
-            <p className="text-neutral-600 max-w-sm mx-auto">
-              You've maintained a <strong>{analytics.longestStreak} day</strong>{" "}
-              streak of capturing life. This consistency builds a rich
-              foundation for AI-driven heritage narratives.
+            <h2 className="font-display text-2xl font-bold text-neutral-900">Personal Growth</h2>
+            <p className="mx-auto max-w-sm text-neutral-600">
+              You've maintained a <strong>{analytics.longestStreak} day</strong> streak of capturing
+              life. This consistency builds a rich foundation for AI-driven heritage narratives.
             </p>
             <div className="pt-4">
-              <div className="inline-flex items-center space-x-2 px-4 py-2 bg-secondary-400 rounded-full text-primary-900 font-bold text-sm">
+              <div className="bg-secondary-400 text-primary-900 inline-flex items-center space-x-2 rounded-full px-4 py-2 text-sm font-bold">
                 <span>Keep it going!</span>
               </div>
             </div>

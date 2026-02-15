@@ -71,20 +71,15 @@ export async function GET(req: Request) {
     const memoriesThisMonth = userMemories.filter((memory) => {
       const memoryDate = new Date(memory.date);
       return (
-        memoryDate.getMonth() === now.getMonth() &&
-        memoryDate.getFullYear() === now.getFullYear()
+        memoryDate.getMonth() === now.getMonth() && memoryDate.getFullYear() === now.getFullYear()
       );
     }).length;
 
     const weeksSinceStart = Math.max(
       1,
-      Math.ceil(
-        (now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 7),
-      ),
+      Math.ceil((now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 7)),
     );
-    const averagePerWeek = parseFloat(
-      (totalMemories / weeksSinceStart).toFixed(1),
-    );
+    const averagePerWeek = parseFloat((totalMemories / weeksSinceStart).toFixed(1));
 
     // Calculate mood distribution
     const moodCounts: Record<string, number> = {};
@@ -98,8 +93,7 @@ export async function GET(req: Request) {
       .map(([mood, count]) => ({
         mood,
         count,
-        percentage:
-          totalMemories > 0 ? Math.round((count / totalMemories) * 100) : 0,
+        percentage: totalMemories > 0 ? Math.round((count / totalMemories) * 100) : 0,
       }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 5);
@@ -120,8 +114,7 @@ export async function GET(req: Request) {
       .map(([tag, count]) => ({
         tag,
         count,
-        percentage:
-          totalMemories > 0 ? Math.round((count / totalMemories) * 100) : 0,
+        percentage: totalMemories > 0 ? Math.round((count / totalMemories) * 100) : 0,
       }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 5);
@@ -169,9 +162,7 @@ export async function GET(req: Request) {
       memories: weeklyCounts[day] || 0,
     }));
 
-    const sortedDates = userMemories
-      .map((m) => new Date(m.date).toDateString())
-      .sort();
+    const sortedDates = userMemories.map((m) => new Date(m.date).toDateString()).sort();
 
     let currentStreak = 0;
     let longestStreak = 0;
@@ -200,33 +191,36 @@ export async function GET(req: Request) {
     const heatmap: Record<string, number> = {};
     const oneYearAgo = new Date();
     oneYearAgo.setFullYear(now.getFullYear() - 1);
-    
-    userMemories.forEach(memory => {
-        const dateKey = new Date(memory.date).toISOString().split('T')[0];
-        heatmap[dateKey] = (heatmap[dateKey] || 0) + 1;
+
+    userMemories.forEach((memory) => {
+      const dateKey = new Date(memory.date).toISOString().split("T")[0];
+      heatmap[dateKey] = (heatmap[dateKey] || 0) + 1;
     });
 
     // Calculate Tag Relationship Clusters (Co-occurrence)
     const tagCooccurrence: Record<string, Record<string, number>> = {};
-    userMemories.forEach(memory => {
-        const tags = memory.memoryTags.map(t => t.tag.name);
-        tags.forEach(t1 => {
-            if (!tagCooccurrence[t1]) tagCooccurrence[t1] = {};
-            tags.forEach(t2 => {
-              if (t1 !== t2) {
-                tagCooccurrence[t1][t2] = (tagCooccurrence[t1][t2] || 0) + 1;
-              }
-            });
+    userMemories.forEach((memory) => {
+      const tags = memory.memoryTags.map((t) => t.tag.name);
+      tags.forEach((t1) => {
+        if (!tagCooccurrence[t1]) tagCooccurrence[t1] = {};
+        tags.forEach((t2) => {
+          if (t1 !== t2) {
+            tagCooccurrence[t1][t2] = (tagCooccurrence[t1][t2] || 0) + 1;
+          }
         });
+      });
     });
 
-    const tagClusters = Object.entries(tagCooccurrence).map(([tag, relations]) => ({
+    const tagClusters = Object.entries(tagCooccurrence)
+      .map(([tag, relations]) => ({
         tag,
         related: Object.entries(relations)
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, 3)
-            .map(([name, count]) => ({ name, count }))
-    })).sort((a, b) => b.related.length - a.related.length).slice(0, 10);
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 3)
+          .map(([name, count]) => ({ name, count })),
+      }))
+      .sort((a, b) => b.related.length - a.related.length)
+      .slice(0, 10);
 
     const analytics = {
       totalMemories,
@@ -238,7 +232,7 @@ export async function GET(req: Request) {
       monthlyActivity,
       weeklyPattern,
       heatmap,
-      tagClusters
+      tagClusters,
     };
 
     logger.info(`Analytics fetched for user ${user.id}`);
@@ -246,9 +240,6 @@ export async function GET(req: Request) {
     return NextResponse.json(analytics, { status: 200 });
   } catch (error) {
     logger.error("Error fetching analytics:", error);
-    return NextResponse.json(
-      { message: "Internal Server Error" },
-      { status: 500 },
-    );
+    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }
 }

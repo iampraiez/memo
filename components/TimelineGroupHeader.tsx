@@ -35,13 +35,9 @@ const TimelineGroupHeader: React.FC<TimelineGroupHeaderProps> = ({
   return (
     <div className={cn(stickyStyles)}>
       <button onClick={onToggle} className={cn(baseStyles, levelStyles[level])}>
-        {isExpanded ? (
-          <ChevronDown className="w-6 h-6" />
-        ) : (
-          <ChevronRight className="w-6 h-6" />
-        )}
+        {isExpanded ? <ChevronDown className="h-6 w-6" /> : <ChevronRight className="h-6 w-6" />}
         <span>{title}</span>
-        <span className="text-sm font-normal text-neutral-500 ml-2">
+        <span className="ml-2 text-sm font-normal text-neutral-500">
           ({count} {count === 1 ? "memory" : "memories"})
         </span>
       </button>

@@ -12,11 +12,11 @@ interface MemoryState {
     };
     mood: string | null;
   };
-  
+
   setSelectedMemories: (ids: string[]) => void;
   toggleMemorySelection: (id: string) => void;
   clearSelection: () => void;
-  
+
   setSearchQuery: (query: string) => void;
   setTagFilter: (tags: string[]) => void;
   setDateRangeFilter: (start: Date | null, end: Date | null) => void;
@@ -71,5 +71,5 @@ export const useMemoryStore = create<MemoryState>()(
           mood: null,
         },
       }),
-  }))
+  })),
 );

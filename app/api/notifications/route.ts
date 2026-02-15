@@ -33,15 +33,18 @@ export async function POST(req: Request) {
   try {
     const { type, title, message, relatedId } = await req.json();
 
-    const newNotification = await db.insert(notifications).values({
-      id: crypto.randomUUID(),
-      userId: session.user.id,
-      type,
-      title,
-      message,
-      relatedId,
-      read: false,
-    }).returning();
+    const newNotification = await db
+      .insert(notifications)
+      .values({
+        id: crypto.randomUUID(),
+        userId: session.user.id,
+        type,
+        title,
+        message,
+        relatedId,
+        read: false,
+      })
+      .returning();
 
     return NextResponse.json({ notification: newNotification[0] });
   } catch (error) {

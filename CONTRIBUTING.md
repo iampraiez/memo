@@ -27,6 +27,7 @@ By participating in this project, you agree to maintain a respectful and inclusi
 ## 🔄 Development Workflow
 
 1. **Create a feature branch**
+
    ```bash
    git checkout -b feature/your-feature-name
    ```
@@ -38,6 +39,7 @@ By participating in this project, you agree to maintain a respectful and inclusi
    - Update documentation as needed
 
 3. **Test your changes**
+
    ```bash
    pnpm dev        # Test locally
    pnpm build      # Verify build works
@@ -45,11 +47,12 @@ By participating in this project, you agree to maintain a respectful and inclusi
    ```
 
 4. **Commit your changes**
+
    ```bash
    git add .
    git commit -m "feat: add amazing feature"
    ```
-   
+
    Follow [Conventional Commits](https://www.conventionalcommits.org/):
    - `feat:` - New feature
    - `fix:` - Bug fix
@@ -60,6 +63,7 @@ By participating in this project, you agree to maintain a respectful and inclusi
    - `chore:` - Maintenance tasks
 
 5. **Push to your fork**
+
    ```bash
    git push origin feature/your-feature-name
    ```
@@ -127,17 +131,17 @@ const data: any = {};
 ```typescript
 // Good
 interface ButtonProps {
-  variant?: 'primary' | 'secondary';
-  size?: 'sm' | 'md' | 'lg';
+  variant?: "primary" | "secondary";
+  size?: "sm" | "md" | "lg";
   onClick?: () => void;
   children: React.ReactNode;
 }
 
-export const Button: React.FC<ButtonProps> = ({ 
-  variant = 'primary',
-  size = 'md',
+export const Button: React.FC<ButtonProps> = ({
+  variant = "primary",
+  size = "md",
   onClick,
-  children 
+  children,
 }) => {
   // Component logic
 };
@@ -155,6 +159,7 @@ export const Button: React.FC<ButtonProps> = ({
 Currently, the project doesn't have a comprehensive test suite. Contributions to add tests are highly welcome!
 
 When tests are added, ensure:
+
 - All new features have tests
 - Bug fixes include regression tests
 - Tests are clear and well-documented
@@ -207,6 +212,7 @@ If you discover a security vulnerability:
 ```
 
 **Example:**
+
 ```
 feat(auth): add Google OAuth integration
 
@@ -232,6 +238,7 @@ We especially welcome contributions in:
 ## 🏆 Recognition
 
 Contributors will be:
+
 - Listed in CONTRIBUTORS.md
 - Mentioned in release notes
 - Credited in the application (for major contributions)

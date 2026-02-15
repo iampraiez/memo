@@ -9,17 +9,17 @@ export const useMemories = (isPublic?: boolean, limit = 100, offset = 0) => {
   const memories = useLiveQuery(async () => {
     const userId = await memoryService.getCurrentUserId();
     if (!userId) return [];
-    
-    let query = db.memories.where('userId').equals(userId);
-    
-    // We can't easily filter by isPublic in Dexie without multi-index, 
+
+    let query = db.memories.where("userId").equals(userId);
+
+    // We can't easily filter by isPublic in Dexie without multi-index,
     // but we can filter the result for now or add index later.
-    const results = await query.reverse().sortBy('createdAt');
-    
+    const results = await query.reverse().sortBy("createdAt");
+
     if (isPublic !== undefined) {
-      return results.filter(m => m.isPublic === isPublic);
+      return results.filter((m) => m.isPublic === isPublic);
     }
-    
+
     return results;
   }, [isPublic, limit, offset]);
 
@@ -51,7 +51,7 @@ export const useMemory = (id: string) => {
   };
 };
 
-export const useSearchMemories = (query: string, scope: 'mine' | 'circle' = 'mine') => {
+export const useSearchMemories = (query: string, scope: "mine" | "circle" = "mine") => {
   return useQuery<{ memories: Memory[] }>({
     queryKey: ["memories", "search", query, scope],
     queryFn: () => memoryService.search(query, scope),
@@ -77,7 +77,7 @@ export const useUpdateMemory = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: UpdateMemoryData }) => 
+    mutationFn: ({ id, data }: { id: string; data: UpdateMemoryData }) =>
       memoryService.update(id, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["memory", variables.id] });

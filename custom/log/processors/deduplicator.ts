@@ -13,7 +13,7 @@ export class Deduplicator implements IProcessor {
     const lastTime = this.lastSeen.get(key) || 0;
 
     if (now - lastTime < config.deduplication.windowMs) {
-      return null; 
+      return null;
     }
 
     this.lastSeen.set(key, now);

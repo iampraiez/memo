@@ -35,10 +35,7 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        selectRef.current &&
-        !selectRef.current.contains(event.target as Node)
-      ) {
+      if (selectRef.current && !selectRef.current.contains(event.target as Node)) {
         setIsOpen(false);
         setSearchTerm("");
       }
@@ -52,9 +49,7 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
     option.label.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
-  const selectedOptions = options.filter((option) =>
-    value.includes(option.value),
-  );
+  const selectedOptions = options.filter((option) => value.includes(option.value));
 
   const toggleOption = (optionValue: string) => {
     if (value.includes(optionValue)) {
@@ -70,28 +65,24 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
 
   return (
     <div className={cn("relative", className)} ref={selectRef}>
-      {label && (
-        <label className="block text-sm font-medium text-neutral-700 mb-1">
-          {label}
-        </label>
-      )}
+      {label && <label className="mb-1 block text-sm font-medium text-neutral-700">{label}</label>}
 
       <div
         className={cn(
-          "min-h-[2.5rem] px-3 py-2 bg-white border border-neutral-300 rounded-lg shadow-sm cursor-pointer",
-          "focus-within:outline-none focus-within:ring-2 focus-within:ring-primary-500 focus-within:border-transparent",
+          "min-h-[2.5rem] cursor-pointer rounded-lg border border-neutral-300 bg-white px-3 py-2 shadow-sm",
+          "focus-within:ring-primary-500 focus-within:border-transparent focus-within:ring-2 focus-within:outline-none",
           "transition-all duration-200",
-          disabled && "bg-neutral-50 text-neutral-400 cursor-not-allowed",
+          disabled && "cursor-not-allowed bg-neutral-50 text-neutral-400",
           error && "border-destructive-500 focus-within:ring-destructive-500",
-          isOpen && "ring-2 ring-primary-500 border-transparent",
+          isOpen && "ring-primary-500 border-transparent ring-2",
         )}
         onClick={() => !disabled && setIsOpen(true)}
       >
-        <div className="flex flex-wrap gap-1 items-center">
+        <div className="flex flex-wrap items-center gap-1">
           {selectedOptions.map((option) => (
             <span
               key={option.value}
-              className="inline-flex items-center px-2 py-1 bg-primary-100 text-primary-800 text-sm rounded border border-primary-200"
+              className="bg-primary-100 text-primary-800 border-primary-200 inline-flex items-center rounded border px-2 py-1 text-sm"
             >
               {option.label}
               <button
@@ -100,9 +91,9 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
                   e.stopPropagation();
                   removeOption(option.value);
                 }}
-                className="ml-1 hover:bg-primary-200 rounded-full p-0.5"
+                className="hover:bg-primary-200 ml-1 rounded-full p-0.5"
               >
-                <X className="w-3 h-3" />
+                <X className="h-3 w-3" />
               </button>
             </span>
           ))}
@@ -113,7 +104,7 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="flex-1 min-w-[120px] outline-none bg-transparent"
+              className="min-w-[120px] flex-1 bg-transparent outline-none"
               placeholder={selectedOptions.length === 0 ? placeholder : ""}
               autoFocus
             />
@@ -124,22 +115,20 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
           )}
         </div>
 
-        <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+        <div className="absolute top-1/2 right-3 -translate-y-1/2 transform">
           <ChevronDown
             className={cn(
-              "w-4 h-4 text-neutral-400 transition-transform duration-200",
-              isOpen && "transform rotate-180",
+              "h-4 w-4 text-neutral-400 transition-transform duration-200",
+              isOpen && "rotate-180 transform",
             )}
           />
         </div>
       </div>
 
       {isOpen && (
-        <div className="absolute z-50 w-full mt-1 bg-white border border-neutral-200 rounded-lg shadow-soft-lg max-h-60 overflow-auto">
+        <div className="shadow-soft-lg absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-neutral-200 bg-white">
           {filteredOptions.length === 0 ? (
-            <div className="px-3 py-2 text-sm text-neutral-500">
-              No options found
-            </div>
+            <div className="px-3 py-2 text-sm text-neutral-500">No options found</div>
           ) : (
             filteredOptions.map((option) => (
               <button
@@ -147,23 +136,20 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
                 type="button"
                 onClick={() => toggleOption(option.value)}
                 className={cn(
-                  "w-full px-3 py-2 text-left hover:bg-neutral-50 flex items-center justify-between",
+                  "flex w-full items-center justify-between px-3 py-2 text-left hover:bg-neutral-50",
                   "first:rounded-t-lg last:rounded-b-lg",
-                  value.includes(option.value) &&
-                    "bg-primary-50 text-primary-900",
+                  value.includes(option.value) && "bg-primary-50 text-primary-900",
                 )}
               >
                 <span>{option.label}</span>
-                {value.includes(option.value) && (
-                  <Check className="w-4 h-4 text-primary-600" />
-                )}
+                {value.includes(option.value) && <Check className="text-primary-600 h-4 w-4" />}
               </button>
             ))
           )}
         </div>
       )}
 
-      {error && <p className="mt-1 text-sm text-destructive-600">{error}</p>}
+      {error && <p className="text-destructive-600 mt-1 text-sm">{error}</p>}
     </div>
   );
 };

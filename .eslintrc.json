@@ -4,7 +4,7 @@
     "es2024": true,
     "node": true
   },
-  "extends": ["eslint:recommended"],
+  "extends": ["eslint:recommended", "next/core-web-vitals", "plugin:prettier/recommended"],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "ecmaVersion": 2024,
@@ -13,22 +13,11 @@
       "jsx": true
     }
   },
-  "plugins": ["@typescript-eslint"],
+  "plugins": ["@typescript-eslint", "prettier"],
   "rules": {
     "@typescript-eslint/no-explicit-any": "warn",
-    "@typescript-eslint/no-unused-vars": [
-      "warn",
-      { "argsIgnorePattern": "^_" }
-    ],
+    "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
     "no-unused-vars": "off"
   },
-  "ignorePatterns": [
-    ".next",
-    "node_modules",
-    "dist",
-    "build",
-    "coverage",
-    ".vercel",
-    "public"
-  ]
+  "ignorePatterns": [".next", "node_modules", "dist", "build", "coverage", ".vercel", "public"]
 }

@@ -7,7 +7,7 @@ export const useStories = () => {
   const stories = useLiveQuery(async () => {
     const userId = await storyService.getCurrentUserId();
     if (!userId) return [];
-    return await db.stories.where('userId').equals(userId).reverse().sortBy('createdAt');
+    return await db.stories.where("userId").equals(userId).reverse().sortBy("createdAt");
   });
 
   const query = useQuery<{ stories: LocalStory[] }>({

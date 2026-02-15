@@ -46,9 +46,7 @@ class ApiService {
           console.error(`[API] Server Error - ${status}: ${message}`);
         }
 
-        return Promise.reject(
-          new ApiError(message, status, error.response?.data),
-        );
+        return Promise.reject(new ApiError(message, status, error.response?.data));
       },
     );
   }
@@ -86,31 +84,27 @@ class ApiService {
     const fileList = Array.isArray(files) ? files : [files];
 
     const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-    const oversizedFiles = fileList.filter(file => file.size > MAX_FILE_SIZE);
+    const oversizedFiles = fileList.filter((file) => file.size > MAX_FILE_SIZE);
 
     if (oversizedFiles.length > 0) {
-      const names = oversizedFiles.map(f => f.name).join(", ");
+      const names = oversizedFiles.map((f) => f.name).join(", ");
       throw new Error(`File size limit exceeded (10MB). Too large: ${names}`);
     }
 
     fileList.forEach((file) => formData.append("file", file));
 
-    const response = await this.client.post<{ urls: string[] }>(
-      "/upload",
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
+    const response = await this.client.post<{ urls: string[] }>("/upload", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
       },
-    );
+    });
 
     return response.data.urls;
   }
 
   public async userExists(user: string) {
     try {
-      const res = await this.post("/auth/sign_in", { user }) as { user: User[]}
+      const res = (await this.post("/auth/sign_in", { user })) as { user: User[] };
       return res.user?.[0];
     } catch (err) {
       console.error("[API] userExists error:", err);
@@ -118,11 +112,7 @@ class ApiService {
     }
   }
 
-  public async registerUser(userData: {
-    email: string;
-    password: string;
-    name?: string;
-  }) {
+  public async registerUser(userData: { email: string; password: string; name?: string }) {
     try {
       const response = await this.client.post("/auth/register", {
         ...userData,

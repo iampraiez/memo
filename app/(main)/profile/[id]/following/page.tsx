@@ -27,7 +27,7 @@ export default function FollowingPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="flex min-h-[60vh] items-center justify-center">
         <Loader size="lg" />
       </div>
     );
@@ -36,11 +36,11 @@ export default function FollowingPage() {
   const following = data?.following || [];
 
   return (
-    <div className="max-w-400 mx-auto px-4 py-8">
+    <div className="mx-auto max-w-400 px-4 py-8">
       {/* Header */}
-      <div className="flex items-center space-x-4 mb-8">
+      <div className="mb-8 flex items-center space-x-4">
         <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-full">
-          <ArrowLeft className="w-5 h-5 text-neutral-600" />
+          <ArrowLeft className="h-5 w-5 text-neutral-600" />
         </Button>
         <h1 className="text-2xl font-bold text-neutral-900">Following</h1>
       </div>
@@ -48,36 +48,38 @@ export default function FollowingPage() {
       {/* List */}
       <div className="space-y-4">
         {following.length === 0 ? (
-          <div className="text-center py-20 bg-white rounded-[2rem] border border-neutral-100">
-            <User className="w-12 h-12 text-neutral-200 mx-auto mb-4" />
-            <p className="text-neutral-500 font-medium">Not following anyone yet</p>
+          <div className="rounded-[2rem] border border-neutral-100 bg-white py-20 text-center">
+            <User className="mx-auto mb-4 h-12 w-12 text-neutral-200" />
+            <p className="font-medium text-neutral-500">Not following anyone yet</p>
           </div>
         ) : (
           following.map((user) => (
-            <div 
-              key={user.id} 
-              className="flex items-center justify-between p-5 bg-white rounded-[2rem] border border-neutral-100 hover:shadow-lg hover:shadow-neutral-950/5 transition-all"
+            <div
+              key={user.id}
+              className="flex items-center justify-between rounded-[2rem] border border-neutral-100 bg-white p-5 transition-all hover:shadow-lg hover:shadow-neutral-950/5"
             >
-              <div 
-                className="flex items-center space-x-4 cursor-pointer"
+              <div
+                className="flex cursor-pointer items-center space-x-4"
                 onClick={() => router.push(`/profile/${user.username || user.id}`)}
               >
                 <div className="relative">
                   {user.image ? (
-                    <img 
-                      src={user.image} 
-                      alt={user.name || "User"} 
-                      className="w-12 h-12 rounded-full object-cover"
+                    <img
+                      src={user.image}
+                      alt={user.name || "User"}
+                      className="h-12 w-12 rounded-full object-cover"
                     />
                   ) : (
-                    <div className="w-12 h-12 rounded-full bg-primary-100 flex items-center justify-center">
-                      <User className="w-6 h-6 text-primary-600" />
+                    <div className="bg-primary-100 flex h-12 w-12 items-center justify-center rounded-full">
+                      <User className="text-primary-600 h-6 w-6" />
                     </div>
                   )}
                 </div>
                 <div>
                   <h3 className="font-bold text-neutral-900">{user.name || "Anonymous User"}</h3>
-                  <p className="text-sm text-neutral-500 font-medium">@{user.username || user.id.slice(0, 8)}</p>
+                  <p className="text-sm font-medium text-neutral-500">
+                    @{user.username || user.id.slice(0, 8)}
+                  </p>
                 </div>
               </div>
 
@@ -85,10 +87,10 @@ export default function FollowingPage() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="rounded-full px-4 font-bold text-xs h-9 text-destructive-600 hover:bg-destructive-50 hover:text-destructive-700"
+                  className="text-destructive-600 hover:bg-destructive-50 hover:text-destructive-700 h-9 rounded-full px-4 text-xs font-bold"
                   onClick={() => handleUnfollow(user.id)}
                 >
-                  <UserMinus className="w-4 h-4 mr-2" />
+                  <UserMinus className="mr-2 h-4 w-4" />
                   Unfollow
                 </Button>
               )}

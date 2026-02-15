@@ -31,29 +31,35 @@ export default function UserDropdown() {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center space-x-2 p-1.5 rounded-2xl hover:bg-neutral-50 transition-all border border-transparent hover:border-neutral-100"
+        className="flex items-center space-x-2 rounded-2xl border border-transparent p-1.5 transition-all hover:border-neutral-100 hover:bg-neutral-50"
       >
-        <div className="w-8 h-8 rounded-full bg-neutral-200 flex items-center justify-center text-neutral-600 font-bold overflow-hidden border border-white shadow-sm">
+        <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border border-white bg-neutral-200 font-bold text-neutral-600 shadow-sm">
           {session.user.image ? (
             <Image src={session.user.image} alt={session.user.name || ""} width={32} height={32} />
           ) : (
             <span>{session.user.name?.[0] || "U"}</span>
           )}
         </div>
-        <CaretDown className={cn("w-3 h-3 text-neutral-400 transition-transform duration-300", isOpen && "rotate-180")} weight="bold" />
+        <CaretDown
+          className={cn(
+            "h-3 w-3 text-neutral-400 transition-transform duration-300",
+            isOpen && "rotate-180",
+          )}
+          weight="bold"
+        />
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-soft-xl border border-neutral-100 py-2 z-50 animate-in fade-in zoom-in duration-200">
-          <div className="px-4 py-3 border-b border-neutral-50">
-            <p className="text-sm font-bold text-neutral-900 truncate">{session.user.name}</p>
-            <p className="text-xs text-neutral-500 truncate">{session.user.email}</p>
+        <div className="shadow-soft-xl animate-in fade-in zoom-in absolute right-0 z-50 mt-2 w-64 rounded-2xl border border-neutral-100 bg-white py-2 duration-200">
+          <div className="border-b border-neutral-50 px-4 py-3">
+            <p className="truncate text-sm font-bold text-neutral-900">{session.user.name}</p>
+            <p className="truncate text-xs text-neutral-500">{session.user.email}</p>
           </div>
-          
+
           <div className="py-1">
             <Link
               href={`/profile/${session.user.id}`}
-              className="flex items-center space-x-3 px-4 py-2 text-sm text-neutral-600 hover:bg-neutral-50 hover:text-primary-900 transition-colors"
+              className="hover:text-primary-900 flex items-center space-x-3 px-4 py-2 text-sm text-neutral-600 transition-colors hover:bg-neutral-50"
               onClick={() => setIsOpen(false)}
               onMouseEnter={() => {
                 queryClient.prefetchQuery({
@@ -62,12 +68,12 @@ export default function UserDropdown() {
                 });
               }}
             >
-              <User className="w-4 h-4" />
+              <User className="h-4 w-4" />
               <span>Your Profile</span>
             </Link>
             <Link
               href="/settings"
-              className="flex items-center space-x-3 px-4 py-2 text-sm text-neutral-600 hover:bg-neutral-50 hover:text-primary-900 transition-colors"
+              className="hover:text-primary-900 flex items-center space-x-3 px-4 py-2 text-sm text-neutral-600 transition-colors hover:bg-neutral-50"
               onClick={() => setIsOpen(false)}
               onMouseEnter={() => {
                 queryClient.prefetchQuery({
@@ -76,24 +82,24 @@ export default function UserDropdown() {
                 });
               }}
             >
-              <Gear className="w-4 h-4" />
+              <Gear className="h-4 w-4" />
               <span>Settings</span>
             </Link>
           </div>
 
-          <div className="pt-1 mt-1 border-t border-neutral-50">
+          <div className="mt-1 border-t border-neutral-50 pt-1">
             <button
               onClick={async () => {
                 setIsSigningOut(true);
                 await signOut({ callbackUrl: "/" });
               }}
               disabled={isSigningOut}
-              className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-destructive-600 hover:bg-destructive-50 transition-colors text-left disabled:opacity-50"
+              className="text-destructive-600 hover:bg-destructive-50 flex w-full items-center space-x-3 px-4 py-2 text-left text-sm transition-colors disabled:opacity-50"
             >
               {isSigningOut ? (
-                <Spinner className="w-4 h-4 animate-spin" />
+                <Spinner className="h-4 w-4 animate-spin" />
               ) : (
-                <SignOut className="w-4 h-4" />
+                <SignOut className="h-4 w-4" />
               )}
               <span>{isSigningOut ? "Signing Out..." : "Sign Out"}</span>
             </button>

@@ -14,7 +14,7 @@ export async function sendDailyReport(logger: Logger) {
 
   let report = "📊 <b>DAILY ERROR REPORT</b>\n";
   report += "━━━━━━━━━━━━━━━━━━━━\n\n";
-  
+
   stats.sort((a, b) => b.count - a.count);
 
   for (const s of stats) {
@@ -25,7 +25,7 @@ export async function sendDailyReport(logger: Logger) {
 
   const telegram = new TelegramTransport();
   await telegram.sendMessage(report);
-  
+
   // Clear tracker after report
   logger.tracker.clear();
   return `Report with ${stats.length} errors sent to Telegram`;

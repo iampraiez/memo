@@ -5,10 +5,7 @@ import { reactions, memories, notifications } from "@/drizzle/db/schema";
 import { and, eq } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 
-export async function GET(
-  req: Request,
-  props: { params: Promise<{ id: string }> }
-) {
+export async function GET(req: Request, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   const session = await auth();
   const memoryId = params.id;
@@ -32,10 +29,7 @@ export async function GET(
   }
 }
 
-export async function POST(
-  req: Request,
-  props: { params: Promise<{ id: string }> }
-) {
+export async function POST(req: Request, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   const session = await auth();
   const memoryId = params.id;
@@ -50,10 +44,7 @@ export async function POST(
 
     // Check if user already reacted
     const existingReaction = await db.query.reactions.findFirst({
-      where: and(
-        eq(reactions.memoryId, memoryId),
-        eq(reactions.userId, userId)
-      ),
+      where: and(eq(reactions.memoryId, memoryId), eq(reactions.userId, userId)),
     });
 
     if (existingReaction) {
@@ -62,9 +53,7 @@ export async function POST(
         await db.delete(reactions).where(eq(reactions.id, existingReaction.id));
         return NextResponse.json({ action: "removed" });
       } else {
-        await db.update(reactions)
-          .set({ type })
-          .where(eq(reactions.id, existingReaction.id));
+        await db.update(reactions).set({ type }).where(eq(reactions.id, existingReaction.id));
         return NextResponse.json({ action: "updated", reaction: { ...existingReaction, type } });
       }
     }
@@ -82,16 +71,16 @@ export async function POST(
     // Notification trigger
     const memory = await db.query.memories.findFirst({
       where: eq(memories.id, memoryId),
-      columns: { userId: true, title: true }
+      columns: { userId: true, title: true },
     });
 
     if (memory && memory.userId !== userId) {
       await db.insert(notifications).values({
         id: uuidv4(),
         userId: memory.userId,
-        type: 'reaction',
-        title: 'New Reaction',
-        message: `${session.user.name || 'Someone'} reacted to your memory "${memory.title}"`,
+        type: "reaction",
+        title: "New Reaction",
+        message: `${session.user.name || "Someone"} reacted to your memory "${memory.title}"`,
         relatedId: memoryId,
         read: false,
       });

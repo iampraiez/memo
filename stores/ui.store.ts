@@ -45,5 +45,5 @@ export const useUIStore = create<UIState>()(
     // Loading
     isLoading: false,
     setLoading: (loading) => set({ isLoading: loading }),
-  }))
+  })),
 );

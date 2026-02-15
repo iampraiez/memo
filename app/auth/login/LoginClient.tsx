@@ -26,7 +26,7 @@ export default function LoginClient() {
     if (searchParams.get("verified") === "true") {
       toast.success("Email verified successfully! You can now sign in.");
       // Clear the session storage or URL to avoid showing the toast twice if needed
-      // router.replace("/auth/login", { scroll: false }); 
+      // router.replace("/auth/login", { scroll: false });
     }
   }, [searchParams]);
 
@@ -68,7 +68,7 @@ export default function LoginClient() {
         // Handle specific error cases
         if (errorCode === "EMAIL_NOT_VERIFIED") {
           toast.info("Email not verified. Resending verification code...");
-          
+
           try {
             await fetch("/api/auth/resend-code", {
               method: "POST",
@@ -77,20 +77,19 @@ export default function LoginClient() {
             });
             router.push(`/auth/verify?email=${encodeURIComponent(email)}`);
           } catch {
-            toast.error(
-              "Failed to resend code. Please try again from the verification page.",
-            );
+            toast.error("Failed to resend code. Please try again from the verification page.");
             router.push(`/auth/verify?email=${encodeURIComponent(email)}`);
           }
           return;
         }
 
         const errorMap: Record<string, string> = {
-          "INVALID_CREDENTIALS": "Invalid email or password. Please try again.",
-          "CredentialsSignin": "Invalid credentials. Please try again.",
-          "OAuthAccountNotLinked": "An account with this email already exists. Please sign in with your original method.",
-          "GOOGLE_AUTH_FAILED": "Google authentication failed. Please try again.",
-          "Configuration": "Invalid credentials. Please try again.",
+          INVALID_CREDENTIALS: "Invalid email or password. Please try again.",
+          CredentialsSignin: "Invalid credentials. Please try again.",
+          OAuthAccountNotLinked:
+            "An account with this email already exists. Please sign in with your original method.",
+          GOOGLE_AUTH_FAILED: "Google authentication failed. Please try again.",
+          Configuration: "Invalid credentials. Please try again.",
         };
 
         toast.error(errorMap[errorCode as string] || "An error occurred during sign-in.");
@@ -104,7 +103,7 @@ export default function LoginClient() {
           router.push("/timeline");
         }
       }
-    } catch{
+    } catch {
       toast.error("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
@@ -117,28 +116,24 @@ export default function LoginClient() {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-primary-50 via-white to-secondary-50 flex items-center justify-center px-4">
+    <div className="from-primary-50 to-secondary-50 flex min-h-screen items-center justify-center bg-linear-to-br via-white px-4">
       <div className="w-full max-w-md space-y-8">
-        <div className="text-center space-y-3">
+        <div className="space-y-3 text-center">
           <Link href="/" className="inline-block">
-            <div className="w-12 h-12 bg-primary-900 rounded-xl flex items-center justify-center mx-auto shadow-lg">
-              <span className="text-white font-serif font-bold text-xl">M</span>
+            <div className="bg-primary-900 mx-auto flex h-12 w-12 items-center justify-center rounded-xl shadow-lg">
+              <span className="font-serif text-xl font-bold text-white">M</span>
             </div>
           </Link>
-          <h1 className="text-3xl font-display font-bold text-neutral-900">
-            Welcome Back
-          </h1>
+          <h1 className="font-display text-3xl font-bold text-neutral-900">Welcome Back</h1>
           <p className="text-neutral-600">Sign in to continue your journey</p>
         </div>
 
-        <Card className="p-8 space-y-6">
+        <Card className="space-y-6 p-8">
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-neutral-700">
-                Email
-              </label>
+              <label className="text-sm font-medium text-neutral-700">Email</label>
               <div className="relative">
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400">
+                <div className="absolute top-1/2 left-3 -translate-y-1/2 text-neutral-400">
                   <EnvelopeSimple size={20} />
                 </div>
                 <input
@@ -148,25 +143,23 @@ export default function LoginClient() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
                   autoComplete="email"
-                  className="w-full pl-10 pr-4 py-3 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                  className="focus:ring-primary-500 w-full rounded-lg border border-neutral-200 py-3 pr-4 pl-10 transition-all focus:border-transparent focus:ring-2 focus:outline-none"
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <label className="text-sm font-medium text-neutral-700">
-                  Password
-                </label>
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium text-neutral-700">Password</label>
                 <Link
                   href="/auth/forgot-password"
-                  className="text-sm text-primary-600 hover:text-primary-700 font-medium"
+                  className="text-primary-600 hover:text-primary-700 text-sm font-medium"
                 >
                   Forgot?
                 </Link>
               </div>
               <div className="relative">
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400">
+                <div className="absolute top-1/2 left-3 -translate-y-1/2 text-neutral-400">
                   <Lock size={20} />
                 </div>
                 <input
@@ -177,12 +170,12 @@ export default function LoginClient() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   autoComplete="current-password"
-                  className="w-full pl-10 pr-12 py-3 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                  className="focus:ring-primary-500 w-full rounded-lg border border-neutral-200 py-3 pr-12 pl-10 transition-all focus:border-transparent focus:ring-2 focus:outline-none"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 focus:outline-none"
+                  className="absolute top-1/2 right-3 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 focus:outline-none"
                 >
                   {showPassword ? <EyeSlash size={20} /> : <Eye size={20} />}
                 </button>
@@ -193,10 +186,14 @@ export default function LoginClient() {
               type="submit"
               size="lg"
               loading={loading}
-              className="w-full mt-6 bg-primary-900 text-white font-bold hover:bg-black transition-all group"
+              className="bg-primary-900 group mt-6 w-full font-bold text-white transition-all hover:bg-black"
             >
               Sign In
-              <ArrowRight weight="duotone" size={20} className="ml-2 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight
+                weight="duotone"
+                size={20}
+                className="ml-2 transition-transform group-hover:translate-x-1"
+              />
             </Button>
           </form>
 
@@ -205,9 +202,7 @@ export default function LoginClient() {
               <div className="w-full border-t border-neutral-200" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-white text-neutral-500">
-                Or continue with
-              </span>
+              <span className="bg-white px-4 text-neutral-500">Or continue with</span>
             </div>
           </div>
 
@@ -215,7 +210,7 @@ export default function LoginClient() {
             variant="secondary"
             loading={loadingGoogle}
             onClick={handleGoogleSignIn}
-            className="w-full h-12 space-x-3"
+            className="h-12 w-full space-x-3"
           >
             <GoogleLogo size={20} weight="bold" className="text-neutral-700" />
             <span className="font-medium text-neutral-700">Google</span>

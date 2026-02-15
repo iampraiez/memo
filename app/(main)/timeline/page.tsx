@@ -4,7 +4,7 @@ import TimelineClient from "./TimelineClient";
 import { getTimelineMemories } from "@/lib/timeline-ssr";
 
 async function TimelineContent() {
-  const initialMemories = await getTimelineMemories() || [];
+  const initialMemories = (await getTimelineMemories()) || [];
   return <TimelineClient initialMemories={initialMemories} />;
 }
 

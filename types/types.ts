@@ -27,14 +27,7 @@ export interface Memory {
   content: string;
   summary?: string | null;
   date: string;
-  mood?:
-    | "joyful"
-    | "peaceful"
-    | "excited"
-    | "nostalgic"
-    | "grateful"
-    | "reflective"
-    | null;
+  mood?: "joyful" | "peaceful" | "excited" | "nostalgic" | "grateful" | "reflective" | null;
   tags?: string[];
   images?: string[];
   location?: string | null;
@@ -55,52 +48,52 @@ export interface Memory {
   commentCount?: number;
 }
 
-export interface Timeline  {
-    date: Date;
+export interface Timeline {
+  date: Date;
+  id: string;
+  createdAt: Date;
+  updatedAt: Date;
+  userId: string;
+  title: string;
+  content: string;
+  summary: string | null;
+  location: string | null;
+  mood: string | null;
+  isPublic: boolean;
+  isAiGenerated: boolean;
+  syncStatus: string;
+  user: {
     id: string;
+    email: string;
+    name: string | null;
+    password: string | null;
+    image: string | null;
+    bio: string | null;
+    username: string | null;
+    isOnboarded: boolean;
     createdAt: Date;
     updatedAt: Date;
-    userId: string;
-    title: string;
-    content: string;
-    summary: string | null;
-    location: string | null;
-    mood: string | null;
-    isPublic: boolean;
-    isAiGenerated: boolean;
-    syncStatus: string;
-    user: {
-        id: string;
-        email: string;
-        name: string | null;
-        password: string | null;
-        image: string | null;
-        bio: string | null;
-        username: string | null;
-        isOnboarded: boolean;
-        createdAt: Date;
-        updatedAt: Date;
-        emailVerified: Date | null;
+    emailVerified: Date | null;
+  };
+  memoryMedia: {
+    id: string;
+    type: string;
+    memoryId: string;
+    url: string;
+    filename: string;
+    size: number | null;
+    metadata: unknown;
+    storageProvider: string;
+    storageKey: string | null;
+  }[];
+  memoryTags: {
+    tag: {
+      name: string;
+      color: string;
     };
-    memoryMedia: {
-        id: string;
-        type: string;
-        memoryId: string;
-        url: string;
-        filename: string;
-        size: number | null;
-        metadata: unknown;
-        storageProvider: string;
-        storageKey: string | null;
-    }[];
-    memoryTags: {
-        tag: {
-            name: string;
-            color: string;
-        }
-    }[];
-    reactions: Reaction[];
-    comments: Comment[];
+  }[];
+  reactions: Reaction[];
+  comments: Comment[];
 }
 
 export interface User {
@@ -180,10 +173,10 @@ export interface Follow {
 
 export class HttpError extends Error {
   statusCode: number;
-  
+
   constructor(message: string, statusCode: number) {
     super(message);
     this.statusCode = statusCode;
-    this.name = 'HttpError';
+    this.name = "HttpError";
   }
 }

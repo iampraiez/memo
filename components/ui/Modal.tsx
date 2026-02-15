@@ -9,6 +9,7 @@ interface ModalProps {
   title?: string;
   children: React.ReactNode;
   size?: "sm" | "md" | "lg" | "xl" | "full";
+  closeOnOverlayClick?: boolean;
 }
 
 const Modal: React.FC<ModalProps> = ({
@@ -17,6 +18,7 @@ const Modal: React.FC<ModalProps> = ({
   title,
   children,
   size = "md",
+  closeOnOverlayClick = true,
 }) => {
   useEffect(() => {
     if (isOpen) {
@@ -46,29 +48,27 @@ const Modal: React.FC<ModalProps> = ({
         {/* Backdrop */}
         <div
           className="fixed inset-0 bg-black/50 transition-opacity"
-          onClick={onClose}
+          onClick={() => closeOnOverlayClick && onClose()}
         />
 
         {/* Modal */}
         <div
           className={cn(
-            "relative bg-white rounded-2xl shadow-soft-xl w-full animate-scale-in",
+            "shadow-soft-xl animate-scale-in relative w-full rounded-2xl bg-white",
             sizeStyles[size],
           )}
         >
           {/* Header */}
           {title && (
-            <div className="flex items-center justify-between p-6 border-b border-neutral-200">
-              <h2 className="text-xl font-semibold text-neutral-900">
-                {title}
-              </h2>
+            <div className="flex items-center justify-between border-b border-neutral-200 p-6">
+              <h2 className="text-xl font-semibold text-neutral-900">{title}</h2>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={onClose}
                 className="text-neutral-400 hover:text-neutral-600"
               >
-                <X className="w-5 h-5" />
+                <X className="h-5 w-5" />
               </Button>
             </div>
           )}

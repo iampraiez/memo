@@ -1,4 +1,4 @@
-import { ReactNode} from "react";
+import { ReactNode } from "react";
 import type { Metadata } from "next";
 import { auth } from "@/lib/auth";
 import { Inter, Playfair_Display } from "next/font/google";
@@ -7,21 +7,22 @@ import { Providers } from "./providers";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { Toaster } from "sonner";
 
-const inter = Inter({ 
+const inter = Inter({
   subsets: ["latin"],
-  display: 'swap',
-  variable: '--font-sans',
+  display: "swap",
+  variable: "--font-sans",
 });
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
-  display: 'swap',
-  variable: '--font-display',
+  display: "swap",
+  variable: "--font-display",
 });
 
 export const metadata: Metadata = {
   title: "Memory Lane - Your Personal Timeline",
-  description: "Capture, organize, and rediscover your most precious memories with AI-powered insights",
+  description:
+    "Capture, organize, and rediscover your most precious memories with AI-powered insights",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -32,7 +33,8 @@ export const metadata: Metadata = {
   keywords: ["memory", "timeline", "AI", "personal history", "family memories"],
   openGraph: {
     title: "Memory Lane - Your Personal Timeline",
-    description: "Capture, organize, and rediscover your most precious memories with AI-powered insights",
+    description:
+      "Capture, organize, and rediscover your most precious memories with AI-powered insights",
     type: "website",
   },
 };
@@ -43,16 +45,14 @@ export function generateViewport() {
   };
 }
 
-export default async function RootLayout({
-  children,
-}: {
-  children: ReactNode;
-}) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
   const session = await auth();
 
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${playfair.variable} ${inter.className} antialiased selection:bg-primary-100 selection:text-primary-900`}>
+      <body
+        className={`${inter.variable} ${playfair.variable} ${inter.className} selection:bg-primary-100 selection:text-primary-900 antialiased`}
+      >
         <ErrorBoundary>
           <Providers session={session}>
             {children}

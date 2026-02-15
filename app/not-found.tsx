@@ -5,51 +5,49 @@ import { useRouter } from "next/navigation";
 
 export default function NotFound() {
   const router = useRouter();
-  
+
   return (
-    <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-4">
-      <div className="max-w-md w-full text-center space-y-8 animate-fade-in">
+    <div className="flex min-h-screen items-center justify-center bg-neutral-50 p-4">
+      <div className="animate-fade-in w-full max-w-md space-y-8 text-center">
         {/* Graphic */}
-        <div className="relative mx-auto w-48 h-48">
-          <div className="absolute inset-0 bg-primary-100/50 rounded-full blur-3xl animate-pulse" />
-          <div className="relative bg-white rounded-[2rem] shadow-xl p-8 border border-neutral-100 rotate-6 hover:rotate-0 transition-transform duration-500">
-            <span className="text-8xl font-display font-bold bg-gradient-to-br from-primary-600 to-secondary-600 bg-clip-text text-transparent">
+        <div className="relative mx-auto h-48 w-48">
+          <div className="bg-primary-100/50 absolute inset-0 animate-pulse rounded-full blur-3xl" />
+          <div className="relative rotate-6 rounded-[2rem] border border-neutral-100 bg-white p-8 shadow-xl transition-transform duration-500 hover:rotate-0">
+            <span className="font-display from-primary-600 to-secondary-600 bg-gradient-to-br bg-clip-text text-8xl font-bold text-transparent">
               404
             </span>
           </div>
-          <div className="absolute -bottom-4 -right-4 bg-secondary-400 text-primary-900 rounded-xl p-3 shadow-lg -rotate-12">
+          <div className="bg-secondary-400 text-primary-900 absolute -right-4 -bottom-4 -rotate-12 rounded-xl p-3 shadow-lg">
             <span className="text-2xl">🤔</span>
           </div>
         </div>
 
         {/* Text */}
         <div className="space-y-4">
-          <h1 className="text-3xl font-display font-bold text-neutral-900">
-            Page Not Found
-          </h1>
-          <p className="text-neutral-500 text-lg leading-relaxed">
+          <h1 className="font-display text-3xl font-bold text-neutral-900">Page Not Found</h1>
+          <p className="text-lg leading-relaxed text-neutral-500">
             The memory you are looking for seems to have faded away or never existed.
           </p>
         </div>
 
         {/* Actions */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-          <Button 
-            size="lg" 
-            onClick={() => router.push('/timeline')} 
-            className="w-full sm:w-auto rounded-full shadow-lg shadow-primary-900/10"
+        <div className="flex flex-col items-center justify-center gap-4 pt-4 sm:flex-row">
+          <Button
+            size="lg"
+            onClick={() => router.push("/timeline")}
+            className="shadow-primary-900/10 w-full rounded-full shadow-lg sm:w-auto"
           >
-            <House className="w-4 h-4 mr-2" />
+            <House className="mr-2 h-4 w-4" />
             Return Home
           </Button>
-          
-          <Button 
-            variant="ghost" 
-            size="lg" 
-            onClick={() => router.back()} 
-            className="w-full sm:w-auto rounded-full"
+
+          <Button
+            variant="ghost"
+            size="lg"
+            onClick={() => router.back()}
+            className="w-full rounded-full sm:w-auto"
           >
-            <ArrowLeft className="w-4 h-4 mr-2" />
+            <ArrowLeft className="mr-2 h-4 w-4" />
             Go Back
           </Button>
         </div>

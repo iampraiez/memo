@@ -31,10 +31,7 @@ export async function POST(req: Request) {
 
     // Check if email is already verified
     if (user.emailVerified) {
-      return NextResponse.json(
-        { message: "Email is already verified" },
-        { status: 400 },
-      );
+      return NextResponse.json({ message: "Email is already verified" }, { status: 400 });
     }
 
     // Generate new verification code
@@ -42,9 +39,7 @@ export async function POST(req: Request) {
     const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
 
     // Delete any existing tokens for this email
-    await db
-      .delete(verificationTokens)
-      .where(eq(verificationTokens.identifier, email));
+    await db.delete(verificationTokens).where(eq(verificationTokens.identifier, email));
 
     // Insert new verification token
     await db.insert(verificationTokens).values({
@@ -68,21 +63,12 @@ export async function POST(req: Request) {
 
     logger.info(`Verification code resent to: ${email}`);
 
-    return NextResponse.json(
-      { message: "Verification code sent to your email" },
-      { status: 200 },
-    );
+    return NextResponse.json({ message: "Verification code sent to your email" }, { status: 200 });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { message: "Invalid input", errors: error.issues },
-        { status: 400 },
-      );
+      return NextResponse.json({ message: "Invalid input", errors: error.issues }, { status: 400 });
     }
     logger.error("Resend code error:", error);
-    return NextResponse.json(
-      { message: "Internal Server Error" },
-      { status: 500 },
-    );
+    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }
 }

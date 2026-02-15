@@ -8,7 +8,7 @@ import {
   PolarAngleAxis,
   PolarRadiusAxis,
   ResponsiveContainer,
-  Tooltip
+  Tooltip,
 } from "recharts";
 
 interface WeeklyPatternChartProps {
@@ -22,7 +22,7 @@ export default function WeeklyPatternChart({ data }: WeeklyPatternChartProps) {
         <RadarChart cx="50%" cy="50%" outerRadius="80%" data={data}>
           <PolarGrid stroke="#E5E7EB" />
           <PolarAngleAxis dataKey="day" tick={{ fill: "#6B7280", fontSize: 12 }} />
-          <PolarRadiusAxis angle={30} domain={[0, 'auto']} tick={false} axisLine={false} />
+          <PolarRadiusAxis angle={30} domain={[0, "auto"]} tick={false} axisLine={false} />
           <Radar
             name="Memories"
             dataKey="memories"

@@ -1,52 +1,52 @@
 # Auto-label PRs based on changed files
 
 # Frontend
-'frontend':
-  - 'app/**/*'
-  - 'components/**/*'
-  - '*.css'
-  - 'tailwind.config.js'
+"frontend":
+  - "app/**/*"
+  - "components/**/*"
+  - "*.css"
+  - "tailwind.config.js"
 
 # Backend/API
-'backend':
-  - 'app/api/**/*'
-  - 'lib/**/*'
-  - 'services/**/*'
+"backend":
+  - "app/api/**/*"
+  - "lib/**/*"
+  - "services/**/*"
 
 # Database
-'database':
-  - 'drizzle/**/*'
-  - 'drizzle.config.ts'
+"database":
+  - "drizzle/**/*"
+  - "drizzle.config.ts"
 
 # Authentication
-'auth':
-  - 'lib/auth.ts'
-  - 'lib/auth.config.ts'
-  - 'app/api/auth/**/*'
-  - 'app/auth/**/*'
+"auth":
+  - "lib/auth.ts"
+  - "lib/auth.config.ts"
+  - "app/api/auth/**/*"
+  - "app/auth/**/*"
 
 # Configuration
-'config':
-  - '*.config.*'
-  - '.env*'
-  - 'config/**/*'
+"config":
+  - "*.config.*"
+  - ".env*"
+  - "config/**/*"
 
 # Documentation
-'documentation':
-  - '*.md'
-  - 'docs/**/*'
+"documentation":
+  - "*.md"
+  - "docs/**/*"
 
 # Dependencies
-'dependencies':
-  - 'package.json'
-  - 'pnpm-lock.yaml'
+"dependencies":
+  - "package.json"
+  - "pnpm-lock.yaml"
 
 # CI/CD
-'ci/cd':
-  - '.github/**/*'
+"ci/cd":
+  - ".github/**/*"
 
 # Tests
-'tests':
-  - '**/*.test.*'
-  - '**/*.spec.*'
-  - '__tests__/**/*'
+"tests":
+  - "**/*.test.*"
+  - "**/*.spec.*"
+  - "__tests__/**/*"

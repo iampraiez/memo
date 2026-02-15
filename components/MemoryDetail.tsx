@@ -23,11 +23,11 @@ interface MemoryDetailProps {
   onShareMemory?: (memory: Memory) => void;
 }
 
-export default function MemoryDetail({ 
-  memoryId, 
-  onBack, 
-  onEdit, 
-  onShareMemory 
+export default function MemoryDetail({
+  memoryId,
+  onBack,
+  onEdit,
+  onShareMemory,
 }: MemoryDetailProps) {
   const router = useRouter();
   const { data, isLoading, error } = useMemory(memoryId);
@@ -46,17 +46,19 @@ export default function MemoryDetail({
 
   if (isLoading) {
     return (
-      <div className="min-h-[400px] flex items-center justify-center">
-        <ArrowsClockwise className="w-8 h-8 text-primary-600 animate-spin" />
+      <div className="flex min-h-[400px] items-center justify-center">
+        <ArrowsClockwise className="text-primary-600 h-8 w-8 animate-spin" />
       </div>
     );
   }
 
   if (error || !memory) {
     return (
-      <div className="max-w-md mx-auto py-20 text-center">
-        <p className="text-destructive-600 font-medium text-lg">Memory not found</p>
-        <Button onClick={() => onBack ? onBack() : router.back()} className="mt-6">Go Back</Button>
+      <div className="mx-auto max-w-md py-20 text-center">
+        <p className="text-destructive-600 text-lg font-medium">Memory not found</p>
+        <Button onClick={() => (onBack ? onBack() : router.back())} className="mt-6">
+          Go Back
+        </Button>
       </div>
     );
   }
@@ -70,22 +72,32 @@ export default function MemoryDetail({
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-8">
+    <div className="mx-auto max-w-4xl space-y-8 p-6">
       <div className="flex items-center justify-between">
         <Button variant="ghost" onClick={handleBack} className="group">
-          <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
+          <ArrowLeft className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" />
           Back
         </Button>
         <div className="flex items-center space-x-3">
           {onEdit && (
-            <Button variant="secondary" size="sm" className="rounded-full" onClick={() => onEdit(memory)}>
-              <PencilSimple className="w-4 h-4 mr-2" />
+            <Button
+              variant="secondary"
+              size="sm"
+              className="rounded-full"
+              onClick={() => onEdit(memory)}
+            >
+              <PencilSimple className="mr-2 h-4 w-4" />
               Edit
             </Button>
           )}
           {onShareMemory && (
-            <Button variant="secondary" size="sm" className="rounded-full" onClick={() => onShareMemory(memory)}>
-              <ShareNetwork className="w-4 h-4 mr-2" />
+            <Button
+              variant="secondary"
+              size="sm"
+              className="rounded-full"
+              onClick={() => onShareMemory(memory)}
+            >
+              <ShareNetwork className="mr-2 h-4 w-4" />
               Share
             </Button>
           )}
@@ -94,74 +106,84 @@ export default function MemoryDetail({
 
       <div className="space-y-8">
         <header className="space-y-4">
-          <h1 className="text-4xl font-display font-bold text-neutral-900 tracking-tight leading-tight">
+          <h1 className="font-display text-4xl leading-tight font-bold tracking-tight text-neutral-900">
             {memory.title}
           </h1>
-          <div className="flex flex-wrap items-center gap-6 text-sm font-medium text-neutral-500 uppercase tracking-widest">
+          <div className="flex flex-wrap items-center gap-6 text-sm font-medium tracking-widest text-neutral-500 uppercase">
             <div className="flex items-center">
-              <Calendar className="w-4 h-4 mr-2" />
+              <Calendar className="mr-2 h-4 w-4" />
               {new Date(memory.date).toLocaleDateString(undefined, {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
+                year: "numeric",
+                month: "long",
+                day: "numeric",
               })}
             </div>
             {memory.location && (
               <div className="flex items-center">
-                <MapPin className="w-4 h-4 mr-2" />
+                <MapPin className="mr-2 h-4 w-4" />
                 {memory.location}
               </div>
             )}
-             {memory.mood && (
-               <span className={`px-3 py-1 rounded-full text-[10px] font-bold border ${moodColors[memory.mood as keyof typeof moodColors] || ""}`}>
-                 {memory.mood}
-               </span>
-             )}
+            {memory.mood && (
+              <span
+                className={`rounded-full border px-3 py-1 text-[10px] font-bold ${moodColors[memory.mood as keyof typeof moodColors] || ""}`}
+              >
+                {memory.mood}
+              </span>
+            )}
           </div>
         </header>
 
         {memory.images && memory.images.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-             {memory.images.map((img, idx) => (
-               <div 
-                key={idx} 
-                className="relative aspect-video rounded-3xl overflow-hidden shadow-2xl ring-1 ring-black/5 group cursor-zoom-in"
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            {memory.images.map((img, idx) => (
+              <div
+                key={idx}
+                className="group relative aspect-video cursor-zoom-in overflow-hidden rounded-3xl shadow-2xl ring-1 ring-black/5"
                 onClick={() => {
                   setLightboxIndex(idx);
                   setLightboxOpen(true);
                 }}
-               >
-                 <Image src={img} alt={memory.title} fill className="object-cover group-hover:scale-105 transition-transform duration-700" />
-               </div>
-             ))}
+              >
+                <Image
+                  src={img}
+                  alt={memory.title}
+                  fill
+                  className="object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+              </div>
+            ))}
           </div>
         )}
 
         <article className="prose prose-neutral max-w-none">
-          <p className="text-xl text-neutral-800 leading-relaxed font-light whitespace-pre-wrap">
+          <p className="text-xl leading-relaxed font-light whitespace-pre-wrap text-neutral-800">
             {memory.content}
           </p>
         </article>
 
         {memory.summary && (
-          <section className="bg-primary-900 rounded-3xl p-8 text-white relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-secondary-400/10 rounded-full blur-3xl -mr-16 -mt-16" />
-            <h3 className="text-secondary-400 font-display font-bold text-xl mb-4 italic">The Reflection</h3>
-            <p className="text-lg text-primary-50 font-light leading-relaxed">
-              {memory.summary}
-            </p>
+          <section className="bg-primary-900 relative overflow-hidden rounded-3xl p-8 text-white">
+            <div className="bg-secondary-400/10 absolute top-0 right-0 -mt-16 -mr-16 h-32 w-32 rounded-full blur-3xl" />
+            <h3 className="text-secondary-400 font-display mb-4 text-xl font-bold italic">
+              The Reflection
+            </h3>
+            <p className="text-primary-50 text-lg leading-relaxed font-light">{memory.summary}</p>
           </section>
         )}
 
         {memory.tags && memory.tags.length > 0 && (
-          <div className="pt-8 border-t border-neutral-100">
-             <div className="flex flex-wrap gap-2">
-               {memory.tags.map(tag => (
-                 <Tag key={tag} className="hover:bg-primary-50 transition-colors uppercase tracking-widest text-[10px]">
-                   {tag}
-                 </Tag>
-               ))}
-             </div>
+          <div className="border-t border-neutral-100 pt-8">
+            <div className="flex flex-wrap gap-2">
+              {memory.tags.map((tag) => (
+                <Tag
+                  key={tag}
+                  className="hover:bg-primary-50 text-[10px] tracking-widest uppercase transition-colors"
+                >
+                  {tag}
+                </Tag>
+              ))}
+            </div>
           </div>
         )}
       </div>

@@ -1,9 +1,9 @@
 "use client";
 
-import React from 'react';
-import { Sparkle } from '@phosphor-icons/react';
-import Button from './Button';
-import { cn } from '@/lib/utils';
+import React from "react";
+import { Sparkle } from "@phosphor-icons/react";
+import Button from "./Button";
+import { cn } from "@/lib/utils";
 
 interface EmptyStateProps {
   icon?: React.ReactNode;
@@ -23,28 +23,26 @@ export default function EmptyState({
   className,
 }: EmptyStateProps) {
   return (
-    <div className={cn(
-      "flex flex-col items-center justify-center min-h-[460px] p-8 text-center animate-fade-in",
-      className
-    )}>
+    <div
+      className={cn(
+        "animate-fade-in flex min-h-[460px] flex-col items-center justify-center p-8 text-center",
+        className,
+      )}
+    >
       {/* Premium Graphic Element */}
       <div className="relative mb-10">
-        <div className="absolute inset-0 bg-primary-100/50 rounded-full blur-3xl scale-150 animate-pulse" />
-        <div className="relative w-24 h-24 bg-gradient-to-br from-primary-900 to-primary-700 rounded-3xl flex items-center justify-center shadow-2xl rotate-3">
-          {icon || <Sparkle className="w-12 h-12 text-white" weight="duotone" />}
+        <div className="bg-primary-100/50 absolute inset-0 scale-150 animate-pulse rounded-full blur-3xl" />
+        <div className="from-primary-900 to-primary-700 relative flex h-24 w-24 rotate-3 items-center justify-center rounded-3xl bg-gradient-to-br shadow-2xl">
+          {icon || <Sparkle className="h-12 w-12 text-white" weight="duotone" />}
         </div>
-        <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-secondary-400 rounded-xl flex items-center justify-center shadow-lg -rotate-12">
-          <Sparkle className="w-5 h-5 text-primary-900" weight="fill" />
+        <div className="bg-secondary-400 absolute -right-2 -bottom-2 flex h-10 w-10 -rotate-12 items-center justify-center rounded-xl shadow-lg">
+          <Sparkle className="text-primary-900 h-5 w-5" weight="fill" />
         </div>
       </div>
-      
+
       <div className="max-w-md space-y-4">
-        <h3 className="text-3xl font-display font-bold text-neutral-900 tracking-tight">
-          {title}
-        </h3>
-        <p className="text-lg text-neutral-500 font-light leading-relaxed">
-          {description}
-        </p>
+        <h3 className="font-display text-3xl font-bold tracking-tight text-neutral-900">{title}</h3>
+        <p className="text-lg leading-relaxed font-light text-neutral-500">{description}</p>
       </div>
 
       {actionLabel && onAction && (
@@ -52,7 +50,7 @@ export default function EmptyState({
           <Button
             size="lg"
             onClick={onAction}
-            className="rounded-full px-8 py-6 shadow-xl shadow-primary-900/10 hover:scale-105 transition-all duration-300"
+            className="shadow-primary-900/10 rounded-full px-8 py-6 shadow-xl transition-all duration-300 hover:scale-105"
           >
             {actionLabel}
           </Button>

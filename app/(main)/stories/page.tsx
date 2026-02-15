@@ -27,14 +27,16 @@ interface StorySettings {
 export default function StoriesPage() {
   const [settings, setSettings] = useState<StorySettings>({
     dateRange: {
-      start: new Date(new Date().setFullYear(new Date().getFullYear() - 1)).toISOString().split('T')[0],
-      end: new Date().toISOString().split('T')[0],
+      start: new Date(new Date().setFullYear(new Date().getFullYear() - 1))
+        .toISOString()
+        .split("T")[0],
+      end: new Date().toISOString().split("T")[0],
     },
     tone: "reflective",
     length: "medium",
     includeimages: true,
   });
-  
+
   const [generatedStory, setGeneratedStory] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
   const [fileName, setFileName] = useState("my_story");
@@ -57,7 +59,7 @@ export default function StoriesPage() {
     try {
       setProgress(10);
       const interval = setInterval(() => {
-        setProgress(prev => (prev >= 90 ? prev : prev + 5));
+        setProgress((prev) => (prev >= 90 ? prev : prev + 5));
       }, 500);
 
       const result = await createStoryMutation.mutateAsync({
@@ -85,9 +87,9 @@ export default function StoriesPage() {
 
     if (format === "pdf") {
       const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-      const paragraphs = generatedStory.split("\n").filter(l => l.trim() !== "");
+      const paragraphs = generatedStory.split("\n").filter((l) => l.trim() !== "");
       let yPosition = 40;
-      paragraphs.forEach(para => {
+      paragraphs.forEach((para) => {
         doc.text(para, 20, yPosition);
         yPosition += 10;
       });
@@ -107,17 +109,19 @@ export default function StoriesPage() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6 p-6">
+    <div className="mx-auto max-w-6xl space-y-6 p-6">
       <div>
-        <h1 className="text-3xl font-display font-bold text-neutral-900">AI Story Generator</h1>
-        <p className="text-neutral-600 mt-1">Create beautiful stories from your memories using AI</p>
+        <h1 className="font-display text-3xl font-bold text-neutral-900">AI Story Generator</h1>
+        <p className="mt-1 text-neutral-600">
+          Create beautiful stories from your memories using AI
+        </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="lg:col-span-1">
           <Card className="space-y-6">
             <div className="flex items-center space-x-2">
-              <MagicWand className="w-5 h-5 text-primary-600" />
+              <MagicWand className="text-primary-600 h-5 w-5" />
               <h2 className="text-lg font-semibold text-neutral-900">Story Settings</h2>
             </div>
 
@@ -127,11 +131,21 @@ export default function StoriesPage() {
                 <div className="grid grid-cols-2 gap-3">
                   <DatePicker
                     value={settings.dateRange.start}
-                    onChange={(date) => setSettings(prev => ({ ...prev, dateRange: { ...prev.dateRange, start: date } }))}
+                    onChange={(date) =>
+                      setSettings((prev) => ({
+                        ...prev,
+                        dateRange: { ...prev.dateRange, start: date },
+                      }))
+                    }
                   />
                   <DatePicker
                     value={settings.dateRange.end}
-                    onChange={(date) => setSettings(prev => ({ ...prev, dateRange: { ...prev.dateRange, end: date } }))}
+                    onChange={(date) =>
+                      setSettings((prev) => ({
+                        ...prev,
+                        dateRange: { ...prev.dateRange, end: date },
+                      }))
+                    }
                   />
                 </div>
               </div>
@@ -140,14 +154,18 @@ export default function StoriesPage() {
                 label="Story Tone"
                 options={toneOptions}
                 value={settings.tone}
-                onChange={(val) => setSettings(prev => ({ ...prev, tone: val as StorySettings["tone"] }))}
+                onChange={(val) =>
+                  setSettings((prev) => ({ ...prev, tone: val as StorySettings["tone"] }))
+                }
               />
 
               <Select
                 label="Story Length"
                 options={lengthOptions}
                 value={settings.length}
-                onChange={(val) => setSettings(prev => ({ ...prev, length: val as StorySettings["length"] }))}
+                onChange={(val) =>
+                  setSettings((prev) => ({ ...prev, length: val as StorySettings["length"] }))
+                }
               />
             </div>
 
@@ -157,7 +175,7 @@ export default function StoriesPage() {
               disabled={createStoryMutation.isPending || !isOnline}
               className="w-full"
             >
-              <BookOpen className="w-4 h-4 mr-2" />
+              <BookOpen className="mr-2 h-4 w-4" />
               Generate Story
             </Button>
 
@@ -167,8 +185,11 @@ export default function StoriesPage() {
                   <span className="text-neutral-600">Generating...</span>
                   <span className="text-neutral-600">{Math.round(progress)}%</span>
                 </div>
-                <div className="w-full bg-neutral-200 rounded-full h-2">
-                  <div className="bg-primary-600 h-2 rounded-full transition-all duration-300" style={{ width: `${progress}%` }} />
+                <div className="h-2 w-full rounded-full bg-neutral-200">
+                  <div
+                    className="bg-primary-600 h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${progress}%` }}
+                  />
                 </div>
               </div>
             )}
@@ -177,13 +198,27 @@ export default function StoriesPage() {
           {generatedStory && (
             <Card className="mt-6 space-y-4">
               <h3 className="font-semibold text-neutral-900">Export Options</h3>
-              <Input label="File Name" value={fileName} onChange={(e) => setFileName(e.target.value)} />
+              <Input
+                label="File Name"
+                value={fileName}
+                onChange={(e) => setFileName(e.target.value)}
+              />
               <div className="space-y-2">
-                <Button variant="secondary" size="sm" onClick={() => handleExport("pdf")} className="w-full">
-                  <FileText className="w-4 h-4 mr-2" /> Export as PDF
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => handleExport("pdf")}
+                  className="w-full"
+                >
+                  <FileText className="mr-2 h-4 w-4" /> Export as PDF
                 </Button>
-                <Button variant="secondary" size="sm" onClick={() => handleExport("docx")} className="w-full">
-                  <Download className="w-4 h-4 mr-2" /> Export as Word
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => handleExport("docx")}
+                  className="w-full"
+                >
+                  <Download className="mr-2 h-4 w-4" /> Export as Word
                 </Button>
               </div>
             </Card>
@@ -194,7 +229,7 @@ export default function StoriesPage() {
           <Card className="min-h-96">
             {!generatedStory && !createStoryMutation.isPending && (
               <EmptyState
-                icon={<BookOpen className="w-12 h-12 text-secondary-400" weight="duotone" />}
+                icon={<BookOpen className="text-secondary-400 h-12 w-12" weight="duotone" />}
                 title="Your Story Awaits"
                 description="Configure your settings and let our AI weave your memories into a beautiful narrative sanctuary."
                 className="py-12"
@@ -206,7 +241,7 @@ export default function StoriesPage() {
               </div>
             )}
             {generatedStory && (
-              <div className="whitespace-pre-wrap text-neutral-800 leading-relaxed prose">
+              <div className="prose leading-relaxed whitespace-pre-wrap text-neutral-800">
                 {generatedStory}
               </div>
             )}

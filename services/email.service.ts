@@ -1,4 +1,4 @@
-import type { Attachment } from 'nodemailer/lib/mailer';
+import type { Attachment } from "nodemailer/lib/mailer";
 import nodemailer from "nodemailer";
 import { logger } from "@/custom/log/logger";
 import { env } from "@/config/env";
@@ -15,10 +15,13 @@ interface SendEmailParams {
   to: string;
   subject: string;
   html: string;
-  attachments?: Attachment[]
+  attachments?: Attachment[];
 }
 
-export const sendEmail = async ({ to, subject, html, attachments }: SendEmailParams, retries = 3) => {
+export const sendEmail = async (
+  { to, subject, html, attachments }: SendEmailParams,
+  retries = 3,
+) => {
   for (let i = 0; i < retries; i++) {
     try {
       const info = await transporter.sendMail({
@@ -85,10 +88,10 @@ export const sendDeletionOTP = async (email: string, code: string) => {
 export const sendErrorReportEmail = async (error: Error, context?: string) => {
   const adminEmail = process.env.ADMIN_EMAIL || "himpraise571@gmail.com";
   const subject = `🚨 CRITICAL ERROR: ${context || "System Alert"}`;
-  
+
   const errorMessage = error instanceof Error ? error.message : String(error);
   const errorStack = error instanceof Error ? error.stack : "No stack trace available";
-  
+
   const html = `
     <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 800px; margin: 0 auto; padding: 30px; color: #1f2937; border: 1px solid #e5e7eb; border-radius: 12px; background-color: #ffffff;">
       <div style="border-bottom: 2px solid #ef4444; padding-bottom: 20px; margin-bottom: 25px;">

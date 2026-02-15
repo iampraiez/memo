@@ -15,7 +15,7 @@ export default function TagsPage() {
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
-  
+
   const { data: tagsData, isLoading: tagsLoading } = useTags();
   const { data: memoriesData, isLoading: memoriesLoading } = useMemories();
 
@@ -23,7 +23,7 @@ export default function TagsPage() {
   const allMemories = memoriesData?.memories || [];
 
   const filteredTags = tags.filter((tag) =>
-    tag.name.toLowerCase().includes(searchQuery.toLowerCase())
+    tag.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const tagMemories = selectedTag
@@ -38,48 +38,48 @@ export default function TagsPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-6 space-y-6">
+    <div className="mx-auto max-w-6xl space-y-6 p-6">
       {!selectedTag ? (
         <React.Fragment>
           <div>
-            <h1 className="text-3xl font-display font-bold text-neutral-900">Tags & Categories</h1>
-            <p className="text-neutral-600 mt-1">Explore your memories by topics and themes</p>
+            <h1 className="font-display text-3xl font-bold text-neutral-900">Tags & Categories</h1>
+            <p className="mt-1 text-neutral-600">Explore your memories by topics and themes</p>
           </div>
 
-          <div className="max-w-md relative">
+          <div className="relative max-w-md">
             <Input
               placeholder="Search tags..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
             />
-            <MagnifyingGlass className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 pointer-events-none" />
+            <MagnifyingGlass className="pointer-events-none absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 transform text-neutral-400" />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="text-center space-y-2">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+            <Card className="space-y-2 text-center">
               <h3 className="text-2xl font-bold text-neutral-900">{tags.length}</h3>
               <p className="text-neutral-600">Total Tags</p>
             </Card>
-            <Card className="text-center space-y-2">
+            <Card className="space-y-2 text-center">
               <h3 className="text-2xl font-bold text-neutral-900">{tags[0]?.name || "N/A"}</h3>
               <p className="text-neutral-600">Most Used</p>
             </Card>
-             <Card className="text-center space-y-2">
-               <h3 className="text-2xl font-bold text-neutral-900">{allMemories.length}</h3>
-               <p className="text-neutral-600">Tagged Memories</p>
-             </Card>
+            <Card className="space-y-2 text-center">
+              <h3 className="text-2xl font-bold text-neutral-900">{allMemories.length}</h3>
+              <p className="text-neutral-600">Tagged Memories</p>
+            </Card>
           </div>
 
           {filteredTags.length > 0 ? (
             <Card className="p-8">
-              <h2 className="text-xl font-semibold text-neutral-900 mb-6">Tag Cloud</h2>
-              <div className="flex flex-wrap gap-4 justify-center">
+              <h2 className="mb-6 text-xl font-semibold text-neutral-900">Tag Cloud</h2>
+              <div className="flex flex-wrap justify-center gap-4">
                 {filteredTags.map((tag) => (
                   <button
                     key={tag.id}
                     onClick={() => setSelectedTag(tag.name)}
-                    className="text-lg font-medium text-primary-600 hover:text-primary-700 transition-colors"
+                    className="text-primary-600 hover:text-primary-700 text-lg font-medium transition-colors"
                   >
                     {tag.name}
                   </button>
@@ -87,8 +87,8 @@ export default function TagsPage() {
               </div>
             </Card>
           ) : (
-            <EmptyState 
-              icon={<TagIcon className="w-12 h-12 text-secondary-400" weight="duotone" />}
+            <EmptyState
+              icon={<TagIcon className="text-secondary-400 h-12 w-12" weight="duotone" />}
               title="No Categories Yet"
               description="Tags will appear here once you start categorizing your memories. Use them to organize your story by themes, people, or places."
             />
@@ -96,9 +96,11 @@ export default function TagsPage() {
         </React.Fragment>
       ) : (
         <div className="space-y-6">
-          <Button variant="ghost" onClick={() => setSelectedTag(null)}>← Back to Tags</Button>
-          <h1 className="text-3xl font-display font-bold text-neutral-900">{selectedTag}</h1>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Button variant="ghost" onClick={() => setSelectedTag(null)}>
+            ← Back to Tags
+          </Button>
+          <h1 className="font-display text-3xl font-bold text-neutral-900">{selectedTag}</h1>
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             {tagMemories.map((memory) => (
               <MemoryCard
                 key={memory.id}

@@ -51,10 +51,7 @@ const providers: Provider[] = [
         if (!user || !user.password) {
           throw new AuthError("INVALID_CREDENTIALS");
         }
-        const compare = await brcypt.compare(
-          c.password as string,
-          user.password,
-        );
+        const compare = await brcypt.compare(c.password as string, user.password);
         if (!compare) {
           throw new AuthError("INVALID_CREDENTIALS");
         }
@@ -189,7 +186,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (token.id && !isEdge && (now - lastRefreshed > oneMinute || trigger === "update")) {
         try {
           console.log(`[Auth] Refreshing user data for ${token.id}. Trigger: ${trigger}`);
-          
+
           const [dbUser] = await db
             .select({
               isOnboarded: users.isOnboarded,
@@ -225,8 +222,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         if (userData.name !== undefined) token.name = userData.name;
         if (userData.image !== undefined) token.image = userData.image;
         if (userData.avatar !== undefined) token.image = userData.avatar;
-        if (userData.isOnboarded !== undefined)
-          token.isOnboarded = userData.isOnboarded;
+        if (userData.isOnboarded !== undefined) token.isOnboarded = userData.isOnboarded;
       }
 
       return token;

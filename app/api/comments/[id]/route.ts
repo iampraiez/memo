@@ -4,14 +4,10 @@ import db from "@/drizzle/index";
 import { comments } from "@/drizzle/db/schema";
 import { and, eq } from "drizzle-orm";
 
-export async function DELETE(
-  req: Request,
-  props: { params: Promise<{ id: string }> }
-) {
+export async function DELETE(req: Request, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   const session = await auth();
   const commentId = params.id;
-
 
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -19,10 +15,7 @@ export async function DELETE(
 
   try {
     const existingComment = await db.query.comments.findFirst({
-      where: and(
-        eq(comments.id, commentId),
-        eq(comments.userId, session.user.id)
-      ),
+      where: and(eq(comments.id, commentId), eq(comments.userId, session.user.id)),
     });
 
     if (!existingComment) {

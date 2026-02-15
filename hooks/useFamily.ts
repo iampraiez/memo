@@ -7,7 +7,7 @@ export const useFamilyMembers = () => {
   const members = useLiveQuery(async () => {
     const userId = await familyService.getCurrentUserId();
     if (!userId) return [];
-    return await db.familyMembers.where('userId').equals(userId).toArray();
+    return await db.familyMembers.where("userId").equals(userId).toArray();
   });
 
   const query = useQuery<{ members: FamilyMember[] }>({
@@ -25,7 +25,7 @@ export const useInviteFamilyMember = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: { email: string; name?: string; relationship: string }) => 
+    mutationFn: (data: { email: string; name?: string; relationship: string }) =>
       familyService.invite(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["family", "members"] });

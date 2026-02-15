@@ -34,13 +34,13 @@ export async function GET(req: Request) {
 
     // Get user ID
     interface User {
-        id: string;
-        email: string;
+      id: string;
+      email: string;
     }
-    const [user] = await db.query.users.findMany({
+    const [user] = (await db.query.users.findMany({
       where: sql`email = ${session.user.email}`,
       limit: 1,
-    }) as User[];
+    })) as User[];
 
     if (!user) {
       return NextResponse.json({ message: "User not found" }, { status: 404 });
@@ -48,7 +48,7 @@ export async function GET(req: Request) {
 
     // Build query conditions
     const conditions = [eq(memories.userId, user.id)];
-    
+
     if (isPublic !== null && isPublic !== undefined) {
       conditions.push(eq(memories.isPublic, isPublic === "true"));
     }
@@ -61,22 +61,22 @@ export async function GET(req: Request) {
       offset,
       with: {
         memoryTags: {
-            with: { tag: true }
+          with: { tag: true },
         },
         memoryMedia: true,
-      }
+      },
     });
-    
+
     if (!userMemories) {
-       logger.warn(`No memories found context for user ${user.id}`);
-       return NextResponse.json({ memories: [] }, { status: 200 });
+      logger.warn(`No memories found context for user ${user.id}`);
+      return NextResponse.json({ memories: [] }, { status: 200 });
     }
 
     // Transform result to include flattened tags and images
     const formattedMemories = userMemories.map((mem) => ({
-        ...mem,
-        tags: mem.memoryTags ? mem.memoryTags.map((mt) => mt.tag.name) : [],
-        images: mem.memoryMedia ? mem.memoryMedia.map((mm) => mm.url) : [],
+      ...mem,
+      tags: mem.memoryTags ? mem.memoryTags.map((mt) => mt.tag.name) : [],
+      images: mem.memoryMedia ? mem.memoryMedia.map((mm) => mm.url) : [],
     }));
 
     logger.info(`Fetched ${formattedMemories.length} memories for user ${user.id}`);
@@ -85,12 +85,12 @@ export async function GET(req: Request) {
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
     const errorStack = error instanceof Error ? error.stack : undefined;
-    
+
     logger.error("Error fetching memories:", { error: errorMessage, stack: errorStack });
-    
+
     return NextResponse.json(
       { message: "Internal Server Error", error: errorMessage },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -109,13 +109,13 @@ export async function POST(req: Request) {
 
     // Get user ID
     interface User {
-        id: string;
-        email: string;
+      id: string;
+      email: string;
     }
-    const [user] = await db.query.users.findMany({
+    const [user] = (await db.query.users.findMany({
       where: sql`email = ${session.user.email}`,
       limit: 1,
-    }) as User[];
+    })) as User[];
 
     if (!user) {
       return NextResponse.json({ message: "User not found" }, { status: 404 });
@@ -141,52 +141,52 @@ export async function POST(req: Request) {
 
     // Handle Tags
     if (validatedData.tags && validatedData.tags.length > 0) {
-        for (const tagName of validatedData.tags) {
-            let tagId;
-            const existingTag = await db.query.tags.findFirst({
-                where: eq(tags.name, tagName)
-            });
-            
-            if (existingTag) {
-                tagId = existingTag.id;
-            } else {
-                tagId = uuidv4();
-                await db.insert(tags).values({
-                    id: tagId,
-                    name: tagName,
-                    color: "#3B82F6",
-                });
-            }
-            
-            await db.insert(memoryTags).values({
-                id: uuidv4(),
-                memoryId: newMemory.id,
-                tagId: tagId
-            });
+      for (const tagName of validatedData.tags) {
+        let tagId;
+        const existingTag = await db.query.tags.findFirst({
+          where: eq(tags.name, tagName),
+        });
+
+        if (existingTag) {
+          tagId = existingTag.id;
+        } else {
+          tagId = uuidv4();
+          await db.insert(tags).values({
+            id: tagId,
+            name: tagName,
+            color: "#3B82F6",
+          });
         }
+
+        await db.insert(memoryTags).values({
+          id: uuidv4(),
+          memoryId: newMemory.id,
+          tagId: tagId,
+        });
+      }
     }
 
     // Handle Images
     if (validatedData.images && validatedData.images.length > 0) {
-        for (const url of validatedData.images) {
-             await db.insert(memoryMedia).values({
-                id: uuidv4(),
-                memoryId: newMemory.id,
-                url: url,
-                type: "image",
-                filename: "unknown",
-                storageProvider: "local"
-             });
-        }
+      for (const url of validatedData.images) {
+        await db.insert(memoryMedia).values({
+          id: uuidv4(),
+          memoryId: newMemory.id,
+          url: url,
+          type: "image",
+          filename: "unknown",
+          storageProvider: "local",
+        });
+      }
     }
 
     // Re-fetch memory with relations to return complete object
-    // Or construct it manually to save a query. 
+    // Or construct it manually to save a query.
     // Manual construction is faster.
     const returnedMemory = {
-        ...newMemory,
-        tags: validatedData.tags || [],
-        images: validatedData.images || []
+      ...newMemory,
+      tags: validatedData.tags || [],
+      images: validatedData.images || [],
     };
 
     logger.info(`Created memory ${newMemory.id} for user ${user.id}`);
@@ -194,18 +194,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ memory: returnedMemory }, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { message: "Invalid input", errors: error.issues },
-        { status: 400 }
-      );
+      return NextResponse.json({ message: "Invalid input", errors: error.issues }, { status: 400 });
     }
 
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
     logger.error("Error creating memory:", { error: errorMessage });
-    
-    return NextResponse.json(
-      { message: "Internal Server Error" },
-      { status: 500 }
-    );
+
+    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }
 }

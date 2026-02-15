@@ -58,10 +58,7 @@ export async function GET() {
     return NextResponse.json(userSettings, { status: 200 });
   } catch (error) {
     logger.error("Error fetching settings:", error);
-    return NextResponse.json(
-      { message: "Internal Server Error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }
 }
 
@@ -87,7 +84,7 @@ export async function PATCH(req: Request) {
       if (existingUser) {
         return NextResponse.json(
           { message: "Username already taken. Please choose another." },
-          { status: 400 }
+          { status: 400 },
         );
       }
     }
@@ -110,15 +107,12 @@ export async function PATCH(req: Request) {
     if (username !== undefined) updateData.username = username;
     if (isOnboarded !== undefined) updateData.isOnboarded = isOnboarded;
 
-    await db
-      .update(users)
-      .set(updateData)
-      .where(eq(users.id, session.user.id));
+    await db.update(users).set(updateData).where(eq(users.id, session.user.id));
 
     // Update preferences if provided
     if (preferences) {
       const { aiEnabled, autoBackup, theme, privacyMode, notifications } = preferences;
-      
+
       await db
         .insert(userPreferences)
         .values({
@@ -147,9 +141,6 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ message: "Settings updated" }, { status: 200 });
   } catch (error) {
     logger.error("Error updating settings:", error);
-    return NextResponse.json(
-      { message: "Internal Server Error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }
 }

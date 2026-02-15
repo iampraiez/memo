@@ -55,8 +55,7 @@ function validateEnv() {
     return { ...serverResult.data, ...clientResult.data };
   }
 
-  return clientResult.data as z.infer<typeof clientSchema> &
-    z.infer<typeof serverSchema>;
+  return clientResult.data as z.infer<typeof clientSchema> & z.infer<typeof serverSchema>;
 }
 
 export const env = validateEnv() as z.infer<typeof serverSchema> & z.infer<typeof clientSchema>;

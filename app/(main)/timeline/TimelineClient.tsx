@@ -1,5 +1,5 @@
 "use client";
-import { useState,useEffect } from "react";
+import { useState, useEffect } from "react";
 import Timeline from "@/components/Timeline";
 import { useMemories, useDeleteMemory, useUpdateMemory } from "@/hooks/useMemories";
 import { Memory } from "@/types/types";
@@ -13,9 +13,8 @@ interface TimelineClientProps {
 }
 
 export default function TimelineClient({ initialMemories }: TimelineClientProps) {
-  const { data: memoriesData, isLoading: isLoadingMemories } =
-    useMemories(undefined, 100, 0);
-  
+  const { data: memoriesData, isLoading: isLoadingMemories } = useMemories(undefined, 100, 0);
+
   const deleteMemoryMutation = useDeleteMemory();
   const updateMemoryMutation = useUpdateMemory();
   const [viewingMemoryDetail, setViewingMemoryDetail] = useState<string | null>(null);
@@ -27,7 +26,7 @@ export default function TimelineClient({ initialMemories }: TimelineClientProps)
     setIsMounted(true);
   }, []);
 
-  const memories = isMounted ? (memoriesData?.memories || initialMemories) : initialMemories;
+  const memories = isMounted ? memoriesData?.memories || initialMemories : initialMemories;
   const isLoading = isMounted ? isLoadingMemories : true;
 
   const handleEditMemory = (memory: Memory) => {
@@ -55,9 +54,7 @@ export default function TimelineClient({ initialMemories }: TimelineClientProps)
       });
       if (!response.ok) throw new Error("Failed");
       toast.success(
-        memory.isPublic
-          ? "Memory is now private"
-          : "Memory shared with sanctuary circle",
+        memory.isPublic ? "Memory is now private" : "Memory shared with sanctuary circle",
       );
     } catch {
       toast.error("Failed to update share status");
@@ -78,9 +75,7 @@ export default function TimelineClient({ initialMemories }: TimelineClientProps)
   return (
     <div className="p-6">
       <div className="space-y-6">
-        <h1 className="text-3xl font-display font-bold text-neutral-900">
-          Your Timeline
-        </h1>
+        <h1 className="font-display text-3xl font-bold text-neutral-900">Your Timeline</h1>
         {isLoading && memories.length === 0 ? (
           <Loading fullPage text="Retrieving your memories..." />
         ) : (
@@ -101,12 +96,12 @@ export default function TimelineClient({ initialMemories }: TimelineClientProps)
           setSelectedMemory(null);
         }}
         onSave={async (val) => {
-            if (selectedMemory) {
-               await updateMemoryMutation.mutateAsync({ id: selectedMemory.id, data: val });
-               toast.success("Memory updated");
-            }
-            setEditModalOpen(false);
-            setSelectedMemory(null);
+          if (selectedMemory) {
+            await updateMemoryMutation.mutateAsync({ id: selectedMemory.id, data: val });
+            toast.success("Memory updated");
+          }
+          setEditModalOpen(false);
+          setSelectedMemory(null);
         }}
         editingMemory={selectedMemory || undefined}
       />
