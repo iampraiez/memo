@@ -14,6 +14,7 @@ export const useUserSettings = () => {
     queryKey: ["userSettings"],
     queryFn: () => userService.getSettings(),
     staleTime: 0,
+    structuralSharing: true,
   });
 
   return {

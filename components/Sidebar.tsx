@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   House,
   MagnifyingGlass,
@@ -32,13 +32,20 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onNavigate, onClick }) => {
   const { data: session } = useSession();
   const queryClient = useQueryClient();
   const { data: memoriesData } = useMemories();
+  const [memoryCount, setCount] = useState<number>(0);
   const pathname = usePathname();
+
+  useEffect(() => {
+    if (memoriesData) {
+      setCount(memoriesData?.memories?.length || 0);
+    }
+  }, [memoriesData]);
 
   const navigation = [
     { name: "Timeline", icon: House, id: "timeline" },
     { name: "Profile", icon: User, id: "profile" },
     { name: "Friends", icon: Users, id: "friends" },
-    { name: "Images", icon: ImageIcon, id: "images" }, // Added Images item
+    { name: "Images", icon: ImageIcon, id: "images" },
     { name: "Search", icon: MagnifyingGlass, id: "search" },
     { name: "Tags", icon: Tag, id: "tags" },
     { name: "Stories", icon: BookOpen, id: "stories" },
@@ -172,7 +179,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onNavigate, onClick }) => {
               <div className="grid grid-cols-1 gap-4">
                 <div className="flex flex-col">
                   <span className="font-display text-[28px] leading-none font-bold text-neutral-900">
-                    {memoriesData?.memories?.length || 0}
+                    {memoryCount}
                   </span>
                   <span className="mt-1 text-xs font-medium text-neutral-500">
                     Total Memories Captured

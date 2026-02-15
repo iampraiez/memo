@@ -28,6 +28,7 @@ export const useMemories = (isPublic?: boolean, limit = 100, offset = 0) => {
     queryKey: ["memories", { isPublic, limit, offset }],
     queryFn: () => memoryService.getAll(isPublic, limit, offset),
     enabled: true, // Always fetch to update Dexie in background
+    structuralSharing: true,
   });
 
   return {
@@ -43,6 +44,7 @@ export const useMemory = (id: string) => {
     queryKey: ["memory", id],
     queryFn: () => memoryService.getById(id),
     enabled: !!id,
+    structuralSharing: true,
   });
 
   return {
@@ -56,6 +58,7 @@ export const useSearchMemories = (query: string, scope: "mine" | "circle" = "min
     queryKey: ["memories", "search", query, scope],
     queryFn: () => memoryService.search(query, scope),
     enabled: query.length >= 2,
+    structuralSharing: true,
   });
 };
 

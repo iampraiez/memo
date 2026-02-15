@@ -13,6 +13,7 @@ export const useTags = () => {
   const query = useQuery<{ tags: Tag[] }>({
     queryKey: ["tags"],
     queryFn: () => tagService.getAll(),
+    structuralSharing: true,
   });
 
   return {

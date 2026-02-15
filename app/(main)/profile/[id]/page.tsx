@@ -81,6 +81,7 @@ export default function ProfilePage() {
                 src={profile.image}
                 alt={profile.name || "User profile"}
                 fill
+                sizes="128px"
                 className="object-cover"
               />
             ) : (

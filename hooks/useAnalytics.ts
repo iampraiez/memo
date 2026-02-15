@@ -6,5 +6,6 @@ export const useAnalytics = (timeRange: string = "year") => {
     queryKey: ["analytics", timeRange],
     queryFn: () => analyticsService.get(timeRange),
     staleTime: 1000 * 60 * 5, // 5 minutes
+    structuralSharing: true,
   });
 };

@@ -97,6 +97,7 @@ export default function GalleryPage() {
                   alt={img.title}
                   width={600}
                   height={800}
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
                   className="h-auto w-full transform object-cover transition-transform duration-1000 group-hover:scale-110"
                 />
 

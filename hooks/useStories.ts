@@ -16,6 +16,7 @@ export const useStories = () => {
       const data = await storyService.getAll();
       return data as { stories: LocalStory[] };
     },
+    structuralSharing: true,
   });
 
   return {

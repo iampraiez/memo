@@ -13,6 +13,7 @@ export const useFamilyMembers = () => {
   const query = useQuery<{ members: FamilyMember[] }>({
     queryKey: ["family", "members"],
     queryFn: () => familyService.getMembers(),
+    structuralSharing: true,
   });
 
   return {

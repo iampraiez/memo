@@ -21,6 +21,7 @@ export const useTimelineMemories = (sort: string = "date", initialData?: Memory[
           pageParams: [undefined],
         }
       : undefined,
+    structuralSharing: true,
   });
 };
 
@@ -34,6 +35,7 @@ export const useComments = (memoryId: string) => {
     queryKey: ["comments", memoryId],
     queryFn: () => socialService.getComments(memoryId),
     enabled: !!memoryId,
+    structuralSharing: true,
   });
 
   return {
@@ -65,6 +67,7 @@ export const useReactions = (memoryId: string) => {
     queryKey: ["reactions", memoryId],
     queryFn: () => socialService.getReactions(memoryId),
     enabled: !!memoryId,
+    structuralSharing: true,
   });
 
   return {
@@ -130,6 +133,7 @@ export const useFollowers = (userId: string) => {
     queryKey: ["followers", userId],
     queryFn: () => socialService.getFollowers(userId),
     enabled: !!userId,
+    structuralSharing: true,
   });
 };
 
@@ -138,6 +142,7 @@ export const useFollowing = (userId: string) => {
     queryKey: ["following", userId],
     queryFn: () => socialService.getFollowing(userId),
     enabled: !!userId,
+    structuralSharing: true,
   });
 };
 
@@ -146,5 +151,6 @@ export const useSearchUsers = (query: string) => {
     queryKey: ["users", "search", query],
     queryFn: () => socialService.searchUsers(query),
     enabled: query.length >= 2,
+    structuralSharing: true,
   });
 };

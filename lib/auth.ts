@@ -185,8 +185,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
       if (token.id && !isEdge && (now - lastRefreshed > oneMinute || trigger === "update")) {
         try {
-          console.log(`[Auth] Refreshing user data for ${token.id}. Trigger: ${trigger}`);
-
           const [dbUser] = await db
             .select({
               isOnboarded: users.isOnboarded,
@@ -204,18 +202,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             if (dbUser.name) token.name = dbUser.name;
             if (dbUser.image) token.image = dbUser.image;
             token.lastRefreshed = now;
-            console.log(`[Auth] User data refreshed successfully for ${token.id}`);
-          } else {
-            console.warn(`[Auth] User not found during JWT refresh: ${token.id}`);
           }
         } catch (error) {
           console.error("[Auth] Connection Error during JWT refresh:", error);
-          // Don't crash the session if refresh fails, keep current token
         }
       }
 
       if (trigger === "update" && session) {
-        // Support both nested and flat update structures
         const userData = session.user || session;
 
         if (userData.username !== undefined) token.username = userData.username;

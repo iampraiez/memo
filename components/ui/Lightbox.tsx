@@ -82,6 +82,7 @@ const Lightbox: React.FC<LightboxProps> = ({
                 src={images[currentIndex]}
                 alt={`Image ${currentIndex + 1}`}
                 fill
+                sizes="100vw"
                 className="object-contain"
                 priority
               />
@@ -126,7 +127,13 @@ const Lightbox: React.FC<LightboxProps> = ({
                         : "opacity-40 hover:opacity-100"
                     }`}
                   >
-                    <Image src={img} alt={`Thumb ${idx}`} fill className="object-cover" />
+                    <Image
+                      src={img}
+                      alt={`Thumb ${idx}`}
+                      fill
+                      sizes="56px"
+                      className="object-cover"
+                    />
                   </button>
                 ))}
               </div>

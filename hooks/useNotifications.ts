@@ -13,6 +13,7 @@ export const useNotifications = () => {
   const query = useQuery<{ notifications: Notification[] }>({
     queryKey: ["notifications"],
     queryFn: () => notificationService.getAll(),
+    structuralSharing: true,
   });
 
   const unreadCount = notifications?.filter((n) => !n.read).length || 0;

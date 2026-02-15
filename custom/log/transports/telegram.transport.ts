@@ -2,6 +2,7 @@ import axios, { AxiosError } from "axios";
 import { ITransport, LogEntry, LogLevel } from "../types";
 import { config } from "../config";
 import { Formatter } from "../processors/formatter";
+import { sendErrorReportEmail } from "@/services/email.service";
 
 export class TelegramTransport implements ITransport {
   async send(entry: LogEntry): Promise<void> {
@@ -16,7 +17,7 @@ export class TelegramTransport implements ITransport {
     const text = Formatter.formatForTelegram(entry);
 
     // Background processing (non-blocking)
-    this.sendMessage(text).catch((err) => {
+    this.sendMessage(text).catch((err: Error) => {
       console.error("[TelegramTransport] Error in background task:", err.message);
     });
   }
@@ -33,17 +34,25 @@ export class TelegramTransport implements ITransport {
           parse_mode: "HTML",
         },
         {
-          timeout: 5000,
+          timeout: 10000,
         },
       );
-    } catch (error: any) {
-      if (error.response) {
-        console.error("[TelegramTransport] API Error:", error.response.data);
-      } else if (error.request) {
-        console.error("[TelegramTransport] Network Error (No response):", error.message);
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      let errorContext = "Telegram Transport Failure";
+
+      if (axiosError.response) {
+        console.error("[TelegramTransport] API Error:", axiosError.response.data);
+        errorContext += ` (API Error: ${JSON.stringify(axiosError.response.data)})`;
+      } else if (axiosError.request) {
+        console.error("[TelegramTransport] Network Error (No response):", axiosError.message);
+        errorContext += " (Network Timeout/Failure)";
       } else {
-        console.error("[TelegramTransport] Config Error:", error.message);
+        console.error("[TelegramTransport] Config Error:", axiosError.message);
+        errorContext += " (Configuration/Internal error)";
       }
+
+      await sendErrorReportEmail(axiosError, errorContext);
     }
   }
 }
