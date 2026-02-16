@@ -81,6 +81,13 @@ jobs:
           NODE_ENV: production
           NEXT_PUBLIC_URL: http://localhost:3000
           NEXT_PUBLIC_VAPID_PUBLIC_KEY: test-vapid-key
+          AUTH_GOOGLE_ID: test-google-id
+          AUTH_GOOGLE_SECRET: test-google-secret
+          EMAIL_USER: test@example.com
+          VAPID_PRIVATE_KEY: test-vapid-private-key
+          CLOUDINARY_CLOUD_NAME: test-cloud
+          CLOUDINARY_API_KEY: test-api-key
+          CLOUDINARY_API_SECRET: test-api-secret
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v6
