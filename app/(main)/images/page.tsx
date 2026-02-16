@@ -124,7 +124,7 @@ export default function GalleryPage() {
         <Lightbox
           images={imageUrls}
           currentIndex={selectedImageIndex}
-          isOpen={selectedImageIndex !== null && selectedImageIndex !== undefined}
+          isOpen={selectedImageIndex !== null}
           onClose={() => setSelectedImageIndex(null)}
           onNavigate={setSelectedImageIndex}
         />
