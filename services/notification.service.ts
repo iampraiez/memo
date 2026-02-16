@@ -42,13 +42,6 @@ export const notificationService = {
           } as LocalNotification);
         }
 
-        // Re-read
-        notifications = await db.notifications
-          .where("userId")
-          .equals(userId || "")
-          .reverse()
-          .sortBy("createdAt");
-
         return response;
       } catch (error) {
         console.error("[NotificationService] Sync failed, using cache:", error);

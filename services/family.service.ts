@@ -40,12 +40,6 @@ export const familyService = {
           });
         }
 
-        // Re-read
-        members = await db.familyMembers
-          .where("userId")
-          .equals(userId || "")
-          .toArray();
-
         return response;
       } catch (error) {
         console.error("[FamilyService] Sync failed, using cache:", error);

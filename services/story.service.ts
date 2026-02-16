@@ -40,13 +40,6 @@ export const storyService = {
           });
         }
 
-        // Re-read
-        stories = await db.stories
-          .where("userId")
-          .equals(userId || "")
-          .reverse()
-          .sortBy("createdAt");
-
         return response;
       } catch (error) {
         console.error("[StoryService] Sync failed, using cache:", error);

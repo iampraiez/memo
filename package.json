@@ -36,7 +36,7 @@
     "jspdf": "^4.1.0",
     "lucide-react": "^0.563.0",
     "next": "^16.1.6",
-    "next-auth": "5.0.0-beta.29",
+    "next-auth": "5.0.0-beta.30",
     "next-pwa": "^5.6.0",
     "nodemailer": "^7.0.13",
     "pdfkit": "^0.17.2",
@@ -50,10 +50,17 @@
     "tailwind-merge": "^3.4.0",
     "tailwindcss": "^4.1.18",
     "uuid": "^13.0.0",
-    "vercel": "^50.9.6",
+    "vercel": "^50.15.1",
     "web-push": "^3.6.7",
     "zod": "^4.3.6",
     "zustand": "^5.0.11"
+  },
+  "pnpm": {
+    "overrides": {
+      "undici": ">=6.23.1",
+      "path-to-regexp": ">=6.3.2",
+      "esbuild": ">=0.25.0"
+    }
   },
   "devDependencies": {
     "@types/nodemailer": "^7.0.9",

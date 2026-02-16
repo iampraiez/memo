@@ -38,13 +38,6 @@ export const socialService = {
           });
         }
 
-        // Re-read from Dexie
-        memories = await db.memories
-          .where("userId")
-          .notEqual(userId || "")
-          .reverse()
-          .sortBy("createdAt");
-
         return response;
       } catch (error) {
         console.error("[SocialService] Timeline sync failed, using cache:", error);
@@ -75,9 +68,6 @@ export const socialService = {
             _lastSync: Date.now(),
           });
         }
-
-        // Re-read
-        comments = await db.comments.where("memoryId").equals(memoryId).sortBy("createdAt");
 
         return response;
       } catch (error) {
@@ -153,9 +143,6 @@ export const socialService = {
             _lastSync: Date.now(),
           });
         }
-
-        // Re-read
-        reactions = await db.reactions.where("memoryId").equals(memoryId).toArray();
 
         return response;
       } catch (error) {

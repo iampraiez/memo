@@ -36,12 +36,6 @@ export const tagService = {
           } as LocalTag);
         }
 
-        // Re-read
-        tags = await db.tags
-          .where("userId")
-          .equals(userId || "")
-          .toArray();
-
         return response;
       } catch (error) {
         console.error("[TagService] Sync failed, using cache:", error);
