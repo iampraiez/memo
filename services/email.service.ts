@@ -1,6 +1,5 @@
 import type { Attachment } from "nodemailer/lib/mailer";
 import nodemailer from "nodemailer";
-import { logger } from "@/custom/log/logger";
 import { env } from "@/config/env";
 
 const transporter = nodemailer.createTransport({
@@ -31,10 +30,10 @@ export const sendEmail = async (
         html,
         attachments,
       });
-      logger.info(`Email sent to ${to}: ${info.messageId}`);
+      console.log(`Email sent to ${to}: ${info.messageId}`);
       return { success: true, messageId: info.messageId };
     } catch (error) {
-      logger.error(`Email attempt ${i + 1} for ${to} failed:`, error);
+      console.error(`Email attempt ${i + 1} for ${to} failed:`, error);
       if (i === retries - 1) return { success: false, error };
       await new Promise((resolve) => setTimeout(resolve, Math.pow(2, i) * 1000));
     }
