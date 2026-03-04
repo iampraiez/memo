@@ -129,7 +129,7 @@ const LandingPage: React.FC = () => {
                 </Button>
               </Link>
 
-              <Link href="https://github.com/iampraiez/memo">
+              <Link href="https://github.com/iampraiez/memo" target="_blank">
                 <Button
                   size="lg"
                   variant="secondary"
@@ -330,24 +330,28 @@ const LandingPage: React.FC = () => {
                 <a
                   href="https://x.com/iampraiez"
                   className="hover:text-primary-900 transition-colors"
+                  target="_blank"
                 >
                   <TwitterLogo weight="duotone" className="white-inner-icon" size={20} />
                 </a>
                 <a
                   href="https://www.linkedin.com/in/thepraiseolaoye"
                   className="hover:text-primary-900 transition-colors"
+                  target="_blank"
                 >
                   <LinkedinLogo weight="duotone" className="white-inner-icon" size={20} />
                 </a>
                 <a
                   href="https://www.instagram.com/iampraiez_?igsh=enI4OWcxOHN1Yml3"
                   className="hover:text-primary-900 transition-colors"
+                  target="_blank"
                 >
                   <InstagramLogo weight="duotone" className="white-inner-icon" size={20} />
                 </a>
                 <a
                   href="https://github.com/iampraiez/memo"
                   className="hover:text-primary-900 transition-colors"
+                  target="_blank"
                 >
                   <GithubLogo weight="duotone" className="white-inner-icon" size={20} />
                 </a>

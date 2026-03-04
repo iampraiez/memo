@@ -6,6 +6,7 @@ cloudinary.config({
   api_key: env.CLOUDINARY_API_KEY,
   api_secret: env.CLOUDINARY_API_SECRET,
   secure: true,
+  timeout: 60000,
 });
 
 export interface CloudinaryUploadResult {

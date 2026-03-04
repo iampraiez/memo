@@ -132,3 +132,27 @@ export const sendErrorReportEmail = async (error: Error, context?: string) => {
 
   return sendEmail({ to: adminEmail, subject, html });
 };
+
+export const sendPasswordResetEmail = async (email: string, token: string) => {
+  const resetLink = `${env.NEXT_PUBLIC_URL}/auth/reset-password?token=${token}`;
+  const subject = "Reset your Memory Lane password";
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333;">
+      <h1 style="color: #2563EB;">Password Reset Request</h1>
+      <p>We received a request to reset your password for your Memory Lane account. If you didn't make this request, you can safely ignore this email.</p>
+      <p>To reset your password, click the button below:</p>
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="${resetLink}" style="background-color: #2563EB; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">Reset Password</a>
+      </div>
+      <p>Or copy and paste this link into your browser:</p>
+      <p style="word-break: break-all; color: #666;">${resetLink}</p>
+      <p>This link will expire in 1 hour.</p>
+      <hr style="border: none; border-top: 1px solid #E5E7EB; margin: 30px 0;" />
+      <p style="font-size: 12px; color: #6B7280; text-align: center;">
+        &copy; ${new Date().getFullYear()} Memory Lane.
+      </p>
+    </div>
+  `;
+
+  return sendEmail({ to: email, subject, html });
+};

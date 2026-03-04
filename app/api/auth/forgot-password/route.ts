@@ -4,6 +4,8 @@ import { users } from "@/drizzle/db/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { logger } from "@/custom/log/logger";
+import { generatePasswordResetToken } from "@/services/token.service";
+import { sendPasswordResetEmail } from "@/services/email.service";
 
 const forgotPasswordSchema = z.object({
   email: z.string().email(),
@@ -19,26 +21,28 @@ export async function POST(req: Request) {
     });
 
     if (!user) {
-      // Don't reveal user existence
+      // Don't reveal user existence for security
       return NextResponse.json(
         { message: "If that email exists, we sent a link." },
         { status: 200 },
       );
     }
 
-    // TODO: Generate a real token and store it in verificationTokens or strict resetTokens table
-    // For now, we will simulate the process as a placeholder or use Nodemailer to send a generic link if not using next-auth's built-in flow for this specific custom logic.
-    // The user asked for "forget password logic" using "email smtp".
-    // NextAuth handles "Magic Links" for sign in, but strict password reset is usually separate.
+    // Check if user has a password (they might be Google-only)
+    if (!user.password) {
+      return NextResponse.json(
+        {
+          message: "This account uses Google login. Please sign in with Google.",
+        },
+        { status: 400 },
+      );
+    }
 
-    // START MANUAL RESET TOKEN GENERATION (Simplified)
-    // In a real app, generate a token, save to DB with expiry.
+    // Generate token and save to DB
+    const token = await generatePasswordResetToken(email);
+    await sendPasswordResetEmail(email, token);
 
-    logger.info(`Password reset requested for: ${email}`);
-
-    // If configured with SMTP, we could send an email here.
-    // const transporter = nodemailer.createTransport({ ...env.SMTP_... });
-    // await transporter.sendMail({ ... });
+    logger.info(`Password reset link sent to: ${email}`);
 
     return NextResponse.json({ message: "If that email exists, we sent a link." }, { status: 200 });
   } catch (error) {
@@ -46,6 +50,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: "Invalid email" }, { status: 400 });
     }
     logger.error("Forgot password error:", error);
-    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json(
+      { message: "Something went wrong. Please try again later." },
+      { status: 500 },
+    );
   }
 }

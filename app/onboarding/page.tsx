@@ -6,12 +6,14 @@ import {
   Shield,
   Sparkle,
   Tag,
-  Check,
   User,
   Spinner,
   Camera,
   X,
   CaretLeft,
+  Users,
+  House,
+  BookOpen,
 } from "@phosphor-icons/react";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
@@ -63,9 +65,8 @@ const OnboardingFlow: React.FC = () => {
   const steps = [
     { id: "welcome", title: "Welcome", icon: Sparkle },
     { id: "profile", title: "Profile Setup", icon: User },
-    { id: "import", title: "Import Data", icon: UploadSimple },
-    { id: "privacy", title: "Privacy Settings", icon: Shield },
-    { id: "ai", title: "AI Features", icon: Sparkle },
+    { id: "features", title: "Get Started", icon: BookOpen },
+    { id: "preferences", title: "Preferences", icon: Shield },
     { id: "tags", title: "Choose Tags", icon: Tag },
   ];
 
@@ -396,204 +397,156 @@ const OnboardingFlow: React.FC = () => {
           </div>
         );
 
-      case "import":
+      case "features":
         return (
           <div className="space-y-6">
             <div className="space-y-3 text-center">
               <h2 className="font-display text-2xl font-bold text-neutral-900">
-                Import Your Existing Data
+                Discover Your Sanctuary
               </h2>
               <p className="text-neutral-600">
-                Bring your memories from other platforms or files to get started quickly.
+                Explore the powerful features designed to preserve your life&apos;s narrative.
               </p>
             </div>
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <Card className="hover:border-primary-300 cursor-pointer space-y-3 p-4 text-center transition-colors">
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100">
-                  <span className="text-lg font-bold text-blue-600">f</span>
+              <Card className="space-y-3 border-transparent bg-neutral-50/50 p-4">
+                <div className="bg-primary-100 flex h-10 w-10 items-center justify-center rounded-lg">
+                  <BookOpen weight="fill" className="text-primary-600 h-5 w-5" />
                 </div>
-                <h3 className="font-medium">Facebook</h3>
-                <p className="text-sm text-neutral-500">Import photos and posts</p>
+                <h3 className="text-sm font-bold">AI Stories</h3>
+                <p className="text-xs text-neutral-500">
+                  Transform scattered memories into beautiful, cohesive narratives.
+                </p>
               </Card>
 
-              <Card className="hover:border-primary-300 cursor-pointer space-y-3 p-4 text-center transition-colors">
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-lg bg-red-100">
-                  <span className="text-lg font-bold text-red-600">G</span>
+              <Card className="space-y-3 border-transparent bg-neutral-50/50 p-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
+                  <Users weight="fill" className="h-5 w-5 text-blue-600" />
                 </div>
-                <h3 className="font-medium">Google Photos</h3>
-                <p className="text-sm text-neutral-500">Import your photo library</p>
+                <h3 className="text-sm font-bold">Family Circle</h3>
+                <p className="text-xs text-neutral-500">
+                  Build a private space to share and preserve moments with loved ones.
+                </p>
               </Card>
 
-              <Card className="group cursor-pointer space-y-3 p-4 text-center transition-colors hover:border-neutral-900">
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-lg bg-neutral-100 transition-colors group-hover:bg-neutral-200">
-                  <UploadSimple className="h-6 w-6 text-neutral-600" />
+              <Card className="space-y-3 border-transparent bg-neutral-50/50 p-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-100">
+                  <UploadSimple weight="fill" className="h-5 w-5 text-amber-600" />
                 </div>
-                <h3 className="text-sm font-bold">Upload Files</h3>
-                <p className="text-xs text-neutral-500">Import from your device</p>
+                <h3 className="text-sm font-bold">The Vault</h3>
+                <p className="text-xs text-neutral-500">
+                  Securely upload and organize your precious photo library.
+                </p>
               </Card>
 
-              <Card className="hover:border-primary-300 cursor-pointer space-y-3 p-4 text-center transition-colors">
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-lg bg-neutral-100">
-                  <span className="text-lg font-bold text-neutral-600">✓</span>
+              <Card className="space-y-3 border-transparent bg-neutral-50/50 p-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100">
+                  <House weight="fill" className="h-5 w-5 text-green-600" />
                 </div>
-                <h3 className="font-medium">Start Fresh</h3>
-                <p className="text-sm text-neutral-500">Begin with a clean slate</p>
-              </Card>
-            </div>
-          </div>
-        );
-
-      case "privacy":
-        return (
-          <div className="space-y-6">
-            <div className="space-y-3 text-center">
-              <h2 className="font-display text-2xl font-bold text-neutral-900">Privacy Settings</h2>
-              <p className="text-neutral-600">
-                Choose how you want to protect and share your memories.
-              </p>
-            </div>
-
-            <div className="space-y-4">
-              <Card
-                className={cn(
-                  "cursor-pointer p-4 transition-all",
-                  preferences.privacyMode === "private" && "border-primary-300 bg-primary-50",
-                )}
-                onClick={() =>
-                  setPreferences((prev) => ({
-                    ...prev,
-                    privacyMode: "private",
-                  }))
-                }
-              >
-                <div className="flex items-start space-x-3">
-                  <div className="border-primary-600 mt-0.5 flex h-6 w-6 items-center justify-center rounded-full border-2">
-                    {preferences.privacyMode === "private" && (
-                      <div className="bg-primary-600 h-3 w-3 rounded-full" />
-                    )}
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-neutral-900">Private (Recommended)</h3>
-                    <p className="text-sm text-neutral-600">
-                      Only you can see your memories. Full encryption and privacy protection.
-                    </p>
-                  </div>
-                </div>
-              </Card>
-
-              <Card
-                className={cn(
-                  "cursor-pointer p-4 transition-all",
-                  preferences.privacyMode === "selective" && "border-primary-300 bg-primary-50",
-                )}
-                onClick={() =>
-                  setPreferences((prev) => ({
-                    ...prev,
-                    privacyMode: "selective",
-                  }))
-                }
-              >
-                <div className="flex items-start space-x-3">
-                  <div className="border-primary-600 mt-0.5 flex h-6 w-6 items-center justify-center rounded-full border-2">
-                    {preferences.privacyMode === "selective" && (
-                      <div className="bg-primary-600 h-3 w-3 rounded-full" />
-                    )}
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-neutral-900">Selective Sharing</h3>
-                    <p className="text-sm text-neutral-600">
-                      Choose which memories to share with family and friends.
-                    </p>
-                  </div>
-                </div>
-              </Card>
-
-              <Card
-                className={cn(
-                  "cursor-pointer p-4 transition-all",
-                  preferences.privacyMode === "family" && "border-primary-300 bg-primary-50",
-                )}
-                onClick={() => setPreferences((prev) => ({ ...prev, privacyMode: "family" }))}
-              >
-                <div className="flex items-start space-x-3">
-                  <div className="border-primary-600 mt-0.5 flex h-6 w-6 items-center justify-center rounded-full border-2">
-                    {preferences.privacyMode === "family" && (
-                      <div className="bg-primary-600 h-3 w-3 rounded-full" />
-                    )}
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-neutral-900">Family Timeline</h3>
-                    <p className="text-sm text-neutral-600">
-                      Share memories automatically with family members.
-                    </p>
-                  </div>
-                </div>
+                <h3 className="text-sm font-bold">Timeline</h3>
+                <p className="text-xs text-neutral-500">
+                  Capture daily reflections and see your life journey unfold.
+                </p>
               </Card>
             </div>
           </div>
         );
 
-      case "ai":
+      case "preferences":
         return (
           <div className="space-y-6">
             <div className="space-y-3 text-center">
               <h2 className="font-display text-2xl font-bold text-neutral-900">
-                AI-Powered Features
+                Privacy & Preferences
               </h2>
-              <p className="text-neutral-600">
-                Let AI help you organize, discover patterns, and create stories from your memories.
-              </p>
+              <p className="text-neutral-600">Customize your experience and security settings.</p>
             </div>
 
             <div className="space-y-4">
-              <Card className="p-4">
-                <div className="flex items-start space-x-3">
-                  <button
-                    onClick={() =>
-                      setPreferences((prev) => ({
-                        ...prev,
-                        aiEnabled: !prev.aiEnabled,
-                      }))
-                    }
-                    className={cn(
-                      "flex h-6 w-6 items-center justify-center rounded border-2",
-                      preferences.aiEnabled
-                        ? "bg-primary-600 border-primary-600"
-                        : "border-neutral-300",
-                    )}
-                  >
-                    {preferences.aiEnabled && <Check className="h-4 w-4 text-white" />}
-                  </button>
-                  <div>
-                    <h3 className="font-medium text-neutral-900">Enable AI Features</h3>
-                    <p className="mb-3 text-sm text-neutral-600">
-                      Get automatic summaries, smart tagging, and pattern discovery.
-                    </p>
-                    <ul className="space-y-1 text-sm text-neutral-500">
-                      <li>• Automatic photo recognition and tagging</li>
-                      <li>• Smart content summaries</li>
-                      <li>• Pattern discovery in your memories</li>
-                      <li>• Personalized story generation</li>
-                    </ul>
-                  </div>
-                </div>
-              </Card>
-
-              {preferences.aiEnabled && (
-                <div className="bg-primary-50 border-primary-200 rounded-lg border p-4">
-                  <div className="flex items-start space-x-2">
-                    <Shield className="text-primary-600 mt-0.5 h-5 w-5" />
-                    <div className="text-sm">
-                      <p className="text-primary-800 mb-1 font-medium">Privacy Protected</p>
-                      <p className="text-primary-700">
-                        AI processing happens securely and privately. Your data never leaves our
-                        encrypted servers.
+              <div className="grid grid-cols-1 gap-3">
+                <Card
+                  className={cn(
+                    "cursor-pointer border-neutral-200 p-4 transition-all",
+                    preferences.privacyMode === "private" && "border-primary-300 bg-primary-50",
+                  )}
+                  onClick={() => setPreferences((prev) => ({ ...prev, privacyMode: "private" }))}
+                >
+                  <div className="flex items-start space-x-3">
+                    <div className="border-primary-600 mt-0.5 flex h-5 w-5 items-center justify-center rounded-full border-2">
+                      {preferences.privacyMode === "private" && (
+                        <div className="bg-primary-600 h-2.5 w-2.5 rounded-full" />
+                      )}
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-bold text-neutral-900">Private (Recommended)</h3>
+                      <p className="text-xs text-neutral-500">
+                        Only you can see your memories by default.
                       </p>
                     </div>
                   </div>
+                </Card>
+
+                <Card
+                  className={cn(
+                    "cursor-pointer border-neutral-200 p-4 transition-all",
+                    preferences.privacyMode === "family" && "border-primary-300 bg-primary-50",
+                  )}
+                  onClick={() => setPreferences((prev) => ({ ...prev, privacyMode: "family" }))}
+                >
+                  <div className="flex items-start space-x-3">
+                    <div className="border-primary-600 mt-0.5 flex h-5 w-5 items-center justify-center rounded-full border-2">
+                      {preferences.privacyMode === "family" && (
+                        <div className="bg-primary-600 h-2.5 w-2.5 rounded-full" />
+                      )}
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-bold text-neutral-900">Family Circle</h3>
+                      <p className="text-xs text-neutral-500">
+                        Automatically prepare moments for sharing with your group.
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+              </div>
+
+              <Card className="border-neutral-200 p-4">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1">
+                    <h3 className="text-sm font-bold text-neutral-900">AI Enhancements</h3>
+                    <p className="text-xs text-neutral-500">
+                      Enable smart tagging and story generation.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() =>
+                      setPreferences((prev) => ({ ...prev, aiEnabled: !prev.aiEnabled }))
+                    }
+                    className={cn(
+                      "relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
+                      preferences.aiEnabled ? "bg-primary-600" : "bg-neutral-200",
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                        preferences.aiEnabled ? "translate-x-5" : "translate-x-0",
+                      )}
+                    />
+                  </button>
                 </div>
-              )}
+              </Card>
+
+              <div className="rounded-xl border border-neutral-100 bg-neutral-50 p-4">
+                <div className="flex items-start space-x-3">
+                  <Shield className="text-primary-600 mt-0.5 h-5 w-5" />
+                  <p className="text-xs leading-relaxed text-neutral-600">
+                    Your data is encrypted and stored securely. AI features process your memories
+                    locally or via secure, isolated environments to ensure your privacy is never
+                    compromised.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         );
