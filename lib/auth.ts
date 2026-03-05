@@ -10,7 +10,6 @@ import brcypt from "bcryptjs";
 import { userExists } from "./query";
 import { verifyGoogleToken, getOrCreateGoogleUser } from "./google-auth";
 import { env } from "@/config/env";
-import { eq } from "drizzle-orm";
 
 import { CredentialsSignin } from "next-auth";
 
