@@ -175,38 +175,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.lastRefreshed = Date.now();
       }
 
-      // Refresh isOnboarded status from database on every request IF NOT in Edge Runtime
-      // Database queries with 'pg' driver fail in Edge Runtime (Middleware)
-      const isEdge = process.env.NEXT_RUNTIME === "edge";
-
-      const now = Date.now();
-      const lastRefreshed = (token.lastRefreshed as number) || 0;
-      const oneMinute = 60 * 1000;
-
-      if (token.id && !isEdge && (now - lastRefreshed > oneMinute || trigger === "update")) {
-        try {
-          const [dbUser] = await db
-            .select({
-              isOnboarded: users.isOnboarded,
-              username: users.username,
-              name: users.name,
-              image: users.image,
-            })
-            .from(users)
-            .where(eq(users.id, token.id as string))
-            .limit(1);
-
-          if (dbUser) {
-            token.isOnboarded = dbUser.isOnboarded;
-            if (dbUser.username) token.username = dbUser.username;
-            if (dbUser.name) token.name = dbUser.name;
-            if (dbUser.image) token.image = dbUser.image;
-            token.lastRefreshed = now;
-          }
-        } catch (error) {
-          console.error("[Auth] Connection Error during JWT refresh:", error);
-        }
-      }
+      // Removed automatic DB polling on JWT refresh to prevent connection pool exhaustion.
+      // Session updates now rely on explicit trigger === "update" calls from the client.
 
       if (trigger === "update" && session) {
         const userData = session.user || session;

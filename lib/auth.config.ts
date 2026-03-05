@@ -41,10 +41,6 @@ export const authConfig = {
         return false;
       }
 
-      if (!isLoggedIn && !isPublicPage && !isOnboardingPage) {
-        return false;
-      }
-
       return true;
     },
     // Add lightweight callbacks for middleware to access token data
