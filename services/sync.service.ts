@@ -199,10 +199,14 @@ class SyncService {
     }
   }
 
-  private async syncNotification<T>(op: string, id: string, data: T) {
+  private async syncNotification<T extends { action?: string }>(op: string, id: string, data: T) {
     switch (op) {
       case "update":
-        await apiService.patch(`/notifications/${id}`, data);
+        if (id === "all" || data?.action === "markAllRead") {
+          await apiService.patch("/notifications", {});
+        } else {
+          await apiService.patch(`/notifications/${id}`, data);
+        }
         break;
       case "delete":
         await apiService.delete(`/notifications/${id}`);
