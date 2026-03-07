@@ -4,10 +4,7 @@ import db from "@/drizzle/index";
 import { stories, memories as memoriesTable } from "@/drizzle/db/schema";
 import { eq, desc, and, gte, lte } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import { env } from "@/config/env";
-
-const genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY);
+import { cleanJSON, generateContent } from "../memories/generate/route";
 
 export async function GET() {
   const session = await auth();
@@ -86,9 +83,8 @@ Guidelines:
 - Return only the story text.`;
 
     // 3. Generate content with Gemini
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-    const result = await model.generateContent(prompt);
-    const storyContent = result.response.text();
+    const result = await generateContent(prompt);
+    const storyContent = cleanJSON(result as string);
 
     // 4. Save to DB
     const newStory = {

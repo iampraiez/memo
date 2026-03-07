@@ -5,7 +5,7 @@ import Sidebar from "@/components/Sidebar";
 import OfflineBanner from "@/components/ui/OfflineBanner";
 import NotificationPanel from "@/components/NotificationPanel";
 import { useNotifications } from "@/hooks/useNotifications";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useSync } from "@/components/providers/SyncProvider";
 import { useSession } from "next-auth/react";
 import CreateMemoryModal from "@/components/CreateMemoryModal";
@@ -21,7 +21,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { unreadCount } = useNotifications();
   const { isOnline } = useSync();
   const pathname = usePathname();
-  const router = useRouter();
   const { data: session, status } = useSession();
   const createMemoryMutation = useCreateMemory();
   const updateMemoryMutation = useUpdateMemory();
@@ -64,19 +63,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         onShowNotifications={() => setShowNotifications(!showNotifications)}
         syncStatus={mounted ? (isOnline ? "online" : "offline") : "offline"}
         notificationCount={unreadCount}
-        onNavigate={(page) => router.push(`/${page}`)}
       />
       {mounted && <OfflineBanner />}
 
       <div className="flex">
-        <Sidebar
-          isOpen={sidebarOpen}
-          onNavigate={(page) => {
-            router.push(`/${page}`);
-            setSidebarOpen(false);
-          }}
-          onClick={() => setSidebarOpen(false)}
-        />
+        <Sidebar isOpen={sidebarOpen} onClick={() => setSidebarOpen(false)} />
 
         <main className="flex-1 transition-all duration-300 lg:ml-64">
           <div className="mx-auto min-h-[calc(100vh-80px)] max-w-400">{children}</div>

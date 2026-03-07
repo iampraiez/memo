@@ -1,6 +1,5 @@
 "use client";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Users, Heart, ChatCircle, MagnifyingGlass, CaretDown } from "@phosphor-icons/react";
 import Loading from "@/components/ui/Loading";
 import Card from "@/components/ui/Card";
@@ -12,6 +11,7 @@ import {
   useUnfollowUser,
 } from "@/hooks/useSocial";
 import Image from "next/image";
+import Link from "next/link";
 import EmptyState from "@/components/ui/EmptyState";
 import Select from "@/components/ui/Select";
 import { Memory, Reaction, User } from "@/types/types";
@@ -24,7 +24,6 @@ export default function FriendsClient({ initialMemories }: FriendsClientProps) {
   const [friendSearch, setFriendSearch] = useState("");
   const [discoverySearch, setDiscoverySearch] = useState("");
   const [sort, setSort] = useState("date"); // 'date' | 'random'
-  const router = useRouter();
 
   const {
     data: timelineData,
@@ -121,10 +120,12 @@ export default function FriendsClient({ initialMemories }: FriendsClientProps) {
                   .map((user) => (
                     <div
                       key={user.id}
-                      className="group/item flex cursor-pointer items-center justify-between p-4 transition-colors hover:bg-neutral-50"
-                      onClick={() => router.push(`/profile/${user.username || user.id}`)}
+                      className="group/item flex items-center justify-between p-4 transition-colors hover:bg-neutral-50"
                     >
-                      <div className="flex items-center space-x-3">
+                      <Link
+                        href={`/profile/${user.username || user.id}`}
+                        className="flex flex-1 items-center space-x-3"
+                      >
                         <div className="bg-primary-900 text-secondary-400 flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border-2 border-white font-bold shadow-sm">
                           {user.image ? (
                             <Image
@@ -145,7 +146,7 @@ export default function FriendsClient({ initialMemories }: FriendsClientProps) {
                             @{user.username || user.id.slice(0, 8)}
                           </p>
                         </div>
-                      </div>
+                      </Link>
                       <Button
                         variant={user.isFollowing ? "ghost" : "primary"}
                         size="sm"
@@ -189,7 +190,7 @@ export default function FriendsClient({ initialMemories }: FriendsClientProps) {
               <Card
                 key={memory.id}
                 className="group cursor-pointer space-y-6 border-neutral-100 p-8 transition-all duration-500 hover:shadow-2xl"
-                onClick={() => router.push(`/memories/${memory.id}`)}
+                href={`/memories/${memory.id}`}
               >
                 <div className="flex items-center justify-between border-b border-neutral-100 pb-4">
                   <div className="flex items-center space-x-3">

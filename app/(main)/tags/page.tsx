@@ -9,14 +9,12 @@ import Card from "@/components/ui/Card";
 import EmptyState from "@/components/ui/EmptyState";
 import { useTags } from "@/hooks/useTags";
 import { useMemories } from "@/hooks/useMemories";
-import { useRouter } from "next/navigation";
 import { useIsMounted } from "@/hooks/useIsMounted";
 
 export default function TagsPage() {
   const isMounted = useIsMounted();
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const router = useRouter();
 
   const { data: tagsData, isLoading: tagsLoading } = useTags();
   const { data: memoriesData, isLoading: memoriesLoading } = useMemories();
@@ -107,7 +105,7 @@ export default function TagsPage() {
               <MemoryCard
                 key={memory.id}
                 memory={memory}
-                onClick={() => router.push(`/memory/${memory.id}`)}
+                href={`/memory/${memory.id}`}
                 onEdit={() => {}}
                 onDelete={() => {}}
                 onShareMemory={() => {}}

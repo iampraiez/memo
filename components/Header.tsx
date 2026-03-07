@@ -11,7 +11,6 @@ interface HeaderProps {
   syncStatus: "online" | "offline" | "syncing";
   notificationCount?: number;
   className?: string;
-  onNavigate: (page: string) => void;
 }
 
 const Header: React.FC<HeaderProps> = ({

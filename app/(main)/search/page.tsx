@@ -1,19 +1,18 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { MagnifyingGlass, GlobeHemisphereWest, User } from "@phosphor-icons/react";
 import Loading from "@/components/ui/Loading";
 import MemoryCard from "@/components/MemoryCard";
 import EmptyState from "@/components/ui/EmptyState";
 import Input from "@/components/ui/Input";
 import { useSearchMemories } from "@/hooks/useMemories";
-import { useRouter } from "next/navigation";
 import { useIsMounted } from "@/hooks/useIsMounted";
+import { Memory } from "@/types/types";
 
 export default function SearchPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [scope, setScope] = useState<"mine" | "circle">("mine");
-  const router = useRouter();
 
   // Debounce search query
   useEffect(() => {
@@ -77,12 +76,8 @@ export default function SearchPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            {searchResults.map((memory) => (
-              <MemoryCard
-                key={memory.id}
-                memory={memory}
-                onClick={() => router.push(`/memory/${memory.id}`)}
-              />
+            {searchResults.map((memory: Memory) => (
+              <MemoryCard key={memory.id} memory={memory} href={`/memory/${memory.id}`} />
             ))}
           </div>
         )}

@@ -21,14 +21,14 @@ import { analyticsService } from "@/services/analytics.service";
 import { userService } from "@/services/user.service";
 import { socialService } from "@/services/social.service";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
 
 interface SidebarProps {
   isOpen: boolean;
-  onNavigate: (page: string) => void;
   onClick: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ isOpen, onNavigate, onClick }) => {
+const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClick }) => {
   const { data: session } = useSession();
   const queryClient = useQueryClient();
   const { data: memoriesData } = useMemories();
@@ -61,7 +61,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onNavigate, onClick }) => {
       {/* Mobile Overlay */}
       <div
         className={cn(
-          "fixed inset-0 z-[45] bg-neutral-950/40 backdrop-blur-md transition-all duration-500 lg:hidden",
+          "fixed inset-0 z-45 bg-neutral-950/40 backdrop-blur-md transition-all duration-500 lg:hidden",
           isOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0",
         )}
         onClick={onClick}
@@ -70,7 +70,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onNavigate, onClick }) => {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-[50] w-[280px] transform border-r border-neutral-200/50 bg-white shadow-2xl transition-all duration-500 ease-in-out sm:w-[320px] lg:w-72 lg:shadow-none",
+          "fixed inset-y-0 left-0 z-50 w-[280px] transform border-r border-neutral-200/50 bg-white shadow-2xl transition-all duration-500 ease-in-out sm:w-[320px] lg:w-72 lg:shadow-none",
           isOpen ? "translate-x-0" : "-translate-x-full",
           "lg:translate-x-0",
           "lg:pb-8",
@@ -106,15 +106,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onNavigate, onClick }) => {
                   ? pathname === "/" || pathname === "/timeline"
                   : pathname.startsWith(`/${item.id}`);
 
+              const path = item.id === "profile" ? `/profile/${session?.user?.id}` : `/${item.id}`;
+
               return (
-                <button
+                <Link
                   key={item.id}
-                  onClick={() => {
-                    const path =
-                      item.id === "profile" ? `/profile/${session?.user?.id}` : `/${item.id}`;
-                    onNavigate(path.startsWith("/") ? path.slice(1) : path);
-                    onClick();
-                  }}
+                  href={path}
+                  onClick={onClick}
                   onMouseEnter={() => {
                     if (item.id === "timeline") {
                       queryClient.prefetchQuery({
@@ -163,14 +161,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onNavigate, onClick }) => {
                   {isActive && (
                     <div className="bg-primary-600 absolute right-4 h-1.5 w-1.5 rounded-full shadow-[0_0_10px_rgba(37,99,235,0.3)]" />
                   )}
-                </button>
+                </Link>
               );
             })}
           </nav>
 
           {/* Quick Stats - Enhanced aesthetic */}
           <div className="p-6">
-            <div className="space-y-5 rounded-[2rem] border border-white bg-gradient-to-br from-neutral-50 to-neutral-100 p-6 shadow-inner">
+            <div className="space-y-5 rounded-4xl border border-white bg-linear-to-br from-neutral-50 to-neutral-100 p-6 shadow-inner">
               <div className="flex items-center justify-between">
                 <h3 className="text-[10px] font-bold tracking-[0.2em] text-neutral-400 uppercase">
                   Your Archive

@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils";
 interface MemoryCardProps {
   memory: Memory;
   onClick?: () => void;
+  href?: string;
   onEdit?: (memory: Memory) => void; // Update prop type to pass memory
   onDelete?: (memoryId: string) => void; // Update prop type to pass memoryId
   onShareMemory?: (memory: Memory) => void; // Update prop type to pass memory
@@ -29,6 +30,7 @@ interface MemoryCardProps {
 const MemoryCard: React.FC<MemoryCardProps> = ({
   memory,
   onClick,
+  href,
   onEdit,
   onDelete,
   onShareMemory,
@@ -73,13 +75,14 @@ const MemoryCard: React.FC<MemoryCardProps> = ({
       hover
       className="group cursor-pointer overflow-hidden"
       padding="none"
-      onClick={() => onClick?.()}
+      onClick={onClick ? () => onClick() : undefined}
+      href={href}
     >
       {/* Mood Gradient Overlay */}
       {memory.mood && (
         <div
           className={cn(
-            "pointer-events-none absolute inset-0 bg-gradient-to-br to-transparent opacity-[0.03]",
+            "pointer-events-none absolute inset-0 bg-linear-to-br to-transparent opacity-[0.03]",
             moodColors[memory.mood].split(" ").pop(),
           )}
         />
@@ -186,7 +189,7 @@ const MemoryCard: React.FC<MemoryCardProps> = ({
               sizes="(max-width: 768px) 100vw, (max-width: 1536px) 50vw, 33vw"
               className="object-cover transition-transform duration-700 group-hover/image:scale-110"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 transition-opacity duration-500 group-hover/image:opacity-100" />
+            <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent opacity-0 transition-opacity duration-500 group-hover/image:opacity-100" />
             {memory.images.length > 1 && (
               <div className="absolute right-3 bottom-3 rounded-full border border-white/20 bg-white/90 px-3 py-1.5 text-[10px] font-bold text-neutral-900 shadow-sm backdrop-blur-md">
                 +{memory.images.length - 1} MORE
@@ -194,7 +197,7 @@ const MemoryCard: React.FC<MemoryCardProps> = ({
             )}
           </div>
         ) : (
-          <div className="group/empty flex aspect-video items-center justify-center rounded-2xl border border-neutral-100 bg-gradient-to-br from-neutral-50 to-neutral-100 shadow-inner">
+          <div className="group/empty flex aspect-video items-center justify-center rounded-2xl border border-neutral-100 bg-linear-to-br from-neutral-50 to-neutral-100 shadow-inner">
             <div className="shadow-soft rounded-full bg-white p-4 transition-transform duration-500 group-hover/empty:scale-110">
               <Calendar className="text-primary-200 h-8 w-8" />
             </div>
