@@ -53,8 +53,11 @@ const withPWA = require("next-pwa")({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // turbopack removed: next-pwa relies on webpack for SW generation.
-  // Enabling turbopack: {} breaks the build pipeline for the service worker. (Rule F)
+  // turbopack: {} — needed for `next dev` in Next.js 16 (Turbopack is the default).
+  // next-pwa is disabled in dev (see above), so no webpack conflict exists in dev.
+  // Production build uses `next build --webpack` (see package.json) so next-pwa
+  // can generate sw.js correctly via its webpack plugin.
+  turbopack: {},
 
   reactStrictMode: true,
 

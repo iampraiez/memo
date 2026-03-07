@@ -10,8 +10,7 @@ export default function OfflinePage() {
       <body
         style={{
           margin: 0,
-          fontFamily:
-            "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+          fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
           background: "#0f0f13",
           color: "#e4e4e7",
           display: "flex",
@@ -39,8 +38,8 @@ export default function OfflinePage() {
               marginBottom: "2rem",
             }}
           >
-            Memory Lane couldn&apos;t load this page. Check your connection and
-            try again — your previously visited pages are still available.
+            Memory Lane couldn&apos;t load this page. Check your connection and try again — your
+            previously visited pages are still available.
           </p>
           <button
             onClick={() => window.location.reload()}

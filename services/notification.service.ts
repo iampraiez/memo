@@ -1,7 +1,6 @@
 import { apiService } from "./api.service";
 import { db, type LocalNotification } from "@/lib/dexie/db";
 import { syncService } from "./sync.service";
-import { HttpError } from "@/types/types";
 
 export interface Notification {
   id: string;
@@ -96,53 +95,6 @@ export const notificationService = {
   },
 };
 
-export const sendNotificationToUser = async (
-  userId: string,
-  payload: { title: string; body: string; data?: never },
-) => {
-  if (typeof window !== "undefined") {
-    console.warn("sendNotificationToUser should only be called on the server");
-    return;
-  }
-
-  try {
-    const { default: webpush } = await import("web-push");
-    const { default: drizzleDb } = await import("@/drizzle/index");
-    const { pushSubscriptions } = await import("@/drizzle/db/schema");
-    const { eq } = await import("drizzle-orm");
-
-    // Configure web-push
-    webpush.setVapidDetails(
-      `mailto:${process.env.EMAIL_USER || "admin@memo.com"}`,
-      process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-      process.env.VAPID_PRIVATE_KEY!,
-    );
-
-    // Fetch user subscriptions from drizzle db (server-side)
-    const subs = await drizzleDb
-      .select()
-      .from(pushSubscriptions)
-      .where(eq(pushSubscriptions.userId, userId));
-
-    const notifications = subs.map(async (sub) => {
-      try {
-        await webpush.sendNotification(
-          {
-            endpoint: sub.endpoint,
-            keys: sub.keys as { auth: string; p256dh: string },
-          },
-          JSON.stringify(payload),
-        );
-      } catch (error: unknown) {
-        if (error instanceof HttpError && (error.statusCode === 410 || error.statusCode === 404)) {
-          await drizzleDb.delete(pushSubscriptions).where(eq(pushSubscriptions.id, sub.id));
-        }
-        console.error("Error sending push notification:", error);
-      }
-    });
-
-    await Promise.all(notifications);
-  } catch (error) {
-    console.error("Failed to send push notification:", error);
-  }
-};
+// NOTE: sendNotificationToUser has been moved to:
+// services/push-notification.server.ts
+// Import it only in Server Components or API route handlers — never in client code.

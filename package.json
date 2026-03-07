@@ -1,7 +1,7 @@
 {
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
@@ -63,6 +63,8 @@
     }
   },
   "devDependencies": {
+    "@babel/core": "^7.29.0",
+    "@babel/preset-env": "^7.29.0",
     "@types/nodemailer": "^7.0.9",
     "@types/pg": "^8.16.0",
     "@types/react": "19.2.14",
@@ -70,6 +72,7 @@
     "@types/web-push": "^3.6.4",
     "@typescript-eslint/eslint-plugin": "^8.24.0",
     "@typescript-eslint/parser": "^8.24.0",
+    "babel-loader": "^10.1.0",
     "drizzle-kit": "^0.31.8",
     "eslint": "^8.57.0",
     "eslint-config-next": "16.1.6",
