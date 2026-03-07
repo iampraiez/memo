@@ -10,7 +10,7 @@ import { useSync } from "@/components/providers/SyncProvider";
 import { useSession } from "next-auth/react";
 import CreateMemoryModal from "@/components/CreateMemoryModal";
 import { useCreateMemory, useUpdateMemory } from "@/hooks/useMemories";
-import { Memory } from "@/types/types";
+import { CreateMemoryData } from "@/services/memory.service";
 import { toast } from "sonner";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -31,29 +31,26 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     setSidebarOpen(false);
   }, [pathname]);
 
-  // useEffect(() => {
-  //   if (status === "unauthenticated") {
-  //     router.push("/login");
-  //   }
-  // }, [status, router]);
-
-  const handleSaveMemory = async (memory: Memory) => {
+  const handleSaveMemory = async (memoryData: CreateMemoryData & { id?: string }) => {
     try {
-      // Check if it's a temp ID or existing ID
-      const isUpdate = memory.id && !memory.id.startsWith("memory-");
-
-      if (isUpdate) {
-        // Extract only updateable data
-        const { id, ...data } = memory;
+      if (createModalOpen && !memoryData.id) {
+        // Create mode - ensure required fields for CreateMemoryData
+        const { title, content, date } = memoryData;
+        if (!title || !content || !date) {
+          throw new Error("Missing required fields for memory creation");
+        }
+        await createMemoryMutation.mutateAsync(memoryData);
+        toast.success("Memory created successfully!");
+      } else if (memoryData.id) {
+        // Update mode
+        const { id, ...data } = memoryData;
         await updateMemoryMutation.mutateAsync({ id, data });
         toast.success("Memory updated successfully!");
-      } else {
-        await createMemoryMutation.mutateAsync(memory);
-        toast.success("Memory created successfully!");
       }
       setCreateModalOpen(false);
-    } catch {
-      toast.error("Failed to save memory");
+    } catch (error) {
+      console.error("Failed to save memory:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to save memory");
     }
   };
 

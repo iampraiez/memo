@@ -22,9 +22,16 @@ interface MediaUploaderProps {
   maxFiles?: number;
   files: UploadedFile[];
   onFilesChange: (files: UploadedFile[]) => void;
-  onUpload?: (files: { file: File; id: string }[]) => Promise<void>;
+  // onUpload now takes an onProgress callback and an abort signal
+  onUpload?: (
+    files: { file: File; id: string }[],
+    onProgress: (progressEvent: { loaded: number; total?: number }) => void,
+    signal: AbortSignal,
+  ) => Promise<void>;
   onUploadStart?: () => void;
   onUploadEnd?: () => void;
+  // Add an onCancel callback for when a file is removed during upload
+  onCancelUpload?: (fileId: string) => void;
   className?: string;
 }
 
@@ -39,11 +46,13 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
   onUpload,
   onUploadStart,
   onUploadEnd,
+  onCancelUpload,
   className,
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const activeUploads = useRef<{ [fileId: string]: AbortController }>({});
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -83,29 +92,68 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
       return;
     }
 
+    const abortController = new AbortController();
+
     // Create file objects with progress
-    const fileObjects: UploadedFile[] = validFiles.map((file) => ({
-      id: `${Date.now()}-${Math.random()}`,
-      name: file.name,
-      size: file.size,
-      type: file.type,
-      url: URL.createObjectURL(file),
-      progress: 0,
-    }));
+    const fileObjects: UploadedFile[] = validFiles.map((file) => {
+      const id = `${Date.now()}-${Math.random()}`;
+      activeUploads.current[id] = abortController;
+      return {
+        id,
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        url: URL.createObjectURL(file), // temporary local URL
+        progress: 0,
+      };
+    });
 
-    onFilesChange([...files, ...fileObjects]);
+    const updatedFiles = [...files, ...fileObjects];
+    onFilesChange(updatedFiles);
 
-    // Simulate upload progress
+    // Simulate/real upload progress
     if (onUpload) {
       setUploading(true);
       onUploadStart?.();
       try {
-        await onUpload(fileObjects.map((obj, i) => ({ file: validFiles[i], id: obj.id })));
-      } catch (error) {
-        // Update files to show error
-        onFilesChange([...files, ...fileObjects.map((f) => ({ ...f, error: "Upload failed" }))]);
-        console.error("Upload failed", error);
+        await onUpload(
+          fileObjects.map((obj, i) => ({ file: validFiles[i], id: obj.id })),
+          (progressEvent) => {
+            if (progressEvent.total) {
+              const percentCompleted = Math.round(
+                (progressEvent.loaded * 100) / progressEvent.total,
+              );
+              // Update progress for these specific files in the parent state
+              onFilesChange(
+                updatedFiles.map((f) =>
+                  fileObjects.find((fo) => fo.id === f.id)
+                    ? { ...f, progress: percentCompleted }
+                    : f,
+                ),
+              );
+            }
+          },
+          abortController.signal,
+        );
+      } catch (error: unknown) {
+        if (
+          error instanceof Error &&
+          (error.name === "CanceledError" || error.message === "canceled")
+        ) {
+          console.log("Upload canceled.");
+        } else {
+          // Update files to show error
+          onFilesChange(
+            updatedFiles.map((f) =>
+              fileObjects.find((fo) => fo.id === f.id) ? { ...f, error: "Upload failed" } : f,
+            ),
+          );
+          console.error("Upload failed", error);
+        }
       } finally {
+        fileObjects.forEach((f) => {
+          delete activeUploads.current[f.id];
+        });
         setUploading(false);
         onUploadEnd?.();
       }
@@ -113,6 +161,14 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
   };
 
   const removeFile = (fileId: string) => {
+    // Check if we need to abort an ongoing upload for this batch
+    const controller = activeUploads.current[fileId];
+    if (controller) {
+      controller.abort("canceled"); // Abort the fetch/axios request
+    }
+    if (onCancelUpload) {
+      onCancelUpload(fileId);
+    }
     const updatedFiles = files.filter((f) => f.id !== fileId);
     onFilesChange(updatedFiles);
   };
@@ -164,7 +220,7 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
           {files.map((file) => (
             <div key={file.id} className="flex items-center space-x-3 rounded-lg bg-neutral-50 p-3">
               {/* File Icon/Thumbnail */}
-              <div className="flex-shrink-0">
+              <div className="shrink-0">
                 {file.type.startsWith("image/") ? (
                   <div className="h-10 w-10 overflow-hidden rounded bg-neutral-200">
                     <img src={file.url} alt={file.name} className="h-full w-full object-cover" />
@@ -203,7 +259,7 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
               </div>
 
               {/* Status/Actions */}
-              <div className="flex-shrink-0">
+              <div className="shrink-0">
                 {typeof file.progress === "number" && file.progress < 100 && !file.error && (
                   <Loader size="sm" />
                 )}

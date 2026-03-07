@@ -6,15 +6,14 @@ import Input from "./ui/Input";
 import Tag from "./ui/Tag";
 import MediaUploader from "./ui/MediaUploader";
 import { Memory } from "@/types/types";
-import { useNetworkStatus } from "@/hooks/useNetworkStatus";
-import { db } from "@/lib/dexie/db";
-import { syncService } from "@/services/sync.service";
+import { CreateMemoryData } from "@/services/memory.service";
 import { toast } from "sonner";
+import axios from "axios";
 
 interface CreateMemoryModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (memory: Memory) => void | Promise<void>;
+  onSave: (memory: CreateMemoryData & { id?: string }) => void | Promise<void>;
   editingMemory?: Memory;
 }
 
@@ -24,7 +23,6 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
   onSave,
   editingMemory,
 }) => {
-  const isOnline = useNetworkStatus();
   const [activeTab, setActiveTab] = useState<"content" | "media" | "metadata">("content");
   const [formData, setFormData] = useState({
     title: editingMemory?.title || "",
@@ -53,6 +51,8 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
   const [aiGeneratedContent, setAiGeneratedContent] = useState(""); // New state for AI generated content
   const [showAiButtons, setShowAiButtons] = useState(false); // New state to control visibility of AI buttons
   const [imageUploading, setImageUploading] = useState(false);
+  const [showCustomMood, setShowCustomMood] = useState(false);
+  const predefinedMoods = ["joyful", "peaceful", "excited", "nostalgic", "grateful", "reflective"];
 
   useEffect(() => {
     if (editingMemory) {
@@ -86,26 +86,31 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
         images: [],
       });
       setActiveTab("content"); // Reset to content tab
+      setShowCustomMood(false);
     }
     setAiGeneratedContent(""); // Clear AI generated content on modal open/edit
   }, [editingMemory, isOpen]); // Depend on editingMemory and isOpen
 
-  // Real file upload to Cloudinary/Dropbox via our API
-  const handleUpload = async (uploadPairs: { file: File; id: string }[]): Promise<void> => {
+  // Real file upload to Cloudinary/Dropbox via our API using axios for progress
+  const handleUpload = async (
+    uploadPairs: { file: File; id: string }[],
+    onProgress?: (progressEvent: { loaded: number; total?: number }) => void,
+    signal?: AbortSignal,
+  ): Promise<void> => {
     const formData = new FormData();
     uploadPairs.forEach((pair) => formData.append("file", pair.file));
 
     try {
-      const response = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
+      const response = await axios.post("/api/upload", formData, {
+        signal,
+        onUploadProgress: (progressEvent) => {
+          if (onProgress) {
+            onProgress(progressEvent);
+          }
+        },
       });
 
-      if (!response.ok) {
-        throw new Error("Upload failed");
-      }
-
-      const { urls } = await response.json();
+      const { urls } = response.data;
 
       // Update the formData with real URLs
       setFormData((prev) => ({
@@ -120,6 +125,11 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
         }),
       }));
     } catch (error) {
+      if (axios.isCancel(error) || (error as Error).message === "canceled") {
+        console.log("Upload gracefully canceled by user.");
+        // We throw this specific error so MediaUploader knows it was intentionally canceled
+        throw new Error("canceled");
+      }
       console.error("Upload failed:", error);
       throw error;
     }
@@ -199,15 +209,17 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
     try {
       setFormErrors({}); // Clear any previous errors
 
-      const newMemory = {
+      // Prepare the data for the service layer
+      const memoryData = {
         ...formData,
+        id: editingMemory?.id,
         images: formData.images.map((file) => file.url),
-        id: editingMemory?.id || `memory-${Date.now()}`,
-        createdAt: editingMemory?.createdAt || new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        syncStatus: "pending",
-        isPublic: editingMemory?.isPublic ?? false,
-      } as Memory;
+      };
+
+      // Delegate persistence to the parent/service layer
+      await onSave(memoryData as Memory);
+
+      // Only reset and close if onSave was successful
       setFormData({
         title: "",
         content: "",
@@ -217,21 +229,6 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
         tags: [],
         images: [],
       });
-
-      if (isOnline) {
-        newMemory.syncStatus = "synced";
-      } else {
-        newMemory.syncStatus = "offline";
-        await syncService.queueOperation({
-          operation: editingMemory ? "update" : "create",
-          entity: "memory",
-          entityId: newMemory.id,
-          data: newMemory as unknown as Record<string, unknown>,
-        });
-      }
-
-      await db.memories.put(newMemory);
-      await onSave(newMemory);
       onClose();
     } catch (error) {
       console.error("Save failed:", error);
@@ -253,24 +250,43 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
 
   const handleGenerateWithAI = async () => {
     if (!formData.title.trim() && !formData.content.trim()) {
-      return; // Only generate if title or content exists
+      toast.error("Please provide at least a title or some initial thoughts for AI to build upon.");
+      return;
     }
+
     setAiLoading(true);
+    try {
+      const response = await fetch("/api/memories/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: formData.title,
+          content: formData.content,
+        }),
+      });
 
-    // Simulate AI API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to generate content");
+      }
 
-    const generatedContent = `AI-generated content for: ${
-      formData.title.trim() || formData.content.trim()
-    }. This is a placeholder for structured and generated text.`;
+      const { content } = await response.json();
 
-    setFormData((prev) => ({
-      ...prev,
-      content: generatedContent,
-    }));
-    setAiGeneratedContent(generatedContent); // Store for potential "Accept" action later
-    setAiLoading(false);
-    setShowAiButtons(true); // Show accept/discard buttons after generation
+      setFormData((prev) => ({
+        ...prev,
+        content: content,
+      }));
+      setAiGeneratedContent(content);
+      setAiLoading(false);
+      setShowAiButtons(true);
+      toast.success("AI has expanded your memory!");
+    } catch (error) {
+      console.error("AI Generation failed:", error);
+      toast.error(
+        error instanceof Error ? error.message : "AI generation failed. Please try again.",
+      );
+      setAiLoading(false);
+    }
   };
 
   const removeTag = (tagToRemove: string) => {
@@ -434,9 +450,12 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
                 {moods.map((mood) => (
                   <button
                     key={mood.value}
-                    onClick={() => setFormData({ ...formData, mood: mood.value as string })}
+                    onClick={() => {
+                      setFormData({ ...formData, mood: mood.value });
+                      setShowCustomMood(false);
+                    }}
                     className={`rounded-lg border-2 p-2 text-sm font-medium transition-colors ${
-                      formData.mood === mood.value
+                      formData.mood === mood.value && !showCustomMood
                         ? "border-primary-500 bg-primary-50"
                         : "border-neutral-200 hover:border-neutral-300"
                     }`}
@@ -444,8 +463,37 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
                     {mood.label}
                   </button>
                 ))}
+                <button
+                  onClick={() => {
+                    setShowCustomMood(true);
+                    if (predefinedMoods.includes(formData.mood)) {
+                      setFormData({ ...formData, mood: "" });
+                    }
+                  }}
+                  className={`rounded-lg border-2 p-2 text-sm font-medium transition-colors ${
+                    showCustomMood ||
+                    (!predefinedMoods.includes(formData.mood) && formData.mood !== "")
+                      ? "border-primary-500 bg-primary-50"
+                      : "border-neutral-200 hover:border-neutral-300"
+                  }`}
+                >
+                  Custom...
+                </button>
               </div>
-              {formErrors.mood && (
+
+              {(showCustomMood ||
+                (!predefinedMoods.includes(formData.mood) && formData.mood !== "")) && (
+                <div className="mt-3">
+                  <Input
+                    placeholder="Enter your custom mood..."
+                    value={!predefinedMoods.includes(formData.mood) ? formData.mood : ""}
+                    onChange={(e) => setFormData({ ...formData, mood: e.target.value })}
+                    error={formErrors.mood}
+                  />
+                </div>
+              )}
+
+              {formErrors.mood && !showCustomMood && predefinedMoods.includes(formData.mood) && (
                 <p className="text-destructive-600 mt-1 text-sm">{formErrors.mood}</p>
               )}
             </div>
@@ -495,6 +543,7 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
                   tags: [],
                   images: [],
                 });
+                setShowCustomMood(false);
               }}
             >
               Clear

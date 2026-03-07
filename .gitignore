@@ -9,7 +9,12 @@ node_modules
 
 scripts/
 
-# next-pwa generates these fresh on every `next build`.
-# Committing them locks in stale chunk hashes → breaks production precaching. (Rule F)
 public/sw.js
 public/workbox-*.js
+
+
+logs/
+
+logs
+
+/logs

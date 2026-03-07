@@ -10,8 +10,10 @@ import EmptyState from "@/components/ui/EmptyState";
 import { useTags } from "@/hooks/useTags";
 import { useMemories } from "@/hooks/useMemories";
 import { useRouter } from "next/navigation";
+import { useIsMounted } from "@/hooks/useIsMounted";
 
 export default function TagsPage() {
+  const isMounted = useIsMounted();
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
@@ -33,7 +35,7 @@ export default function TagsPage() {
       })
     : [];
 
-  if (tagsLoading || memoriesLoading) {
+  if (!isMounted || tagsLoading || memoriesLoading) {
     return <Loading fullPage text="Organizing your sanctuary..." />;
   }
 

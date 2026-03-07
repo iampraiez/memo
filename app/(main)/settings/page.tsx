@@ -66,7 +66,7 @@ export default function SettingsPage() {
 
   const handleSignOut = async () => {
     setIsSigningOut(true);
-    await signOut({ callbackUrl: "/" });
+    await signOut({ callbackUrl: "/auth/login" });
   };
 
   const handleSaveProfile = async () => {

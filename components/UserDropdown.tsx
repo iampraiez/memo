@@ -35,7 +35,13 @@ export default function UserDropdown() {
       >
         <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border border-white bg-neutral-200 font-bold text-neutral-600 shadow-sm">
           {session.user.image ? (
-            <Image src={session.user.image} alt={session.user.name || ""} width={32} height={32} />
+            <Image
+              src={session.user.image}
+              alt={session.user.name || ""}
+              width={32}
+              height={32}
+              className="h-full w-full object-cover"
+            />
           ) : (
             <span>{session.user.name?.[0] || "U"}</span>
           )}
@@ -91,7 +97,7 @@ export default function UserDropdown() {
             <button
               onClick={async () => {
                 setIsSigningOut(true);
-                await signOut({ callbackUrl: "/" });
+                await signOut({ callbackUrl: "/auth/login" });
               }}
               disabled={isSigningOut}
               className="text-destructive-600 hover:bg-destructive-50 flex w-full items-center space-x-3 px-4 py-2 text-left text-sm transition-colors disabled:opacity-50"

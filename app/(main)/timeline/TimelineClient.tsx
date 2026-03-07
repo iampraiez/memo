@@ -47,12 +47,10 @@ export default function TimelineClient({ initialMemories }: TimelineClientProps)
 
   const handleShareMemory = async (memory: Memory) => {
     try {
-      const response = await fetch(`/api/memories/${memory.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ isPublic: !memory.isPublic }),
+      await updateMemoryMutation.mutateAsync({
+        id: memory.id,
+        data: { isPublic: !memory.isPublic },
       });
-      if (!response.ok) throw new Error("Failed");
       toast.success(
         memory.isPublic ? "Memory is now private" : "Memory shared with sanctuary circle",
       );

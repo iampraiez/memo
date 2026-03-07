@@ -6,10 +6,14 @@ import { motion } from "framer-motion";
 import Lightbox from "@/components/ui/Lightbox";
 import { Image as ImageIcon, ShootingStar, Camera, Sparkle } from "@phosphor-icons/react";
 import Card from "@/components/ui/Card";
+import { useIsMounted } from "@/hooks/useIsMounted";
 
 export default function GalleryPage() {
-  const { data, isLoading } = useMemories();
+  const isMounted = useIsMounted();
+  const { data, isLoading: queryLoading } = useMemories();
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
+
+  const isLoading = !isMounted || queryLoading;
 
   const allImages = useMemo(() => {
     if (!data?.memories) return [];
@@ -102,15 +106,16 @@ export default function GalleryPage() {
                 />
 
                 {/* Overlay on Hover */}
-                <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/80 via-black/20 to-transparent p-6 opacity-0 transition-opacity duration-500 group-hover:opacity-100">
+                <div className="absolute inset-0 flex flex-col justify-end bg-linear-to-t from-black/80 via-black/20 to-transparent p-6 opacity-0 transition-opacity duration-500 group-hover:opacity-100">
                   <motion.div initial={{ y: 20 }} whileHover={{ y: 0 }} className="space-y-1">
                     <h3 className="line-clamp-1 text-lg font-bold text-white">{img.title}</h3>
                     <div className="flex items-center text-xs font-medium tracking-widest text-white/70 uppercase">
                       <ShootingStar className="mr-1.5 h-3 w-3" />
-                      {new Date(img.date).toLocaleDateString(undefined, {
-                        month: "short",
-                        year: "numeric",
-                      })}
+                      {isMounted &&
+                        new Date(img.date).toLocaleDateString(undefined, {
+                          month: "short",
+                          year: "numeric",
+                        })}
                     </div>
                   </motion.div>
                 </div>

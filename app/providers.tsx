@@ -47,16 +47,16 @@ export function Providers({
         maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
       });
 
-      /* Service Worker is handled by next-pwa in next.config.js
+      // Explicit SW Registration because next-pwa auto-register is known to be
+      // flaky with the new Next.js App Router structure.
       if ("serviceWorker" in navigator && process.env.NODE_ENV === "production") {
         window.addEventListener("load", () => {
           navigator.serviceWorker
             .register("/sw.js")
             .then((reg) => console.log("SW registered:", reg))
-            .catch((err) => console.log("SW registration failed:", err));
+            .catch((err) => console.error("SW registration failed:", err));
         });
       }
-      */
     }
   }, [queryClient]);
 

@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import { CloudinaryService } from "@/services/cloudinary.service";
 import { logger } from "@/custom/log/logger";
 
-export const maxDuration = 60; // Increase timeout to 60 seconds
+export const maxDuration = 300; // Increase timeout to 300 seconds (5 minutes)
 
 export async function POST(req: Request) {
   try {
@@ -20,14 +20,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: "No files provided" }, { status: 400 });
     }
 
-    // Server-side file size validation (10MB limit)
-    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+    // Server-side file size validation (20MB limit)
+    const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
     const oversizedFiles = files.filter((file) => file.size > MAX_FILE_SIZE);
 
     if (oversizedFiles.length > 0) {
       return NextResponse.json(
         {
-          message: `File size limit exceeded. The following files are too large: ${oversizedFiles.map((f) => f.name).join(", ")}`,
+          message: `File size limit exceeded. The following files are too large (max 20MB): ${oversizedFiles.map((f) => f.name).join(", ")}`,
         },
         { status: 400 },
       );
@@ -46,7 +46,11 @@ export async function POST(req: Request) {
     return NextResponse.json({ urls });
   } catch (error: unknown) {
     const errorData = error instanceof Error ? error : new Error("Unknown error");
-    const status = (error as { status?: number }).status || 500;
+
+    // Cloudinary errors often use http_code
+    const status =
+      (error as { status?: number }).status || (error as { http_code?: number }).http_code || 500;
+
     const details =
       (error as { error?: { error_summary?: string } }).error?.error_summary || errorData.message;
 
@@ -55,12 +59,15 @@ export async function POST(req: Request) {
       message: errorData.message,
       stack: errorData.stack,
       status: status,
-      error_details: (error as { error?: unknown }).error,
+      error_details: error,
     });
 
     return NextResponse.json(
       {
-        message: "Internal Server Error",
+        message:
+          status === 499
+            ? "Upload timed out. Please try again or use a smaller file."
+            : "Internal Server Error",
         error: errorData.message,
         details: details,
       },

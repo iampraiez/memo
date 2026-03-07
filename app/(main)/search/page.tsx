@@ -7,6 +7,7 @@ import EmptyState from "@/components/ui/EmptyState";
 import Input from "@/components/ui/Input";
 import { useSearchMemories } from "@/hooks/useMemories";
 import { useRouter } from "next/navigation";
+import { useIsMounted } from "@/hooks/useIsMounted";
 
 export default function SearchPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -22,7 +23,9 @@ export default function SearchPage() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  const { data: searchData, isLoading } = useSearchMemories(debouncedQuery, scope);
+  const { data: searchData, isLoading: queryLoading } = useSearchMemories(debouncedQuery, scope);
+  const isMounted = useIsMounted();
+  const isLoading = !isMounted || queryLoading;
   const searchResults = searchData?.memories || [];
 
   return (
