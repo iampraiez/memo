@@ -19,14 +19,14 @@ interface NotificationPanelProps {
 const NotificationPanel: React.FC<NotificationPanelProps> = ({ isOpen, onClose }) => {
   const { data, isLoading, unreadCount } = useNotifications();
   const markAsRead = useMarkNotificationRead();
-  const markAllRead = useMarkAllNotificationsRead();
+  const { mutate: markAllReadMutate, isPending: isMarkingAllRead } = useMarkAllNotificationsRead();
 
   // Mark all as read when opened
   useEffect(() => {
-    if (isOpen && unreadCount > 0) {
-      markAllRead.mutate();
+    if (isOpen && unreadCount > 0 && !isMarkingAllRead) {
+      markAllReadMutate();
     }
-  }, [isOpen, unreadCount, markAllRead]);
+  }, [isOpen, unreadCount, isMarkingAllRead, markAllReadMutate]);
 
   if (!isOpen) return null;
 
@@ -133,7 +133,7 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ isOpen, onClose }
             <Button
               variant="ghost"
               className="w-full text-xs font-bold text-neutral-500 hover:text-neutral-900"
-              onClick={() => markAllRead.mutate()}
+              onClick={() => markAllReadMutate()}
             >
               Mark all as read
             </Button>
