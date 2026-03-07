@@ -129,7 +129,7 @@ jobs:
           CLOUDINARY_API_SECRET: test-api-secret
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: build-output
           path: .next
