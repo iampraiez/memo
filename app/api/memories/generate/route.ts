@@ -4,14 +4,14 @@ import { GoogleGenAI } from "@google/genai";
 import { env } from "@/config/env";
 import { logger } from "@/custom/log/logger";
 
-export const genAI = new GoogleGenAI({ apiKey: env.GEMINI_API_KEY });
+const genAI = new GoogleGenAI({ apiKey: env.GEMINI_API_KEY });
 
-export const cleanJSON = (text: string) => {
+const cleanJSON = (text: string) => {
   const match = text.match(/\[[\s\S]*\]/);
   return match ? JSON.parse(match[0]) : null;
 };
 
-export async function generateContent(prompt: string) {
+async function generateContent(prompt: string) {
   const result = await genAI.models.generateContent({
     model: "gemini-2.5-flash",
     contents: prompt,

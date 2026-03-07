@@ -3,8 +3,24 @@ import { auth } from "@/lib/auth";
 import db from "@/drizzle/index";
 import { stories, memories as memoriesTable } from "@/drizzle/db/schema";
 import { eq, desc, and, gte, lte } from "drizzle-orm";
+import { GoogleGenAI } from "@google/genai";
 import { v4 as uuidv4 } from "uuid";
-import { cleanJSON, generateContent } from "../memories/generate/route";
+import { env } from "@/config/env";
+
+const genAI = new GoogleGenAI({ apiKey: env.GEMINI_API_KEY });
+
+const cleanJSON = (text: string) => {
+  const match = text.match(/\[[\s\S]*\]/);
+  return match ? JSON.parse(match[0]) : null;
+};
+
+async function generateContent(prompt: string) {
+  const result = await genAI.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: prompt,
+  });
+  return result.text;
+}
 
 export async function GET() {
   const session = await auth();
