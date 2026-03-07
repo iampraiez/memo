@@ -84,6 +84,10 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       updatedAt: new Date(),
     };
 
+    // Strip out array relations that don't belong in the main 'memories' table row
+    delete updateData.tags;
+    delete updateData.images;
+
     if (validatedData.date) {
       updateData.date = new Date(validatedData.date);
     }

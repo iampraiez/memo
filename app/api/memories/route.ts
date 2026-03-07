@@ -8,6 +8,7 @@ import { z } from "zod";
 import { v4 as uuidv4 } from "uuid";
 
 const memorySchema = z.object({
+  id: z.string().optional(),
   title: z.string().min(1),
   content: z.string().min(1),
   date: z.string(),
@@ -122,7 +123,7 @@ export async function POST(req: Request) {
     }
 
     // Create memory
-    const memoryId = `mem-${uuidv4()}`;
+    const memoryId = validatedData.id || `mem-${uuidv4()}`;
     const [newMemory] = await db
       .insert(memories)
       .values({

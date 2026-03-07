@@ -128,7 +128,7 @@ export const memoryService = {
       operation: "create",
       entity: "memory",
       entityId: tempId,
-      data: data as unknown as Record<string, unknown>,
+      data: { ...data, id: tempId } as unknown as Record<string, unknown>,
     });
 
     return { memory: newMemory as Memory };

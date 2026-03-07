@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { Memory } from "@/types/types";
 import MemoryCard from "./MemoryCard";
@@ -20,10 +20,31 @@ const Timeline: React.FC<TimelineProps> = ({
   onDeleteMemory,
   onShareMemory,
 }) => {
-  const [expandedYears, setExpandedYears] = useState<Set<number>>(
-    new Set([new Date().getFullYear()]),
-  );
-  const [expandedMonths, setExpandedMonths] = useState<Set<string>>(new Set());
+  // Initialize state from sessionStorage if available, else default
+  const [expandedYears, setExpandedYears] = useState<Set<number>>(() => {
+    if (typeof window !== "undefined") {
+      const saved = sessionStorage.getItem("timeline_expanded_years");
+      if (saved) return new Set(JSON.parse(saved));
+    }
+    return new Set([new Date().getFullYear()]);
+  });
+
+  const [expandedMonths, setExpandedMonths] = useState<Set<string>>(() => {
+    if (typeof window !== "undefined") {
+      const saved = sessionStorage.getItem("timeline_expanded_months");
+      if (saved) return new Set(JSON.parse(saved));
+    }
+    return new Set();
+  });
+
+  // Sync state changes to sessionStorage
+  useEffect(() => {
+    sessionStorage.setItem("timeline_expanded_years", JSON.stringify(Array.from(expandedYears)));
+  }, [expandedYears]);
+
+  useEffect(() => {
+    sessionStorage.setItem("timeline_expanded_months", JSON.stringify(Array.from(expandedMonths)));
+  }, [expandedMonths]);
 
   // Group memories by year, month, and day
   const groupedMemories = memories.reduce(

@@ -190,7 +190,7 @@ export default function FriendsClient({ initialMemories }: FriendsClientProps) {
               <Card
                 key={memory.id}
                 className="group cursor-pointer space-y-6 border-neutral-100 p-8 transition-all duration-500 hover:shadow-2xl"
-                href={`/memories/${memory.id}`}
+                href={`/memory/${memory.id}`}
               >
                 <div className="flex items-center justify-between border-b border-neutral-100 pb-4">
                   <div className="flex items-center space-x-3">
