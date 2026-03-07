@@ -1,12 +1,5 @@
 "use client";
-import {
-  ArrowLeft,
-  PencilSimple,
-  ShareNetwork,
-  MapPin,
-  Calendar,
-  ArrowsClockwise,
-} from "@phosphor-icons/react";
+import { ArrowLeft, MapPin, Calendar, ArrowsClockwise } from "@phosphor-icons/react";
 import Button from "@/components/ui/Button";
 import Tag from "@/components/ui/Tag";
 import { useMemory } from "@/hooks/useMemories";
@@ -23,12 +16,7 @@ interface MemoryDetailProps {
   onShareMemory?: (memory: Memory) => void;
 }
 
-export default function MemoryDetail({
-  memoryId,
-  onBack,
-  onEdit,
-  onShareMemory,
-}: MemoryDetailProps) {
+export default function MemoryDetail({ memoryId, onBack }: MemoryDetailProps) {
   const router = useRouter();
   const { data, isLoading, error } = useMemory(memoryId);
   const memory = data?.memory;
@@ -78,30 +66,6 @@ export default function MemoryDetail({
           <ArrowLeft className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" />
           Back
         </Button>
-        <div className="flex items-center space-x-3">
-          {onEdit && (
-            <Button
-              variant="secondary"
-              size="sm"
-              className="rounded-full"
-              onClick={() => onEdit(memory)}
-            >
-              <PencilSimple className="mr-2 h-4 w-4" />
-              Edit
-            </Button>
-          )}
-          {onShareMemory && (
-            <Button
-              variant="secondary"
-              size="sm"
-              className="rounded-full"
-              onClick={() => onShareMemory(memory)}
-            >
-              <ShareNetwork className="mr-2 h-4 w-4" />
-              Share
-            </Button>
-          )}
-        </div>
       </div>
 
       <div className="space-y-8">

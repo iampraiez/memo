@@ -1,6 +1,7 @@
 "use client";
+import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, UserPlus, UserMinus, User } from "lucide-react";
+import { ArrowLeft, UserPlus, UserMinus, User, Search } from "lucide-react";
 import Button from "@/components/ui/Button";
 import Loader from "@/components/ui/Loader";
 import { useSession } from "next-auth/react";
@@ -43,81 +44,129 @@ export default function FollowersPage() {
   }
 
   const followers = data?.followers || [];
+  const [searchQuery, setSearchQuery] = useState("");
+  const [visibleCount, setVisibleCount] = useState(20);
+
+  const filteredFollowers = followers.filter(
+    (user) =>
+      (user.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (user.username || "").toLowerCase().includes(searchQuery.toLowerCase()),
+  );
+  const displayedFollowers = filteredFollowers.slice(0, visibleCount);
+  const hasMore = visibleCount < filteredFollowers.length;
 
   return (
     <div className="mx-auto max-w-400 px-4 py-8">
       {/* Header */}
-      <div className="mb-8 flex items-center space-x-4">
+      <div className="mb-6 flex items-center space-x-4">
         <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-full">
           <ArrowLeft className="h-5 w-5 text-neutral-600" />
         </Button>
-        <h1 className="text-2xl font-bold text-neutral-900">Followers</h1>
+        <h1 className="text-2xl font-bold text-neutral-900">
+          Followers
+          <span className="ml-2 text-base font-normal text-neutral-400">({followers.length})</span>
+        </h1>
       </div>
+
+      {/* Search */}
+      {followers.length > 0 && (
+        <div className="relative mb-6">
+          <Search className="absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setVisibleCount(20);
+            }}
+            placeholder="Search followers..."
+            className="w-full rounded-2xl border border-neutral-200 bg-neutral-50 py-3 pr-4 pl-10 text-sm transition-colors outline-none focus:border-neutral-300 focus:bg-white"
+          />
+        </div>
+      )}
 
       {/* List */}
       <div className="space-y-4">
         {followers.length === 0 ? (
           <div className="rounded-4xl border border-neutral-100 bg-white py-20 text-center">
             <User className="mx-auto mb-4 h-12 w-12 text-neutral-200" />
-            <p className="font-medium text-neutral-500">No followers yet</p>
+            <p className="font-medium text-neutral-500">
+              {searchQuery ? "No followers match your search" : "No followers yet"}
+            </p>
           </div>
         ) : (
-          followers.map((user) => (
-            <div
-              key={user.id}
-              className="flex items-center justify-between rounded-4xl border border-neutral-100 bg-white p-5 transition-all hover:shadow-lg hover:shadow-neutral-950/5"
-            >
-              <div className="flex flex-1 items-center justify-between">
-                <Link
-                  href={`/profile/${user.username || user.id}`}
-                  className="flex flex-1 cursor-pointer items-center space-x-4"
-                >
-                  <div className="relative">
-                    {user.image ? (
-                      <img
-                        src={user.image}
-                        alt={user.name || "User"}
-                        className="h-12 w-12 rounded-full object-cover"
-                      />
-                    ) : (
-                      <div className="bg-primary-100 flex h-12 w-12 items-center justify-center rounded-full">
-                        <User className="text-primary-600 h-6 w-6" />
-                      </div>
-                    )}
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-neutral-900">{user.name || "Anonymous User"}</h3>
-                    <p className="text-sm font-medium text-neutral-500">
-                      @{user.username || user.id.slice(0, 8)}
-                    </p>
-                  </div>
-                </Link>
-
-                {session?.user?.id !== user.id && (
-                  <Button
-                    variant={user.isFollowing ? "secondary" : "primary"}
-                    size="sm"
-                    className="h-9 rounded-full px-4 text-xs font-bold"
-                    onClick={() =>
-                      user.isFollowing ? handleUnfollow(user.id) : handleFollow(user.id)
-                    }
+          <>
+            {displayedFollowers.map((user) => (
+              <div
+                key={user.id}
+                className="flex items-center justify-between rounded-4xl border border-neutral-100 bg-white p-5 transition-all hover:shadow-lg hover:shadow-neutral-950/5"
+              >
+                <div className="flex flex-1 items-center justify-between">
+                  <Link
+                    href={`/profile/${user.username || user.id}`}
+                    className="flex flex-1 cursor-pointer items-center space-x-4"
                   >
-                    {user.isFollowing ? (
-                      <>
-                        <UserMinus className="mr-2 h-4 w-4" />
-                        Unfollow
-                      </>
-                    ) : (
-                      <>
-                        <UserPlus className="mr-2 h-4 w-4" />
-                        Follow
-                      </>
-                    )}
-                  </Button>
-                )}
+                    <div className="relative">
+                      {user.image ? (
+                        <img
+                          src={user.image}
+                          alt={user.name || "User"}
+                          className="h-12 w-12 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="bg-primary-100 flex h-12 w-12 items-center justify-center rounded-full">
+                          <User className="text-primary-600 h-6 w-6" />
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-neutral-900">
+                        {user.name || "Anonymous User"}
+                      </h3>
+                      <p className="text-sm font-medium text-neutral-500">
+                        @{user.username || user.id.slice(0, 8)}
+                      </p>
+                    </div>
+                  </Link>
+
+                  {session?.user?.id !== user.id && (
+                    <Button
+                      variant={user.isFollowing ? "secondary" : "primary"}
+                      size="sm"
+                      className="h-9 rounded-full px-4 text-xs font-bold"
+                      onClick={() =>
+                        user.isFollowing ? handleUnfollow(user.id) : handleFollow(user.id)
+                      }
+                    >
+                      {user.isFollowing ? (
+                        <>
+                          <UserMinus className="mr-2 h-4 w-4" />
+                          Unfollow
+                        </>
+                      ) : (
+                        <>
+                          <UserPlus className="mr-2 h-4 w-4" />
+                          Follow
+                        </>
+                      )}
+                    </Button>
+                  )}
+                </div>
               </div>
-            </div>
-          ))
+            ))}
+
+            {hasMore && (
+              <div className="flex justify-center pt-4">
+                <Button
+                  variant="secondary"
+                  className="rounded-2xl px-8"
+                  onClick={() => setVisibleCount((prev) => prev + 20)}
+                >
+                  Show More ({filteredFollowers.length - visibleCount} remaining)
+                </Button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

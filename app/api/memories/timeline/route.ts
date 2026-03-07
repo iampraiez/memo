@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import db from "@/drizzle/index";
 import { memories, follows } from "@/drizzle/db/schema";
-import { and, eq, or, inArray, desc, sql, lt } from "drizzle-orm";
+import { and, eq, or, inArray, desc, sql, lt, SQL } from "drizzle-orm";
 import { Timeline } from "@/types/types";
 
 export async function GET(req: Request) {
@@ -28,13 +28,22 @@ export async function GET(req: Request) {
 
     const relevantUserIds = [userId, ...followingIds];
 
+    const whereConditions: SQL[] = [eq(memories.userId, userId)];
+
+    if (followingIds.length > 0) {
+      const followingCondition = and(
+        inArray(memories.userId, followingIds),
+        eq(memories.isPublic, true),
+      );
+      if (followingCondition) {
+        whereConditions.push(followingCondition);
+      }
+    }
+
     const query = db.query.memories.findMany({
       where: and(
         inArray(memories.userId, relevantUserIds),
-        or(
-          eq(memories.userId, userId),
-          and(inArray(memories.userId, followingIds), eq(memories.isPublic, true)),
-        ),
+        or(...whereConditions),
         cursor ? lt(memories.date, new Date(cursor)) : undefined,
       ),
       orderBy: sort === "random" ? sql`RANDOM()` : desc(memories.date),

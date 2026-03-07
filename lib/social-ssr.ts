@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth";
 import db from "@/drizzle/index";
 import { memories, follows } from "@/drizzle/db/schema";
-import { and, eq, or, inArray, desc } from "drizzle-orm";
+import { and, eq, or, inArray, desc, SQL } from "drizzle-orm";
 import { Memory } from "@/types/types";
 
 export async function getSocialTimeline(_sort: string = "date") {
@@ -22,17 +22,20 @@ export async function getSocialTimeline(_sort: string = "date") {
     const relevantUserIds = [userId, ...followingIds];
 
     // 2. Fetch memories
+    const whereConditions: SQL[] = [eq(memories.userId, userId)];
+
+    if (followingIds.length > 0) {
+      const followingCondition = and(
+        inArray(memories.userId, followingIds),
+        eq(memories.isPublic, true),
+      );
+      if (followingCondition) {
+        whereConditions.push(followingCondition);
+      }
+    }
+
     const allRelevantMemories = await db.query.memories.findMany({
-      where: and(
-        inArray(memories.userId, relevantUserIds),
-        or(
-          eq(memories.userId, userId), // My memories (all)
-          and(
-            inArray(memories.userId, followingIds), // Others' memories
-            eq(memories.isPublic, true), // Only public
-          ),
-        ),
-      ),
+      where: and(inArray(memories.userId, relevantUserIds), or(...whereConditions)),
       orderBy: [desc(memories.date)],
       limit: 10,
       with: {

@@ -144,6 +144,7 @@ export interface Comment {
   memoryId: string;
   userId: string;
   content: string;
+  likes?: string[];
   createdAt: string;
   user?: {
     name: string;

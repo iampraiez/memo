@@ -61,12 +61,7 @@ export default function TimelineClient({ initialMemories }: TimelineClientProps)
 
   if (viewingMemoryDetail) {
     return (
-      <MemoryDetail
-        memoryId={viewingMemoryDetail}
-        onBack={() => setViewingMemoryDetail(null)}
-        onEdit={handleEditMemory}
-        onShareMemory={handleShareMemory}
-      />
+      <MemoryDetail memoryId={viewingMemoryDetail} onBack={() => setViewingMemoryDetail(null)} />
     );
   }
 

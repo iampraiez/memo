@@ -9,11 +9,6 @@ import { env } from "@/config/env";
 
 const genAI = new GoogleGenAI({ apiKey: env.GEMINI_API_KEY });
 
-const cleanJSON = (text: string) => {
-  const match = text.match(/\[[\s\S]*\]/);
-  return match ? JSON.parse(match[0]) : null;
-};
-
 async function generateContent(prompt: string) {
   const result = await genAI.models.generateContent({
     model: "gemini-2.5-flash",
@@ -99,8 +94,7 @@ Guidelines:
 - Return only the story text.`;
 
     // 3. Generate content with Gemini
-    const result = await generateContent(prompt);
-    const storyContent = cleanJSON(result as string);
+    const storyContent = (await generateContent(prompt)) as string;
 
     // 4. Save to DB
     const newStory = {

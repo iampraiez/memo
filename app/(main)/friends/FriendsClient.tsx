@@ -12,8 +12,10 @@ import {
 } from "@/hooks/useSocial";
 import Image from "next/image";
 import Link from "next/link";
+import { useIsMounted } from "@/hooks/useIsMounted";
 import EmptyState from "@/components/ui/EmptyState";
 import Select from "@/components/ui/Select";
+import InlineDiscussion from "@/components/InlineDiscussion";
 import { Memory, Reaction, User } from "@/types/types";
 
 interface FriendsClientProps {
@@ -23,7 +25,21 @@ interface FriendsClientProps {
 export default function FriendsClient({ initialMemories }: FriendsClientProps) {
   const [friendSearch, setFriendSearch] = useState("");
   const [discoverySearch, setDiscoverySearch] = useState("");
-  const [sort, setSort] = useState("date"); // 'date' | 'random'
+  const [sort, setSort] = useState("date");
+  const [openDiscussions, setOpenDiscussions] = useState<Set<string>>(new Set());
+  const isMounted = useIsMounted();
+
+  const toggleDiscussion = (memoryId: string) => {
+    setOpenDiscussions((prev) => {
+      const next = new Set(prev);
+      if (next.has(memoryId)) {
+        next.delete(memoryId);
+      } else {
+        next.add(memoryId);
+      }
+      return next;
+    });
+  };
 
   const {
     data: timelineData,
@@ -184,16 +200,22 @@ export default function FriendsClient({ initialMemories }: FriendsClientProps) {
           {sort === "random" ? "Serendipitous Moments" : "Chronicles Feed"}
         </h2>
 
-        {filteredMemories.length > 0 ? (
+        {!isMounted ? (
+          <div className="flex justify-center p-12">
+            <Loading text="Syncing Feed..." />
+          </div>
+        ) : filteredMemories.length > 0 ? (
           <>
             {filteredMemories.map((memory: Memory) => (
               <Card
                 key={memory.id}
-                className="group cursor-pointer space-y-6 border-neutral-100 p-8 transition-all duration-500 hover:shadow-2xl"
-                href={`/memory/${memory.id}`}
+                className="group space-y-6 border-neutral-100 p-8 transition-all duration-500 hover:shadow-2xl"
               >
                 <div className="flex items-center justify-between border-b border-neutral-100 pb-4">
-                  <div className="flex items-center space-x-3">
+                  <Link
+                    href={`/profile/${memory.user?.username || memory.user?.id}`}
+                    className="flex items-center space-x-3"
+                  >
                     <div className="bg-primary-900 text-secondary-400 flex h-10 w-10 items-center justify-center overflow-hidden rounded-full font-bold">
                       {memory.user?.image ? (
                         <Image
@@ -202,17 +224,21 @@ export default function FriendsClient({ initialMemories }: FriendsClientProps) {
                           width={40}
                           height={40}
                         />
+                      ) : memory.user?.name ? (
+                        memory.user.name[0]
                       ) : (
-                        memory.user?.name[0]
+                        "?"
                       )}
                     </div>
                     <div>
-                      <p className="font-bold text-neutral-900">{memory.user?.name}</p>
+                      <p className="font-bold text-neutral-900">
+                        {memory.user?.name || "Anonymous"}
+                      </p>
                       <p className="text-xs tracking-widest text-neutral-500 uppercase">
                         {new Date(memory.date).toLocaleDateString()}
                       </p>
                     </div>
-                  </div>
+                  </Link>
                   <div className="flex items-center space-x-4 text-neutral-400">
                     <div className="flex items-center space-x-1">
                       <Heart
@@ -263,9 +289,15 @@ export default function FriendsClient({ initialMemories }: FriendsClientProps) {
                   </div>
                 </div>
 
-                <Button variant="secondary" className="w-full rounded-2xl">
-                  View Discussion
+                <Button
+                  variant="secondary"
+                  className="w-full rounded-2xl"
+                  onClick={() => toggleDiscussion(memory.id)}
+                >
+                  {openDiscussions.has(memory.id) ? "Hide Discussion" : "View Discussion"}
                 </Button>
+
+                <InlineDiscussion memoryId={memory.id} isOpen={openDiscussions.has(memory.id)} />
               </Card>
             ))}
 

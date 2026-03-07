@@ -4,15 +4,17 @@ import { useParams, notFound } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { userService } from "@/services/user.service";
 import { socialService } from "@/services/social.service";
+import { apiService } from "@/services/api.service";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Loading from "@/components/ui/Loading";
-import { Calendar } from "@phosphor-icons/react";
+import { Calendar, Heart, ChatCircle, Lock, Globe } from "@phosphor-icons/react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { is404Error } from "@/lib/utils";
+import { Memory } from "@/types/types";
 
 export default function ProfilePage() {
   const { id } = useParams();
@@ -32,6 +34,12 @@ export default function ProfilePage() {
   } = useQuery({
     queryKey: ["profile", userId],
     queryFn: () => userService.getProfile(userId),
+    enabled: mounted,
+  });
+
+  const { data: memoriesData, isLoading: isLoadingMemories } = useQuery({
+    queryKey: ["profile-memories", userId],
+    queryFn: () => apiService.get<{ memories: Memory[] }>(`/user/${userId}/memories`),
     enabled: mounted,
   });
 
@@ -67,6 +75,7 @@ export default function ProfilePage() {
   if (!profile) return null;
 
   const isOwnProfile = session?.user?.id === userId;
+  const profileMemories = memoriesData?.memories || [];
 
   return (
     <div className="mx-auto max-w-4xl space-y-8 p-6">
@@ -147,12 +156,89 @@ export default function ProfilePage() {
         </div>
       </Card>
 
-      {/* Profile Feed Placeholder */}
+      {/* Memories Grid */}
       <div className="space-y-6">
-        <h2 className="font-display text-2xl font-bold text-neutral-900">Memories</h2>
-        <div className="rounded-4xl border-2 border-dashed border-neutral-200 p-20 text-center text-neutral-400">
-          <p className="font-medium">Shared memories will appear here.</p>
-        </div>
+        <h2 className="font-display text-2xl font-bold text-neutral-900">
+          {isOwnProfile ? "My Memories" : "Shared Memories"}
+        </h2>
+
+        {isLoadingMemories ? (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-48 animate-pulse rounded-2xl bg-neutral-100" />
+            ))}
+          </div>
+        ) : profileMemories.length === 0 ? (
+          <div className="rounded-4xl border-2 border-dashed border-neutral-200 p-20 text-center text-neutral-400">
+            <p className="font-medium">
+              {isOwnProfile
+                ? "You haven't created any memories yet."
+                : "No public memories to show yet."}
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {profileMemories.map((memory) => (
+              <Card
+                key={memory.id}
+                className="group relative overflow-hidden transition-all duration-300 hover:shadow-lg"
+              >
+                {/* Cover image or gradient */}
+                {memory.images && memory.images.length > 0 ? (
+                  <div className="relative h-40 w-full overflow-hidden">
+                    <Image
+                      src={memory.images[0]}
+                      alt={memory.title}
+                      fill
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent" />
+                  </div>
+                ) : (
+                  <div className="from-primary-100 to-secondary-100 h-40 bg-linear-to-br" />
+                )}
+
+                {/* Visibility badge */}
+                <div className="absolute top-3 right-3">
+                  <span className="flex items-center space-x-1 rounded-full bg-white/90 px-2 py-1 text-[10px] font-bold tracking-widest text-neutral-600 uppercase shadow-sm backdrop-blur-sm">
+                    {memory.isPublic ? (
+                      <Globe size={10} className="text-green-500" />
+                    ) : (
+                      <Lock size={10} className="text-orange-500" />
+                    )}
+                    <span>{memory.isPublic ? "Public" : "Private"}</span>
+                  </span>
+                </div>
+
+                <div className="p-4">
+                  <p className="text-xs font-bold tracking-widest text-neutral-400 uppercase">
+                    {new Date(memory.date).toLocaleDateString()}
+                  </p>
+                  <h3 className="mt-1 line-clamp-1 font-bold text-neutral-900">{memory.title}</h3>
+                  <p className="mt-1 line-clamp-2 text-sm text-neutral-500">{memory.content}</p>
+
+                  <div className="mt-3 flex items-center justify-between border-t border-neutral-100 pt-3">
+                    <div className="flex items-center space-x-3 text-neutral-400">
+                      <span className="flex items-center space-x-1 text-xs">
+                        <Heart size={12} />
+                        <span>{memory.reactionCount ?? 0}</span>
+                      </span>
+                      <span className="flex items-center space-x-1 text-xs">
+                        <ChatCircle size={12} />
+                        <span>{memory.commentCount ?? 0}</span>
+                      </span>
+                    </div>
+                    {memory.tags && memory.tags.length > 0 && (
+                      <span className="max-w-[120px] truncate rounded-full bg-neutral-100 px-2 py-0.5 text-[10px] font-medium text-neutral-500">
+                        #{memory.tags[0]}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

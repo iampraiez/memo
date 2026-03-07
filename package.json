@@ -34,7 +34,7 @@
     "drizzle-orm": "^0.45.1",
     "framer-motion": "^12.30.0",
     "google-auth-library": "^10.5.0",
-    "jspdf": "^4.1.0",
+    "jspdf": "^4.2.0",
     "lucide-react": "^0.563.0",
     "next": "^16.1.6",
     "next-auth": "5.0.0-beta.30",
@@ -51,7 +51,7 @@
     "tailwind-merge": "^3.4.0",
     "tailwindcss": "^4.1.18",
     "uuid": "^13.0.0",
-    "vercel": "^50.15.1",
+    "vercel": "^50.28.0",
     "web-push": "^3.6.7",
     "zod": "^4.3.6",
     "zustand": "^5.0.11"
@@ -60,7 +60,19 @@
     "overrides": {
       "undici": ">=6.23.1",
       "path-to-regexp": ">=6.3.2",
-      "esbuild": ">=0.25.0"
+      "esbuild": ">=0.25.0",
+      "rollup": ">=4.22.4",
+      "serialize-javascript": ">=7.0.3",
+      "tar": ">=7.5.10",
+      "bn.js": ">=5.2.1",
+      "dompurify": ">=3.3.2",
+      "@tootallnate/once": ">=3.0.1",
+      "ajv": ">=8.18.0",
+      "eslint>ajv": ">=6.14.0 <7",
+      "@eslint/eslintrc>ajv": ">=6.14.0 <7",
+      "minimatch": ">=10.2.3",
+      "eslint>minimatch": ">=3.1.2 <4",
+      "@typescript-eslint/typescript-estree>minimatch": ">=9.0.5 <10"
     }
   },
   "devDependencies": {
