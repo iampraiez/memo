@@ -1,30 +1,17 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
 import db from "@/drizzle/index";
 import { memories } from "@/drizzle/db/schema";
-import { eq, and, gte, lte, sql } from "drizzle-orm";
-import { logger } from "@/custom/log/logger";
+import { eq, and, gte, lte } from "drizzle-orm";
+import { logger } from "@/lib/logger";
+import { requireAuth } from "@/lib/api-utils";
 
 export async function GET(req: Request) {
   try {
-    const session = await auth();
-
-    if (!session?.user?.email) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-    }
+    const { user, error } = await requireAuth();
+    if (error) return error;
 
     const { searchParams } = new URL(req.url);
     const timeRange = searchParams.get("timeRange") || "year";
-
-    // Get user ID from email
-    const [user] = await db.query.users.findMany({
-      where: sql`email = ${session.user.email}`,
-      limit: 1,
-    });
-
-    if (!user) {
-      return NextResponse.json({ message: "User not found" }, { status: 404 });
-    }
 
     // Calculate date range
     const now = new Date();

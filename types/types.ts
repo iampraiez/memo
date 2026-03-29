@@ -27,7 +27,7 @@ export interface Memory {
   content: string;
   summary?: string | null;
   date: string;
-  mood?: "joyful" | "peaceful" | "excited" | "nostalgic" | "grateful" | "reflective" | null;
+  mood?: string | null;
   tags?: string[];
   images?: string[];
   location?: string | null;
@@ -36,6 +36,8 @@ export interface Memory {
   createdAt: string;
   updatedAt: string;
   isPublic: boolean;
+  shareToken?: string | null;
+  unlockDate?: string | null;
   user?: {
     id: string;
     name: string;

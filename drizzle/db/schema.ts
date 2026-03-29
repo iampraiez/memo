@@ -108,6 +108,8 @@ export const memories = pgTable("memories", {
   userId: text("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
+  shareToken: text("share_token").unique(),
+  unlockDate: timestamp("unlock_date"),
 });
 
 export const memoryMedia = pgTable("memory_media", {

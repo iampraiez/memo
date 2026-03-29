@@ -1,19 +1,20 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/dexie/db";
 import { Memory } from "@/types/types";
 import { memoryService, CreateMemoryData, UpdateMemoryData } from "@/services/memory.service";
+import { useSession } from "next-auth/react";
+import { useDebounce } from "./useDebounce";
 
-export const useMemories = (isPublic?: boolean, limit = 100, offset = 0) => {
-  // Live query from Dexie for real-time UI
+export const useMemories = (isPublic?: boolean, limit = 20) => {
+  const { data: session } = useSession();
+  const userId = session?.user?.id;
+
+  // Live query from Dexie for real-time UI (Recent first)
   const memories = useLiveQuery(async () => {
-    const userId = await memoryService.getCurrentUserId();
     if (!userId) return [];
 
     let query = db.memories.where("userId").equals(userId);
-
-    // We can't easily filter by isPublic in Dexie without multi-index,
-    // but we can filter the result for now or add index later.
     const results = await query.reverse().sortBy("createdAt");
 
     if (isPublic !== undefined) {
@@ -21,20 +22,52 @@ export const useMemories = (isPublic?: boolean, limit = 100, offset = 0) => {
     }
 
     return results;
-  }, [isPublic, limit, offset]);
+  }, [userId, isPublic]);
 
-  // Use React Query in background to trigger sync/refetch
-  const query = useQuery({
-    queryKey: ["memories", { isPublic, limit, offset }],
-    queryFn: () => memoryService.getAll(isPublic, limit, offset),
-    enabled: true, // Always fetch to update Dexie in background
+  // Use Infinite Query for paginated fetching
+  const query = useInfiniteQuery({
+    queryKey: ["memories", { userId, isPublic, limit }],
+    queryFn: ({ pageParam = 0 }) =>
+      memoryService.getAll(userId!, isPublic, limit, pageParam as number),
+    enabled: !!userId,
+    getNextPageParam: (lastPage, allPages) => {
+      if (lastPage.memories.length < limit) return undefined;
+      return allPages.length * limit;
+    },
+    initialPageParam: 0,
     structuralSharing: true,
   });
 
   return {
     ...query,
-    data: memories ? { memories: memories as Memory[] } : query.data,
+    // Explicit isLoading flag for when data isn't yet available (item 5.10)
+    isLoading: query.isLoading || (userId && memories === undefined),
+    data: memories ? { memories: memories as Memory[] } : query.data?.pages[0],
   };
+};
+
+export const useStreak = () => {
+  const { data: session } = useSession();
+  const userId = session?.user?.id;
+  return useQuery({
+    queryKey: ["streak", userId],
+    queryFn: () => memoryService.getStreak(userId!),
+    enabled: !!userId,
+  });
+};
+
+export const useOnThisDay = () => {
+  const { data: session } = useSession();
+  const userId = session?.user?.id;
+
+  return useQuery({
+    queryKey: ["on-this-day", userId],
+    queryFn: async () => {
+      const results = await memoryService.getOnThisDayMemories(userId!);
+      return results as Memory[];
+    },
+    enabled: !!userId,
+  });
 };
 
 export const useMemory = (id: string) => {
@@ -53,25 +86,30 @@ export const useMemory = (id: string) => {
   };
 };
 
-export const useSearchMemories = (query: string, scope: "mine" | "circle" = "mine") => {
+export const useSearchMemories = (queryText: string, scope: "mine" | "circle" = "mine") => {
+  const { data: session } = useSession();
+  const userId = session?.user?.id;
+  const debouncedQuery = useDebounce(queryText, 400);
+
   return useQuery<{ memories: Memory[] }>({
-    queryKey: ["memories", "search", query, scope],
-    queryFn: () => memoryService.search(query, scope),
-    enabled: query.length >= 2,
+    queryKey: ["memories", "search", debouncedQuery, scope, userId],
+    queryFn: () => memoryService.search(userId!, debouncedQuery, scope),
+    enabled: !!userId && debouncedQuery.length >= 2,
     structuralSharing: true,
   });
 };
 
 export const useCreateMemory = () => {
   const queryClient = useQueryClient();
+  const { data: session } = useSession();
+  const userId = session?.user?.id;
 
   return useMutation({
-    mutationFn: (data: CreateMemoryData) => memoryService.create(data),
+    mutationFn: (data: CreateMemoryData) => memoryService.create(userId!, data),
     onSuccess: () => {
-      // No need to invalidate for UI updates since useLiveQuery handles it,
-      // but still good for background sync state.
       queryClient.invalidateQueries({ queryKey: ["memories"] });
       queryClient.invalidateQueries({ queryKey: ["analytics"] });
+      queryClient.invalidateQueries({ queryKey: ["streak"] });
     },
   });
 };
@@ -86,6 +124,7 @@ export const useUpdateMemory = () => {
       queryClient.invalidateQueries({ queryKey: ["memory", variables.id] });
       queryClient.invalidateQueries({ queryKey: ["memories"] });
       queryClient.invalidateQueries({ queryKey: ["analytics"] });
+      queryClient.invalidateQueries({ queryKey: ["streak"] });
     },
   });
 };
@@ -98,6 +137,7 @@ export const useDeleteMemory = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["memories"] });
       queryClient.invalidateQueries({ queryKey: ["analytics"] });
+      queryClient.invalidateQueries({ queryKey: ["streak"] });
     },
   });
 };

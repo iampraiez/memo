@@ -10,12 +10,15 @@ import {
   useFollowUser,
   useUnfollowUser,
 } from "@/hooks/useSocial";
+import { useFamilyMembers, useInviteFamilyMember, useRespondToInvite } from "@/hooks/useFamily";
+import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useIsMounted } from "@/hooks/useIsMounted";
 import EmptyState from "@/components/ui/EmptyState";
 import Select from "@/components/ui/Select";
 import InlineDiscussion from "@/components/InlineDiscussion";
+import Modal from "@/components/ui/Modal";
 import { Memory, Reaction, User } from "@/types/types";
 
 interface FriendsClientProps {
@@ -23,6 +26,9 @@ interface FriendsClientProps {
 }
 
 export default function FriendsClient({ initialMemories }: FriendsClientProps) {
+  const { data: session } = useSession();
+  const userId = session?.user?.id || undefined;
+
   const [friendSearch, setFriendSearch] = useState("");
   const [discoverySearch, setDiscoverySearch] = useState("");
   const [sort, setSort] = useState("date");
@@ -50,10 +56,15 @@ export default function FriendsClient({ initialMemories }: FriendsClientProps) {
   } = useTimelineMemories(sort, initialMemories);
 
   const { data: discoveryData, isLoading: isLoadingDiscovery } = useSearchUsers(discoverySearch);
+  const { data: familyData } = useFamilyMembers(userId);
 
   const followMutation = useFollowUser();
   const unfollowMutation = useUnfollowUser();
+  const inviteMutation = useInviteFamilyMember(userId);
+  const respondMutation = useRespondToInvite(userId);
+
   const [updatingUserId, setUpdatingUserId] = useState<string | null>(null);
+  const [invitingUserId, setInvitingUserId] = useState<string | null>(null);
 
   const handleFollow = async (userId: string) => {
     setUpdatingUserId(userId);
@@ -73,6 +84,33 @@ export default function FriendsClient({ initialMemories }: FriendsClientProps) {
     }
   };
 
+  const [selectedUserToInvite, setSelectedUserToInvite] = useState<User | null>(null);
+  const [inviteRelationship, setInviteRelationship] = useState("Family Member");
+
+  const handleInvite = async (user: User) => {
+    setSelectedUserToInvite(user);
+    setInviteRelationship("Family Member");
+  };
+
+  const confirmInvite = async () => {
+    if (!selectedUserToInvite) return;
+    setInvitingUserId(selectedUserToInvite.id);
+    try {
+      await inviteMutation.mutateAsync({
+        email: selectedUserToInvite.email,
+        name: selectedUserToInvite.name ?? undefined,
+        relationship: inviteRelationship,
+      });
+      setSelectedUserToInvite(null);
+    } finally {
+      setInvitingUserId(null);
+    }
+  };
+
+  const handleRespond = async (inviteId: string, status: "accepted" | "declined") => {
+    await respondMutation.mutateAsync({ inviteId, status });
+  };
+
   const memories = timelineData?.pages.flatMap((page) => page.memories) || [];
 
   const filteredMemories = memories.filter(
@@ -80,6 +118,9 @@ export default function FriendsClient({ initialMemories }: FriendsClientProps) {
       m.user?.name.toLowerCase().includes(friendSearch.toLowerCase()) ||
       m.title.toLowerCase().includes(friendSearch.toLowerCase()),
   );
+
+  const pendingInvites =
+    familyData?.members.filter((m) => m.status === "pending" && m.userId === userId) || [];
 
   // We only show full page loading if we don't even have initial memories
   if (isLoadingTimeline && memories.length === 0) {
@@ -127,11 +168,16 @@ export default function FriendsClient({ initialMemories }: FriendsClientProps) {
         </div>
 
         {/* Real-time Search Results Dropdown */}
-        {discoverySearch.length >= 2 && discoveryData?.user && (
+        {discoverySearch.length >= 2 && discoveryData?.users && (
           <div className="animate-in fade-in slide-in-from-top-2 absolute top-full right-0 left-0 z-20 mt-2 overflow-hidden rounded-2xl border border-neutral-100 bg-white shadow-xl duration-200">
-            {discoveryData.user.length > 0 ? (
+            {discoveryData.users.length > 0 ? (
               <div className="divide-y divide-neutral-50">
-                {(discoveryData.user as (User & { isFollowing?: boolean })[])
+                {(
+                  discoveryData.users as (User & {
+                    isFollowing?: boolean;
+                    familyStatus?: string | null;
+                  })[]
+                )
                   .slice(0, 5)
                   .map((user) => (
                     <div
@@ -163,21 +209,40 @@ export default function FriendsClient({ initialMemories }: FriendsClientProps) {
                           </p>
                         </div>
                       </Link>
-                      <Button
-                        variant={user.isFollowing ? "ghost" : "primary"}
-                        size="sm"
-                        className="h-8 rounded-full px-4 text-[10px] font-bold"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          user.isFollowing ? handleUnfollow(user.id) : handleFollow(user.id);
-                        }}
-                        loading={updatingUserId === user.id}
-                      >
-                        {user.isFollowing ? "Unfollow" : "Follow"}
-                      </Button>
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          variant={user.isFollowing ? "ghost" : "primary"}
+                          size="sm"
+                          className="h-8 rounded-full px-4 text-[10px] font-bold"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            user.isFollowing ? handleUnfollow(user.id) : handleFollow(user.id);
+                          }}
+                          loading={updatingUserId === user.id}
+                        >
+                          {user.isFollowing ? "Unfollow" : "Follow"}
+                        </Button>
+                        <Button
+                          variant={user.familyStatus ? "ghost" : "secondary"}
+                          size="sm"
+                          disabled={!!user.familyStatus}
+                          className="h-8 rounded-full px-4 text-[10px] font-bold"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleInvite(user);
+                          }}
+                          loading={invitingUserId === user.id}
+                        >
+                          {user.familyStatus === "accepted"
+                            ? "In Circle"
+                            : user.familyStatus === "pending"
+                              ? "Invited"
+                              : "Invite to Circle"}
+                        </Button>
+                      </div>
                     </div>
                   ))}
-                {discoveryData.user.length > 5 && (
+                {discoveryData.users.length > 5 && (
                   <div className="bg-neutral-50/50 p-3 text-center">
                     <p className="text-[10px] font-bold tracking-widest text-neutral-400 uppercase">
                       Showing top 5 matches
@@ -193,6 +258,54 @@ export default function FriendsClient({ initialMemories }: FriendsClientProps) {
           </div>
         )}
       </div>
+
+      {/* Pending Invitations */}
+      {pendingInvites.length > 0 && (
+        <div className="space-y-6">
+          <h2 className="px-2 text-sm font-bold tracking-widest text-neutral-400 uppercase">
+            Pending Invitations
+          </h2>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {pendingInvites.map((invite) => (
+              <Card key={invite.id} className="border-primary-100 bg-primary-50/30 p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="bg-primary-900 text-secondary-400 flex h-10 w-10 items-center justify-center overflow-hidden rounded-full font-bold">
+                      {invite.avatar ? (
+                        <Image src={invite.avatar} alt={invite.name} width={40} height={40} />
+                      ) : (
+                        invite.name[0]
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-neutral-900">{invite.name}</p>
+                      <p className="text-[10px] text-neutral-500">{invite.relationship}</p>
+                    </div>
+                  </div>
+                  <div className="flex space-x-2">
+                    <Button
+                      size="sm"
+                      variant="primary"
+                      className="h-8 rounded-full px-3 text-[10px] font-bold"
+                      onClick={() => handleRespond(invite.id, "accepted")}
+                    >
+                      Accept
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-8 rounded-full px-3 text-[10px] font-bold text-red-500 hover:bg-red-50"
+                      onClick={() => handleRespond(invite.id, "declined")}
+                    >
+                      Decline
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Feed */}
       <div className="space-y-8">
@@ -338,11 +451,78 @@ export default function FriendsClient({ initialMemories }: FriendsClientProps) {
                 ? "No memories match your filter."
                 : "Start following other sanctuary keepers to see their shared heritage here."
             }
-            actionLabel={friendSearch ? "Clear Search" : "Discover Keepers"}
-            onAction={() => (friendSearch ? setFriendSearch("") : setDiscoverySearch("a"))}
+            actionLabel={friendSearch ? "Clear Search" : undefined}
+            onAction={friendSearch ? () => setFriendSearch("") : undefined}
           />
         )}
       </div>
+
+      {/* Invitation Modal */}
+      <Modal
+        isOpen={!!selectedUserToInvite}
+        onClose={() => setSelectedUserToInvite(null)}
+        title="Invite to Circle"
+      >
+        <div className="space-y-6">
+          <div className="flex items-center space-x-4">
+            <div className="bg-primary-900 text-secondary-400 flex h-16 w-16 items-center justify-center overflow-hidden rounded-full font-bold shadow-lg">
+              {selectedUserToInvite?.image ? (
+                <Image
+                  src={selectedUserToInvite.image}
+                  alt={selectedUserToInvite.name || "User"}
+                  width={64}
+                  height={64}
+                />
+              ) : (
+                (selectedUserToInvite?.name || "?")[0]
+              )}
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-neutral-900">{selectedUserToInvite?.name}</h3>
+              <p className="text-sm font-medium text-neutral-500">
+                @{selectedUserToInvite?.username}
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <label className="text-sm font-bold tracking-widest text-neutral-400 uppercase">
+              How are you related?
+            </label>
+            <Select
+              options={[
+                { value: "Parent", label: "Parent" },
+                { value: "Sibling", label: "Sibling" },
+                { value: "Partner", label: "Partner" },
+                { value: "Child", label: "Child" },
+                { value: "Grandparent", label: "Grandparent" },
+                { value: "Relative", label: "Other Relative" },
+                { value: "Close Friend", label: "Close Friend (Chosen Family)" },
+              ]}
+              value={inviteRelationship}
+              onChange={setInviteRelationship}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 pt-4">
+            <Button
+              variant="ghost"
+              className="rounded-xl"
+              onClick={() => setSelectedUserToInvite(null)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              className="rounded-xl"
+              onClick={confirmInvite}
+              loading={invitingUserId === selectedUserToInvite?.id}
+            >
+              Send Invitation
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

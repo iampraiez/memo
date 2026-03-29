@@ -13,21 +13,16 @@ export interface CreateMemoryData {
   location?: string | null;
   images?: string[];
   isPublic?: boolean;
+  unlockDate?: string | null;
 }
 
 export interface UpdateMemoryData extends Partial<CreateMemoryData> {}
 
 export const memoryService = {
   // Fetch all memories (offline-first)
-  getAll: async (isPublic?: boolean, limit = 100, offset = 0) => {
-    const userId = await memoryService.getCurrentUserId();
-
+  getAll: async (userId: string, isPublic?: boolean, limit = 100, offset = 0) => {
     // Read from Dexie first
-    let memories = await db.memories
-      .where("userId")
-      .equals(userId || "")
-      .reverse()
-      .sortBy("createdAt");
+    let memories = await db.memories.where("userId").equals(userId).reverse().sortBy("createdAt");
 
     // Background sync with API if online
     if (syncService.getOnlineStatus()) {
@@ -41,21 +36,19 @@ export const memoryService = {
           `/memories?${params.toString()}`,
         );
 
-        // Update Dexie with fresh data
-        for (const memory of response.memories) {
-          await db.memories.put({
-            ...memory,
-            syncStatus: "synced",
-            lastSync: Date.now(),
-          });
+        // Update Dexie with fresh data (Batch write)
+        if (response.memories.length > 0) {
+          await db.memories.bulkPut(
+            response.memories.map((m) => ({
+              ...m,
+              syncStatus: "synced" as const,
+              lastSync: Date.now(),
+            })),
+          );
         }
 
         // Re-read from Dexie
-        memories = await db.memories
-          .where("userId")
-          .equals(userId || "")
-          .reverse()
-          .sortBy("createdAt");
+        memories = await db.memories.where("userId").equals(userId).reverse().sortBy("createdAt");
       } catch (error) {
         console.error("[MemoryService] Sync failed, using cached data:", error);
       }
@@ -99,13 +92,12 @@ export const memoryService = {
   },
 
   // Create memory (optimistic update)
-  create: async (data: CreateMemoryData) => {
-    const userId = await memoryService.getCurrentUserId();
+  create: async (userId: string, data: CreateMemoryData) => {
     const tempId = uuidv4();
 
     const newMemory: LocalMemory = {
       id: tempId,
-      userId: userId || "",
+      userId: userId,
       title: data.title,
       content: data.content,
       date: data.date,
@@ -128,7 +120,7 @@ export const memoryService = {
       operation: "create",
       entity: "memory",
       entityId: tempId,
-      data: { ...data, id: tempId } as unknown as Record<string, unknown>,
+      data: { ...data, id: tempId, userId } as unknown as Record<string, unknown>,
     });
 
     return { memory: newMemory as Memory };
@@ -194,14 +186,9 @@ export const memoryService = {
   },
 
   // Search memories (offline-first)
-  search: async (query: string, scope: "mine" | "circle" = "mine") => {
-    const userId = await memoryService.getCurrentUserId();
-
+  search: async (userId: string, query: string, scope: "mine" | "circle" = "mine") => {
     // Search in Dexie
-    const allMemories = await db.memories
-      .where("userId")
-      .equals(userId || "")
-      .toArray();
+    const allMemories = await db.memories.where("userId").equals(userId).toArray();
 
     const lowerQuery = query.toLowerCase();
     const filtered = allMemories.filter(
@@ -219,12 +206,14 @@ export const memoryService = {
         );
 
         // Update cache with search results
-        for (const memory of response.memories) {
-          await db.memories.put({
-            ...memory,
-            syncStatus: "synced",
-            lastSync: Date.now(),
-          });
+        if (response.memories.length > 0) {
+          await db.memories.bulkPut(
+            response.memories.map((m) => ({
+              ...m,
+              syncStatus: "synced" as const,
+              lastSync: Date.now(),
+            })),
+          );
         }
 
         return response;
@@ -236,13 +225,60 @@ export const memoryService = {
     return { memories: filtered as Memory[] };
   },
 
-  // Helper to get current user ID (from session or cache)
-  getCurrentUserId: async (): Promise<string | null> => {
-    // This should be replaced with actual session logic
-    // For now, we'll store it in localStorage or session
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("currentUserId");
+  // Calculate memory streak (consecutive days with memories)
+  getStreak: async (userId: string) => {
+    const memories = await db.memories.where("userId").equals(userId).reverse().sortBy("date");
+
+    if (memories.length === 0) return 0;
+
+    // Get unique dates only (YYYY-MM-DD)
+    const uniqueDates = Array.from(new Set(memories.map((m) => m.date.split("T")[0])));
+    if (uniqueDates.length === 0) return 0;
+
+    const today = new Date().toISOString().split("T")[0];
+    const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0];
+
+    // The streak is active if the latest memory is today or yesterday
+    const latestDate = uniqueDates[0];
+    if (latestDate !== today && latestDate !== yesterday) return 0;
+
+    let streak = 0;
+    let expectedDate = new Date(latestDate);
+
+    for (const dateStr of uniqueDates) {
+      const currentDate = new Date(dateStr);
+
+      // Check if dates are consecutive
+      if (currentDate.getTime() === expectedDate.getTime()) {
+        streak++;
+        // Set expected date to the day before
+        expectedDate.setDate(expectedDate.getDate() - 1);
+      } else {
+        break;
+      }
     }
-    return null;
+
+    return streak;
+  },
+
+  // Surfacing memories from the same day in previous years
+  getOnThisDayMemories: async (userId: string) => {
+    const memories = await db.memories.where("userId").equals(userId).toArray();
+
+    const today = new Date();
+    const currentMonth = today.getMonth();
+    const currentDay = today.getDate();
+    const currentYear = today.getFullYear();
+
+    return memories
+      .filter((m) => {
+        const memDate = new Date(m.date);
+        return (
+          memDate.getMonth() === currentMonth &&
+          memDate.getDate() === currentDay &&
+          memDate.getFullYear() < currentYear
+        );
+      })
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   },
 };

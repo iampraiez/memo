@@ -1,27 +1,14 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
 import db from "@/drizzle/index";
 import { memories } from "@/drizzle/db/schema";
-import { eq, sql } from "drizzle-orm";
-import { logger } from "@/custom/log/logger";
+import { eq } from "drizzle-orm";
+import { requireAuth } from "@/lib/api-utils";
+import { logger } from "@/lib/logger";
 
 export async function GET() {
   try {
-    const session = await auth();
-
-    if (!session?.user?.email) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-    }
-
-    // Get user ID
-    const [user] = await db.query.users.findMany({
-      where: sql`email = ${session.user.email}`,
-      limit: 1,
-    });
-
-    if (!user) {
-      return NextResponse.json({ message: "User not found" }, { status: 404 });
-    }
+    const { user, error } = await requireAuth();
+    if (error) return error;
 
     // Get all user memories
     const userMemories = await db.query.memories.findMany({

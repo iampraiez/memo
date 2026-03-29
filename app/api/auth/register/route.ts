@@ -4,9 +4,10 @@ import db from "@/drizzle/index";
 import { users, verificationTokens } from "@/drizzle/db/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
-import { logger } from "@/custom/log/logger";
+import { logger } from "@/lib/logger";
 import { v4 as uuidv4 } from "uuid";
 import { sendVerificationEmail } from "@/services/email.service";
+import { rateLimit } from "@/lib/rate-limit";
 
 const registerSchema = z.object({
   email: z.string().email(),
@@ -20,6 +21,16 @@ const generateVerificationCode = (): string => {
 
 export async function POST(req: Request) {
   try {
+    const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
+    const { success } = await rateLimit(`register_${ip}`, 5, 60 * 60 * 1000); // 5 requests per hour
+
+    if (!success) {
+      return NextResponse.json(
+        { message: "Too many registration attempts. Please try again later." },
+        { status: 429 },
+      );
+    }
+
     const body = await req.json();
     const { email, password, name } = registerSchema.parse(body);
 

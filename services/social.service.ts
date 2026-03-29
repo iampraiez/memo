@@ -223,17 +223,22 @@ export const socialService = {
 
   // Search users (API only)
   getFollowers: (userId: string) => {
-    return apiService.get<{ followers: Follow[] }>(`/api/user/${userId}/followers`);
+    return apiService.get<{ followers: Follow[] }>(`/user/${userId}/followers`);
   },
 
   getFollowing: (userId: string) => {
-    return apiService.get<{ following: Follow[] }>(`/api/user/${userId}/following`);
+    return apiService.get<{ following: Follow[] }>(`/user/${userId}/following`);
   },
 
   searchUsers: (query: string) => {
     return apiService.get<{
-      user: User[];
+      users: User[];
     }>(`/user/search?q=${encodeURIComponent(query)}`);
+  },
+
+  // On This Day (API only for now, can be cached in Dexie later)
+  getOnThisDay: () => {
+    return apiService.get<{ memories: Memory[] }>("/memories/on-this-day");
   },
 
   // Helper

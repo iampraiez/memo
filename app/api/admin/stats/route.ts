@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import db from "@/drizzle/index";
 import { users, memories, aiJobs } from "@/drizzle/db/schema";
 import { eq, count, sql } from "drizzle-orm";
-import { logger } from "@/custom/log/logger";
+import { logger } from "@/lib/logger";
 
 export async function GET() {
   try {
@@ -13,10 +13,9 @@ export async function GET() {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    // TODO: Add admin role check
-    // if (session.user.role !== 'admin') {
-    //   return NextResponse.json({ message: "Forbidden" }, { status: 403 });
-    // }
+    if ((session.user as { role?: string }).role !== "admin") {
+      return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+    }
 
     // Get system stats
     const [totalUsersResult] = await db.select({ count: count() }).from(users);
@@ -56,8 +55,13 @@ export async function GET() {
       orderBy: (systemLogs, { desc }) => [desc(systemLogs.createdAt)],
     });
 
-    // Calculate storage (mock for now - would need actual file system query)
-    const storageUsed = "2.4 TB"; // TODO: Implement actual storage calculation
+    // Calculate storage (approximate based on memory count and average image size)
+    const avgMemorySize = 50 * 1024; // 50KB for text + metadata
+    const avgImageSize = 800 * 1024; // 800KB for images
+    const totalMediaCount = (totalMemoriesResult?.count || 0) * 1.5; // Estimated 1.5 images per memory
+    const estimatedBytes =
+      (totalMemoriesResult?.count || 0) * avgMemorySize + totalMediaCount * avgImageSize;
+    const storageUsed = `${(estimatedBytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
 
     const stats = {
       totalUsers: totalUsersResult?.count || 0,

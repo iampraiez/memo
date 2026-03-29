@@ -35,6 +35,9 @@ export default function FollowersPage() {
     }
   };
 
+  const [searchQuery, setSearchQuery] = useState("");
+  const [visibleCount, setVisibleCount] = useState(20);
+
   if (isLoading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
@@ -44,8 +47,6 @@ export default function FollowersPage() {
   }
 
   const followers = data?.followers || [];
-  const [searchQuery, setSearchQuery] = useState("");
-  const [visibleCount, setVisibleCount] = useState(20);
 
   const filteredFollowers = followers.filter(
     (user) =>

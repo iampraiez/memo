@@ -6,16 +6,9 @@ import { eq, desc, and, gte, lte } from "drizzle-orm";
 import { GoogleGenAI } from "@google/genai";
 import { v4 as uuidv4 } from "uuid";
 import { env } from "@/config/env";
+import { rateLimit } from "@/lib/rate-limit";
 
 const genAI = new GoogleGenAI({ apiKey: env.GEMINI_API_KEY });
-
-async function generateContent(prompt: string) {
-  const result = await genAI.models.generateContent({
-    model: "gemini-2.5-flash",
-    contents: prompt,
-  });
-  return result.text;
-}
 
 export async function GET() {
   const session = await auth();
@@ -42,6 +35,16 @@ export async function POST(req: Request) {
 
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
+  const { success } = await rateLimit(`generate_story_${ip}`, 5, 24 * 60 * 60 * 1000); // 5 per day
+
+  if (!success) {
+    return NextResponse.json(
+      { error: "Daily story generation limit reached. Please try again tomorrow." },
+      { status: 429 },
+    );
   }
 
   try {
@@ -93,26 +96,72 @@ Guidelines:
 - Do not add fake facts, only expand on the existing memories.
 - Return only the story text.`;
 
-    // 3. Generate content with Gemini
-    const storyContent = (await generateContent(prompt)) as string;
+    // 3. Generate content with Gemini (Streaming)
+    const result = await genAI.models.generateContentStream({
+      model: "gemini-2.0-flash",
+      contents: prompt,
+    });
 
-    // 4. Save to DB
+    const storyId = uuidv4();
     const newStory = {
-      id: uuidv4(),
+      id: storyId,
       userId: session.user.id,
       title: title || "My Memory Story",
-      content: storyContent,
+      content: "", // Will be updated after stream
       tone,
       length,
       dateRange,
-      status: "ready",
+      status: "generating" as const,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
 
+    // Initial insert
     await db.insert(stories).values(newStory);
 
-    return NextResponse.json({ story: newStory });
+    const encoder = new TextEncoder();
+    let fullContent = "";
+
+    const stream = new ReadableStream({
+      async start(controller) {
+        try {
+          for await (const chunk of result) {
+            const text = chunk.text;
+            if (text) {
+              fullContent += text;
+              controller.enqueue(encoder.encode(text));
+            }
+          }
+
+          // Update DB when done
+          await db
+            .update(stories)
+            .set({
+              content: fullContent,
+              status: "ready",
+              updatedAt: new Date(),
+            })
+            .where(eq(stories.id, storyId));
+
+          controller.close();
+        } catch (err) {
+          console.error("Streaming error:", err);
+          await db
+            .update(stories)
+            .set({ status: "failed", updatedAt: new Date() })
+            .where(eq(stories.id, storyId));
+          controller.error(err);
+        }
+      },
+    });
+
+    return new Response(stream, {
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+        "Cache-Control": "no-cache",
+        "X-Story-Id": storyId, // Send ID in header so client knows which story this is
+      },
+    });
   } catch (error) {
     console.error("Error creating story:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });

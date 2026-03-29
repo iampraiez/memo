@@ -7,6 +7,7 @@ import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import Link from "next/link";
 import { toast } from "sonner";
+import { signIn } from "next-auth/react";
 
 export default function VerifyEmailClient() {
   const router = useRouter();
@@ -74,18 +75,19 @@ export default function VerifyEmailClient() {
 
     setIsVerifying(true);
     try {
-      const response = await fetch("/api/auth/verify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, code: verificationCode }),
+      const res = await signIn("credentials", {
+        redirect: false,
+        email,
+        token: verificationCode,
+        type: "verify-token",
       });
 
-      if (response.ok) {
-        setSuccess(true);
-        toast.success("Email verified!");
-        setTimeout(() => router.push("/auth/login?verified=true"), 2000);
-      } else {
+      if (res?.error) {
         toast.error("Verification failed. Please check the code.");
+      } else {
+        setSuccess(true);
+        toast.success("Email verified! Logging you in...");
+        setTimeout(() => router.push("/timeline"), 1500);
       }
     } catch {
       toast.error("An error occurred.");

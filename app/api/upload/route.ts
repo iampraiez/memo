@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { CloudinaryService } from "@/services/cloudinary.service";
-import { logger } from "@/custom/log/logger";
+import { logger } from "@/lib/logger";
 
 export const maxDuration = 300; // Increase timeout to 300 seconds (5 minutes)
 

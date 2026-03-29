@@ -4,7 +4,8 @@ import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import Nodemailer from "next-auth/providers/nodemailer";
 import nodemailer from "nodemailer";
 import db from "@/drizzle/index";
-import { accounts, users, verificationTokens, sessions } from "@/db/db/schema";
+import { accounts, users, verificationTokens, sessions } from "@/drizzle/db/schema";
+import { eq, and } from "drizzle-orm";
 import type { Provider } from "next-auth/providers";
 import brcypt from "bcryptjs";
 import { userExists } from "./query";
@@ -38,6 +39,39 @@ const providers: Provider[] = [
           console.error("Manual Google Auth Error:", error);
           throw new AuthError("GOOGLE_AUTH_FAILED");
         }
+      }
+
+      if (c.type === "verify-token" && c.token && c.email) {
+        const tokenRecord = await db.query.verificationTokens.findFirst({
+          where: and(
+            eq(verificationTokens.identifier, c.email as string),
+            eq(verificationTokens.token, c.token as string),
+          ),
+        });
+
+        if (!tokenRecord || tokenRecord.expires < new Date()) {
+          throw new AuthError("INVALID_VERIFICATION_CODE");
+        }
+
+        // Update emailVerified
+        await db
+          .update(users)
+          .set({ emailVerified: new Date() })
+          .where(eq(users.email, c.email as string));
+
+        await db
+          .delete(verificationTokens)
+          .where(
+            and(
+              eq(verificationTokens.identifier, c.email as string),
+              eq(verificationTokens.token, c.token as string),
+            ),
+          );
+
+        const user = await userExists(c.email as string);
+        if (!user) throw new AuthError("USER_NOT_FOUND");
+
+        return user;
       }
 
       // Handle standard Email/Password Login
@@ -161,6 +195,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.isOnboarded = token.isOnboarded as boolean;
       }
 
+      if (token.emailVerified) {
+        session.user.emailVerified = token.emailVerified as Date | null;
+      }
+
       return session;
     },
     async jwt({ token, user, trigger, session }) {
@@ -171,6 +209,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.name = user.name;
         token.image = user.image;
         token.isOnboarded = user.isOnboarded;
+        token.emailVerified = user.emailVerified;
         token.lastRefreshed = Date.now();
       }
 

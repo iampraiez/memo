@@ -3,7 +3,7 @@ import { users, memories, userPreferences, exportJobs } from "@/drizzle/db/schem
 import { eq } from "drizzle-orm";
 import { sendEmail } from "@/services/email.service";
 import { sendNotificationToUser } from "@/services/push-notification.server";
-import { logger } from "@/custom/log/logger";
+import { logger } from "@/lib/logger";
 
 export const runExportJob = async (jobId: string, userId: string) => {
   try {

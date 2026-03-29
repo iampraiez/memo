@@ -1,23 +1,16 @@
 import React, { useState, useEffect, useRef } from "react";
-import {
-  Tag as TagIcon,
-  Loader,
-  Sparkles,
-  Heart,
-  MapPin,
-  Calendar,
-  X,
-  CheckCircle,
-  Image as ImageIcon,
-  Plus,
-} from "lucide-react";
+import { Heart, MapPin, X, Image as ImageIcon } from "lucide-react";
 import Button from "./ui/Button";
-import Tag from "./ui/Tag";
-import MediaUploader from "./ui/MediaUploader";
 import { Memory } from "@/types/types";
 import { CreateMemoryData } from "@/services/memory.service";
 import { toast } from "sonner";
 import axios from "axios";
+
+// Import the sub-components
+import MemoryContentTab from "./memory/MemoryContentTab";
+import MemoryMediaTab from "./memory/MemoryMediaTab";
+import MemoryDetailsTab from "./memory/MemoryDetailsTab";
+import { MemoryFormData } from "./memory/types";
 
 const formatDateForInput = (date: string | undefined): string => {
   if (!date) return new Date().toISOString().split("T")[0];
@@ -27,55 +20,6 @@ const formatDateForInput = (date: string | undefined): string => {
     return new Date().toISOString().split("T")[0];
   }
 };
-
-const writingStyles = [
-  { value: "narrative", label: "Narrative", emoji: "📖", desc: "Classic storytelling" },
-  { value: "poetic", label: "Poetic", emoji: "🌸", desc: "Lyrical & evocative" },
-  { value: "journaling", label: "Journaling", emoji: "📔", desc: "Personal diary entry" },
-  { value: "letter", label: "Letter", emoji: "✉️", desc: "As if writing to someone" },
-  { value: "cinematic", label: "Cinematic", emoji: "🎬", desc: "Visual & dramatic" },
-];
-
-const MOODS = [
-  {
-    value: "joyful",
-    label: "Joyful",
-    emoji: "😊",
-    color: "bg-yellow-100 text-yellow-800 border-yellow-300",
-  },
-  {
-    value: "peaceful",
-    label: "Peaceful",
-    emoji: "😌",
-    color: "bg-blue-100 text-blue-800 border-blue-300",
-  },
-  {
-    value: "excited",
-    label: "Excited",
-    emoji: "🤩",
-    color: "bg-orange-100 text-orange-800 border-orange-300",
-  },
-  {
-    value: "nostalgic",
-    label: "Nostalgic",
-    emoji: "🌅",
-    color: "bg-purple-100 text-purple-800 border-purple-300",
-  },
-  {
-    value: "grateful",
-    label: "Grateful",
-    emoji: "🙏",
-    color: "bg-green-100 text-green-800 border-green-300",
-  },
-  {
-    value: "reflective",
-    label: "Reflective",
-    emoji: "💭",
-    color: "bg-gray-100 text-gray-800 border-gray-300",
-  },
-];
-
-const PREDEFINED_MOODS = MOODS.map((m) => m.value);
 
 interface CreateMemoryModalProps {
   isOpen: boolean;
@@ -99,7 +43,7 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
   editingMemory,
 }) => {
   const [activeTab, setActiveTab] = useState<TabId>("content");
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<MemoryFormData>({
     title: editingMemory?.title || "",
     content: editingMemory?.content || "",
     date: formatDateForInput(editingMemory?.date),
@@ -114,22 +58,52 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
         type: "image/jpeg",
         url,
       })) || [],
+    unlockDate: editingMemory?.unlockDate
+      ? new Date(editingMemory.unlockDate).toISOString().split("T")[0]
+      : "",
   });
-  const [newTag, setNewTag] = useState("");
+
   const [formErrors, setFormErrors] = useState<{
     title?: string;
     mood?: string;
     location?: string;
   }>({});
-  const [aiLoading, setAiLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [aiGeneratedContent, setAiGeneratedContent] = useState("");
-  const [showAiButtons, setShowAiButtons] = useState(false);
   const [imageUploading, setImageUploading] = useState(false);
-  const [showCustomMood, setShowCustomMood] = useState(false);
-  const [showStylePicker, setShowStylePicker] = useState(false);
-  const [selectedStyle, setSelectedStyle] = useState("narrative");
   const contentRef = useRef<HTMLDivElement>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  // Focus trap logic
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "Tab") return;
+
+      if (!modalRef.current) return;
+
+      const focusableElements = modalRef.current.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+      );
+      const firstElement = focusableElements[0] as HTMLElement;
+      const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+
+      if (e.shiftKey) {
+        if (document.activeElement === firstElement) {
+          lastElement.focus();
+          e.preventDefault();
+        }
+      } else {
+        if (document.activeElement === lastElement) {
+          firstElement.focus();
+          e.preventDefault();
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen]);
 
   useEffect(() => {
     if (editingMemory) {
@@ -148,6 +122,9 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
             type: "image/jpeg",
             url,
           })) || [],
+        unlockDate: editingMemory.unlockDate
+          ? new Date(editingMemory.unlockDate).toISOString().split("T")[0]
+          : "",
       });
       setActiveTab("content");
       setFormErrors({});
@@ -160,13 +137,10 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
         mood: "",
         tags: [],
         images: [],
+        unlockDate: "",
       });
       setActiveTab("content");
-      setShowCustomMood(false);
     }
-    setAiGeneratedContent("");
-    setShowStylePicker(false);
-    setShowAiButtons(false);
   }, [editingMemory, isOpen]);
 
   useEffect(() => {
@@ -186,6 +160,28 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
       document.body.style.overflow = "";
     };
   }, [isOpen]);
+
+  const handleClose = () => {
+    // Only check if we're not currently saving
+    if (isSaving) return;
+
+    // Check if any fields were modified
+    const isDirty =
+      formData.title !== (editingMemory?.title || "") ||
+      formData.content !== (editingMemory?.content || "") ||
+      formData.location !== (editingMemory?.location || "") ||
+      formData.mood !== (editingMemory?.mood || "") ||
+      formData.tags.length !== (editingMemory?.tags?.length || 0) ||
+      formData.images.length !== (editingMemory?.images?.length || 0);
+
+    if (isDirty) {
+      if (window.confirm("You have unsaved changes. Are you sure you want to discard them?")) {
+        onClose();
+      }
+    } else {
+      onClose();
+    }
+  };
 
   const handleUpload = async (
     uploadPairs: { file: File; id: string }[],
@@ -227,12 +223,11 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
 
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
-      // Navigate to most relevant tab with error
-      if (errors.title || errors.mood) {
-        // mood and title are on different tabs but title is content, mood is details
-        if (errors.title) setActiveTab("content");
-        else setActiveTab("details");
+      // Navigate to the first tab that has an error
+      if (errors.title) {
+        setActiveTab("content");
       } else {
+        // mood and location are both on the details tab
         setActiveTab("details");
       }
       return;
@@ -257,6 +252,7 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
         ...formData,
         id: editingMemory?.id,
         images: formData.images.map((f) => f.url),
+        unlockDate: formData.unlockDate || null,
       };
       await onSave(memoryData as Memory);
       setFormData({
@@ -267,53 +263,14 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
         mood: "",
         tags: [],
         images: [],
+        unlockDate: "",
       });
       onClose();
     } catch (error) {
       console.error("Save failed:", error);
-      toast.error("Failed to save memory");
+      toast.error("Failed to save memory. Please check your connection and try again.");
     } finally {
       setIsSaving(false);
-    }
-  };
-
-  const addTag = () => {
-    if (newTag.trim() && !formData.tags.includes(newTag.trim())) {
-      setFormData({ ...formData, tags: [...formData.tags, newTag.trim()] });
-      setNewTag("");
-    }
-  };
-
-  const removeTag = (tagToRemove: string) => {
-    setFormData({ ...formData, tags: formData.tags.filter((t) => t !== tagToRemove) });
-  };
-
-  const handleGenerateWithAI = async (style: string) => {
-    if (!formData.title.trim() && !formData.content.trim()) {
-      toast.error("Please provide a title or initial thoughts first.");
-      return;
-    }
-    setShowStylePicker(false);
-    setAiLoading(true);
-    try {
-      const response = await fetch("/api/memories/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: formData.title, content: formData.content, style }),
-      });
-      if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.error || "Failed to generate content");
-      }
-      const { content } = await response.json();
-      setAiGeneratedContent(content);
-      setFormData((prev) => ({ ...prev, content }));
-      setShowAiButtons(true);
-      toast.success("AI has expanded your memory!");
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "AI generation failed.");
-    } finally {
-      setAiLoading(false);
     }
   };
 
@@ -331,31 +288,27 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
 
   return (
     <>
-      {/* Backdrop */}
       <div
         className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm transition-opacity"
-        onClick={onClose}
+        onClick={handleClose}
       />
 
-      {/* Modal — Full screen on mobile, centred sheet on md+ */}
       <div className="fixed inset-0 z-50 flex flex-col items-stretch justify-end md:items-center md:justify-center md:p-6">
         <div
+          ref={modalRef}
           className="relative flex w-full flex-col overflow-hidden rounded-t-3xl bg-white shadow-2xl md:max-w-2xl md:rounded-3xl"
           style={{ maxHeight: "95dvh" }}
           onClick={(e) => e.stopPropagation()}
         >
-          {/* ── Drag handle (mobile) ── */}
           <div className="flex justify-center pt-3 pb-1 md:hidden">
             <div className="h-1 w-10 rounded-full bg-neutral-300" />
           </div>
 
-          {/* ── Header ── */}
           <div className="flex items-center justify-between border-b border-neutral-100 px-5 py-4">
             <div>
               <h2 className="text-lg font-bold text-neutral-900">
                 {editingMemory ? "Edit Memory" : "New Memory"}
               </h2>
-              {/* Progress bar */}
               <div className="mt-1 flex items-center space-x-2">
                 <div className="h-1.5 w-24 overflow-hidden rounded-full bg-neutral-100">
                   <div
@@ -369,14 +322,14 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
               </div>
             </div>
             <button
-              onClick={onClose}
+              onClick={handleClose}
+              aria-label="Close modal"
               className="flex h-8 w-8 items-center justify-center rounded-full bg-neutral-100 text-neutral-500 transition-colors hover:bg-neutral-200"
             >
               <X size={16} />
             </button>
           </div>
 
-          {/* ── Tab bar ── */}
           <div className="flex border-b border-neutral-100 bg-neutral-50/80">
             {TABS.map((tab) => {
               const Icon = tab.icon;
@@ -404,321 +357,44 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
             })}
           </div>
 
-          {/* ── Scrollable content ── */}
           <div ref={contentRef} className="flex-1 overflow-y-auto overscroll-contain">
-            {/* ─── CONTENT TAB ─── */}
             {activeTab === "content" && (
-              <div className="space-y-4 p-5">
-                <div>
-                  <label className="mb-1.5 block text-sm font-semibold text-neutral-700">
-                    Title <span className="text-red-400">*</span>
-                  </label>
-                  <input
-                    value={formData.title}
-                    onChange={(e) => {
-                      setFormData({ ...formData, title: e.target.value });
-                      if (formErrors.title) setFormErrors((p) => ({ ...p, title: undefined }));
-                    }}
-                    placeholder="What's this memory called?"
-                    className={`w-full rounded-xl border px-4 py-3 text-sm transition-all outline-none focus:ring-2 ${
-                      formErrors.title
-                        ? "border-red-300 focus:ring-red-200"
-                        : "focus:border-primary-300 focus:ring-primary-100 border-neutral-200"
-                    }`}
-                  />
-                  {formErrors.title && (
-                    <p className="mt-1 text-xs text-red-500">{formErrors.title}</p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="mb-1.5 block text-sm font-semibold text-neutral-700">
-                    Your Story
-                  </label>
-                  <textarea
-                    value={formData.content}
-                    onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                    placeholder="Tell your story... even a few sentences is a start."
-                    rows={6}
-                    className="focus:ring-primary-100 focus:border-primary-300 w-full resize-none rounded-xl border border-neutral-200 px-4 py-3 text-sm transition-all outline-none focus:ring-2"
-                  />
-                </div>
-
-                {/* AI section */}
-                {(formData.title.trim() || formData.content.trim()) && (
-                  <div className="rounded-2xl border border-neutral-100 bg-neutral-50 p-4">
-                    {showAiButtons ? (
-                      <div className="space-y-3">
-                        <div className="flex items-center space-x-2 text-sm font-semibold text-neutral-700">
-                          <Sparkles size={14} className="text-amber-500" />
-                          <span>AI has expanded your story</span>
-                        </div>
-                        <div className="flex space-x-2">
-                          <Button
-                            onClick={() => {
-                              setFormData((prev) => ({ ...prev, content: aiGeneratedContent }));
-                              setShowAiButtons(false);
-                              setAiGeneratedContent("");
-                            }}
-                            variant="primary"
-                            className="flex-1 py-2 text-sm"
-                          >
-                            <CheckCircle size={14} className="mr-1.5" /> Keep it
-                          </Button>
-                          <Button
-                            onClick={() => {
-                              setFormData((prev) => ({
-                                ...prev,
-                                content: editingMemory?.content || "",
-                              }));
-                              setShowAiButtons(false);
-                              setAiGeneratedContent("");
-                            }}
-                            variant="secondary"
-                            className="flex-1 py-2 text-sm"
-                          >
-                            <X size={14} className="mr-1.5" /> Discard
-                          </Button>
-                        </div>
-                      </div>
-                    ) : showStylePicker ? (
-                      <div>
-                        <p className="mb-3 flex items-center text-sm font-semibold text-neutral-700">
-                          <Sparkles size={14} className="mr-1.5 text-amber-500" />
-                          Choose a writing style
-                        </p>
-                        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-                          {writingStyles.map((style) => (
-                            <button
-                              key={style.value}
-                              onClick={() => {
-                                setSelectedStyle(style.value);
-                                handleGenerateWithAI(style.value);
-                              }}
-                              className={`rounded-xl border-2 p-3 text-left transition-all active:scale-95 ${
-                                selectedStyle === style.value
-                                  ? "border-primary-500 bg-primary-50"
-                                  : "border-neutral-200 bg-white hover:border-neutral-300"
-                              }`}
-                            >
-                              <div className="mb-1 text-xl">{style.emoji}</div>
-                              <p className="text-xs font-bold text-neutral-900">{style.label}</p>
-                              <p className="text-[10px] text-neutral-500">{style.desc}</p>
-                            </button>
-                          ))}
-                        </div>
-                        <button
-                          onClick={() => setShowStylePicker(false)}
-                          className="mt-3 w-full rounded-lg py-2 text-sm text-neutral-500 hover:text-neutral-700"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => setShowStylePicker(true)}
-                        disabled={aiLoading}
-                        className="flex w-full items-center justify-center space-x-2 rounded-xl border border-dashed border-amber-300 bg-white py-3 text-sm font-medium text-amber-700 transition-all hover:bg-amber-50 active:scale-95 disabled:opacity-50"
-                      >
-                        {aiLoading ? (
-                          <>
-                            <Loader size={14} className="animate-spin" />
-                            <span>Generating with AI...</span>
-                          </>
-                        ) : (
-                          <>
-                            <Sparkles size={14} />
-                            <span>Generate with AI</span>
-                          </>
-                        )}
-                      </button>
-                    )}
-                  </div>
-                )}
-              </div>
+              <MemoryContentTab
+                formData={formData}
+                setFormData={setFormData}
+                formErrors={formErrors}
+                setFormErrors={setFormErrors}
+                editingMemory={editingMemory}
+              />
             )}
-
-            {/* ─── MEDIA TAB ─── */}
             {activeTab === "media" && (
-              <div className="p-5">
-                <div className="mb-3">
-                  <p className="text-sm font-semibold text-neutral-700">Photos & Videos</p>
-                  <p className="text-xs text-neutral-400">
-                    Add visuals to bring your memory to life.
-                  </p>
-                </div>
-                <MediaUploader
-                  label=""
-                  accept="image/*,video/*"
-                  multiple={true}
-                  files={formData.images}
-                  onFilesChange={(uploadedFiles) =>
-                    setFormData((prev) => ({ ...prev, images: uploadedFiles }))
-                  }
-                  onUpload={handleUpload}
-                  onUploadStart={() => setImageUploading(true)}
-                  onUploadEnd={() => setImageUploading(false)}
-                />
-                {imageUploading && (
-                  <p className="mt-3 flex items-center space-x-1.5 text-xs text-neutral-500">
-                    <Loader size={12} className="animate-spin" />
-                    <span>Uploading your images securely...</span>
-                  </p>
-                )}
-              </div>
+              <MemoryMediaTab
+                formData={formData}
+                setFormData={setFormData}
+                handleUpload={handleUpload}
+                imageUploading={imageUploading}
+                setImageUploading={setImageUploading}
+              />
             )}
-
-            {/* ─── DETAILS TAB ─── */}
             {activeTab === "details" && (
-              <div className="space-y-5 p-5">
-                {/* Date & Location */}
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <div>
-                    <label className="mb-1.5 flex items-center space-x-1.5 text-sm font-semibold text-neutral-700">
-                      <Calendar size={14} />
-                      <span>Date</span>
-                    </label>
-                    <input
-                      type="date"
-                      value={formData.date}
-                      onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                      className="focus:border-primary-300 focus:ring-primary-100 w-full rounded-xl border border-neutral-200 px-4 py-3 text-sm transition-all outline-none focus:ring-2"
-                    />
-                  </div>
-                  <div>
-                    <label className="mb-1.5 flex items-center space-x-1.5 text-sm font-semibold text-neutral-700">
-                      <MapPin size={14} />
-                      <span>
-                        Location <span className="text-red-400">*</span>
-                      </span>
-                    </label>
-                    <input
-                      value={formData.location}
-                      onChange={(e) => {
-                        setFormData({ ...formData, location: e.target.value });
-                        if (formErrors.location)
-                          setFormErrors((p) => ({ ...p, location: undefined }));
-                      }}
-                      placeholder="Where did this happen?"
-                      className={`w-full rounded-xl border px-4 py-3 text-sm transition-all outline-none focus:ring-2 ${
-                        formErrors.location
-                          ? "border-red-300 focus:ring-red-200"
-                          : "focus:border-primary-300 focus:ring-primary-100 border-neutral-200"
-                      }`}
-                    />
-                    {formErrors.location && (
-                      <p className="mt-1 text-xs text-red-500">{formErrors.location}</p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Mood */}
-                <div>
-                  <label className="mb-2 flex items-center space-x-1.5 text-sm font-semibold text-neutral-700">
-                    <span>Mood</span>
-                    <span className="text-red-400">*</span>
-                  </label>
-                  <div className="grid grid-cols-3 gap-2 sm:grid-cols-3">
-                    {MOODS.map((mood) => {
-                      const isSelected = formData.mood === mood.value && !showCustomMood;
-                      return (
-                        <button
-                          key={mood.value}
-                          onClick={() => {
-                            setFormData({ ...formData, mood: mood.value });
-                            setShowCustomMood(false);
-                            if (formErrors.mood) setFormErrors((p) => ({ ...p, mood: undefined }));
-                          }}
-                          className={`rounded-xl border-2 p-2.5 text-center transition-all active:scale-95 ${
-                            isSelected
-                              ? `${mood.color} border-opacity-60`
-                              : "border-neutral-200 bg-white hover:border-neutral-300"
-                          }`}
-                        >
-                          <div className="text-xl">{mood.emoji}</div>
-                          <div className="mt-0.5 text-xs font-semibold">{mood.label}</div>
-                        </button>
-                      );
-                    })}
-                    <button
-                      onClick={() => {
-                        setShowCustomMood(true);
-                        if (PREDEFINED_MOODS.includes(formData.mood)) {
-                          setFormData({ ...formData, mood: "" });
-                        }
-                      }}
-                      className={`rounded-xl border-2 p-2.5 text-center transition-all active:scale-95 ${
-                        showCustomMood ||
-                        (!PREDEFINED_MOODS.includes(formData.mood) && formData.mood !== "")
-                          ? "border-primary-500 bg-primary-50"
-                          : "border-neutral-200 bg-white hover:border-neutral-300"
-                      }`}
-                    >
-                      <div className="text-xl">✏️</div>
-                      <div className="mt-0.5 text-xs font-semibold">Custom</div>
-                    </button>
-                  </div>
-                  {formErrors.mood && (
-                    <p className="mt-1 text-xs text-red-500">{formErrors.mood}</p>
-                  )}
-                  {(showCustomMood ||
-                    (!PREDEFINED_MOODS.includes(formData.mood) && formData.mood !== "")) && (
-                    <input
-                      placeholder="Describe your mood..."
-                      value={!PREDEFINED_MOODS.includes(formData.mood) ? formData.mood : ""}
-                      onChange={(e) => setFormData({ ...formData, mood: e.target.value })}
-                      className="focus:border-primary-300 focus:ring-primary-100 mt-3 w-full rounded-xl border border-neutral-200 px-4 py-3 text-sm transition-all outline-none focus:ring-2"
-                    />
-                  )}
-                </div>
-
-                {/* Tags */}
-                <div>
-                  <label className="mb-1.5 flex items-center space-x-1.5 text-sm font-semibold text-neutral-700">
-                    <TagIcon size={14} />
-                    <span>Tags</span>
-                  </label>
-                  <div className="flex space-x-2">
-                    <input
-                      value={newTag}
-                      onChange={(e) => setNewTag(e.target.value)}
-                      onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addTag())}
-                      placeholder="Add a tag..."
-                      className="focus:border-primary-300 focus:ring-primary-100 flex-1 rounded-xl border border-neutral-200 px-4 py-3 text-sm transition-all outline-none focus:ring-2"
-                    />
-                    <Button
-                      onClick={addTag}
-                      variant="secondary"
-                      size="icon"
-                      className="h-auto shrink-0 py-3"
-                    >
-                      <Plus size={18} />
-                    </Button>
-                  </div>
-                  {formData.tags.length > 0 && (
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {formData.tags.map((tag) => (
-                        <Tag key={tag} removable onRemove={() => removeTag(tag)}>
-                          {tag}
-                        </Tag>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
+              <MemoryDetailsTab
+                formData={formData}
+                setFormData={setFormData}
+                formErrors={formErrors}
+                setFormErrors={setFormErrors}
+              />
             )}
           </div>
 
-          {/* ── Sticky Footer ── */}
           <div className="border-t border-neutral-100 bg-white px-5 py-4">
             <div className="flex items-center space-x-3">
-              {/* Tab navigation arrows */}
               <button
                 onClick={() => {
                   const idx = TABS.findIndex((t) => t.id === activeTab);
                   if (idx > 0) setActiveTab(TABS[idx - 1].id);
                 }}
                 disabled={activeTab === TABS[0].id}
+                aria-label="Previous tab"
                 className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-neutral-200 text-neutral-400 transition-all hover:border-neutral-300 hover:text-neutral-600 disabled:opacity-30"
               >
                 ‹
@@ -745,6 +421,7 @@ const CreateMemoryModal: React.FC<CreateMemoryModalProps> = ({
                   if (idx < TABS.length - 1) setActiveTab(TABS[idx + 1].id);
                 }}
                 disabled={activeTab === TABS[TABS.length - 1].id}
+                aria-label="Next tab"
                 className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-neutral-200 text-neutral-400 transition-all hover:border-neutral-300 hover:text-neutral-600 disabled:opacity-30"
               >
                 ›

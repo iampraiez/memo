@@ -7,6 +7,7 @@ export interface Memory {
   userId: string;
   title: string;
   content: string;
+  summary?: string | null;
   date: string;
   location?: string | null;
   mood?: string | null;
@@ -18,6 +19,7 @@ export interface Memory {
   lastSync?: number;
   createdAt: string;
   updatedAt: string;
+  unlockDate?: string | null;
 }
 
 export interface LocalComment {
@@ -88,7 +90,7 @@ export interface LocalStory {
   dateRange: { start: string; end: string };
   tone: "reflective" | "celebratory" | "nostalgic";
   length: "short" | "medium" | "long";
-  status: "generating" | "ready" | "error";
+  status: "generating" | "ready" | "error" | "failed";
   createdAt: string;
   _syncStatus?: "synced" | "pending" | "offline";
   _lastSync?: number;

@@ -89,7 +89,6 @@ export const sendErrorReportEmail = async (error: Error, context?: string) => {
   const subject = `🚨 CRITICAL ERROR: ${context || "System Alert"}`;
 
   const errorMessage = error instanceof Error ? error.message : String(error);
-  const errorStack = error instanceof Error ? error.stack : "No stack trace available";
 
   const html = `
     <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 800px; margin: 0 auto; padding: 30px; color: #1f2937; border: 1px solid #e5e7eb; border-radius: 12px; background-color: #ffffff;">
@@ -118,9 +117,10 @@ export const sendErrorReportEmail = async (error: Error, context?: string) => {
         </table>
       </div>
 
-      <div>
-        <h3 style="color: #374151; margin: 0 0 10px 0; font-size: 16px;">Stack Trace</h3>
-        <pre style="background-color: #111827; color: #fbbf24; padding: 20px; border-radius: 8px; font-size: 13px; line-height: 1.5; overflow-x: auto; white-space: pre-wrap; word-break: break-all;">${errorStack}</pre>
+      <div style="margin-top: 20px; padding: 15px; background-color: #f8fafc; border-radius: 6px; border: 1px solid #e2e8f0;">
+        <p style="margin: 0; color: #64748b; font-size: 13px;">
+          Note: Full stack traces are logged internally to the 'system_logs' table and 'lib/logger' for security.
+        </p>
       </div>
 
       <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; text-align: center; color: #9ca3af; font-size: 12px;">

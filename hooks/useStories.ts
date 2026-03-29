@@ -3,19 +3,20 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { db, type LocalStory } from "@/lib/dexie/db";
 import { storyService, StorySettings } from "@/services/story.service";
 
-export const useStories = () => {
+export const useStories = (userId: string | undefined) => {
   const stories = useLiveQuery(async () => {
-    const userId = await storyService.getCurrentUserId();
     if (!userId) return [];
     return await db.stories.where("userId").equals(userId).reverse().sortBy("createdAt");
-  });
+  }, [userId]);
 
   const query = useQuery<{ stories: LocalStory[] }>({
-    queryKey: ["stories"],
+    queryKey: ["stories", userId],
     queryFn: async () => {
-      const data = await storyService.getAll();
+      if (!userId) return { stories: [] };
+      const data = await storyService.getAll(userId);
       return data as { stories: LocalStory[] };
     },
+    enabled: !!userId,
     structuralSharing: true,
   });
 
@@ -25,13 +26,16 @@ export const useStories = () => {
   };
 };
 
-export const useCreateStory = () => {
+export const useCreateStory = (userId: string | undefined) => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: StorySettings) => storyService.create(data),
+    mutationFn: (data: StorySettings) => {
+      if (!userId) throw new Error("Unauthorized");
+      return storyService.create(userId, data);
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["stories"] });
+      queryClient.invalidateQueries({ queryKey: ["stories", userId] });
     },
   });
 };

@@ -134,9 +134,7 @@ const OnboardingFlow: React.FC = () => {
     } catch (error: unknown) {
       console.error("Upload error details:", error);
 
-      const message =
-        error instanceof Error ? error.message : "Failed to upload image. Please try again.";
-      toast.error(message);
+      toast.error("Failed to upload image. Please try again.");
 
       // Clear the file input so the user can try the same file again
       if (fileInputRef.current) {
@@ -240,9 +238,7 @@ const OnboardingFlow: React.FC = () => {
       toast.success("Welcome to your Sanctuary!");
     } catch (error: unknown) {
       console.error("Onboarding error:", error);
-      const message =
-        error instanceof Error ? error.message : "Failed to complete setup. Please try again.";
-      toast.error(message);
+      toast.error("Failed to complete setup. Please try again.");
     } finally {
       setIsSubmitting(false);
     }

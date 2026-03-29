@@ -1,0 +1,100 @@
+name: Telegram – Push Notification
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  notify:
+    name: Send Telegram Notification
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Gather commit metadata
+        id: meta
+        run: |
+          SHORT_SHA="${GITHUB_SHA::7}"
+          BRANCH="${GITHUB_REF_NAME}"
+          REPO="${GITHUB_REPOSITORY}"
+          ACTOR="${GITHUB_ACTOR}"
+          COMMIT_MSG="$(git log -1 --pretty=%s)"
+          TIMESTAMP="$(git log -1 --pretty=%cd --date=format:'%Y-%m-%d %H:%M UTC')"
+
+          # Files changed in this commit (max 10 to keep message short)
+          CHANGED_FILES="$(git diff --name-only HEAD~1 HEAD 2>/dev/null | head -10 | sed 's/^/\`/' | sed 's/$/\`/' | tr '\n' '\n' || echo '_none_')"
+          # Escape special Markdown characters in the commit message
+          SAFE_MSG="$(echo "$COMMIT_MSG" | sed 's/[_*\[\]()~>#+=|{}.!-]/\\&/g')"
+
+          echo "short_sha=$SHORT_SHA"          >> "$GITHUB_OUTPUT"
+          echo "branch=$BRANCH"                >> "$GITHUB_OUTPUT"
+          echo "repo=$REPO"                    >> "$GITHUB_OUTPUT"
+          echo "actor=$ACTOR"                  >> "$GITHUB_OUTPUT"
+          echo "safe_msg=$SAFE_MSG"            >> "$GITHUB_OUTPUT"
+          echo "timestamp=$TIMESTAMP"          >> "$GITHUB_OUTPUT"
+
+          # Multi-line value needs a heredoc
+          {
+            echo "changed_files<<EOF"
+            echo "$CHANGED_FILES"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Resolve status emoji
+        id: status
+        if: always()
+        run: |
+          if [ "${{ job.status }}" = "success" ]; then
+            echo "emoji=✅" >> "$GITHUB_OUTPUT"
+            echo "label=success" >> "$GITHUB_OUTPUT"
+            echo "header=🚀" >> "$GITHUB_OUTPUT"
+          elif [ "${{ job.status }}" = "failure" ]; then
+            echo "emoji=❌" >> "$GITHUB_OUTPUT"
+            echo "label=failure" >> "$GITHUB_OUTPUT"
+            echo "header=💥" >> "$GITHUB_OUTPUT"
+          else
+            echo "emoji=⚠️" >> "$GITHUB_OUTPUT"
+            echo "label=${{ job.status }}" >> "$GITHUB_OUTPUT"
+            echo "header=🔄" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Send Telegram notification
+        if: always()
+        env:
+          BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          SHORT_SHA: ${{ steps.meta.outputs.short_sha }}
+          BRANCH: ${{ steps.meta.outputs.branch }}
+          REPO: ${{ steps.meta.outputs.repo }}
+          ACTOR: ${{ steps.meta.outputs.actor }}
+          SAFE_MSG: ${{ steps.meta.outputs.safe_msg }}
+          TIMESTAMP: ${{ steps.meta.outputs.timestamp }}
+          CHANGED_FILES: ${{ steps.meta.outputs.changed_files }}
+          STATUS_EMOJI: ${{ steps.status.outputs.emoji }}
+          STATUS_LABEL: ${{ steps.status.outputs.label }}
+          HEADER_EMOJI: ${{ steps.status.outputs.header }}
+        run: |
+          MESSAGE="${HEADER_EMOJI} *New Push – ${REPO##*/}*
+
+          📦 *Repo:*   \`${REPO}\`
+          🌿 *Branch:* \`${BRANCH}\`
+          🔢 *Commit:* [${SHORT_SHA}](https://github.com/${REPO}/commit/${GITHUB_SHA})
+          💬 *Message:* ${SAFE_MSG}
+          👤 *Author:* [${ACTOR}](https://github.com/${ACTOR})
+          🕐 *Time:*    ${TIMESTAMP}
+          ${STATUS_EMOJI} *Status:* ${STATUS_LABEL}
+
+          📝 *Files changed:*
+          ${CHANGED_FILES}"
+
+          curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
+            --data-urlencode "chat_id=${CHAT_ID}" \
+            --data-urlencode "text=${MESSAGE}" \
+            --data-urlencode "parse_mode=Markdown" \
+            --data-urlencode "disable_web_page_preview=true"

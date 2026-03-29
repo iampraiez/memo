@@ -1,21 +1,18 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
 import db from "@/drizzle/index";
 import { users, userPreferences } from "@/drizzle/db/schema";
 import { eq, sql } from "drizzle-orm";
-import { logger } from "@/custom/log/logger";
+import { logger } from "@/lib/logger";
+import { requireAuth } from "@/lib/api-utils";
 import { v4 as uuidv4 } from "uuid";
 
 export async function GET() {
   try {
-    const session = await auth();
-
-    if (!session?.user?.email) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-    }
+    const { user: sessionUser, error } = await requireAuth();
+    if (error) return error;
 
     const user = await db.query.users.findFirst({
-      where: eq(users.id, session.user.id),
+      where: eq(users.id, sessionUser.id),
       with: {
         preferences: true,
       },
@@ -64,18 +61,15 @@ export async function GET() {
 
 export async function PATCH(req: Request) {
   try {
-    const session = await auth();
-
-    if (!session?.user?.email) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-    }
+    const { user: sessionUser, error } = await requireAuth();
+    if (error) return error;
 
     const body = await req.json();
     const { name, avatar, bio, username, image, preferences, isOnboarded } = body;
 
     if (username) {
       const existingUser = await db.query.users.findFirst({
-        where: sql`username = ${username} AND id != ${session.user.id}`,
+        where: sql`username = ${username} AND id != ${sessionUser.id}`,
       });
 
       if (existingUser) {
@@ -104,7 +98,7 @@ export async function PATCH(req: Request) {
     if (username !== undefined) updateData.username = username;
     if (isOnboarded !== undefined) updateData.isOnboarded = isOnboarded;
 
-    await db.update(users).set(updateData).where(eq(users.id, session.user.id));
+    await db.update(users).set(updateData).where(eq(users.id, sessionUser.id));
 
     // Update preferences if provided
     if (preferences) {
@@ -114,7 +108,7 @@ export async function PATCH(req: Request) {
         .insert(userPreferences)
         .values({
           id: uuidv4(),
-          userId: session.user.id,
+          userId: sessionUser.id,
           aiEnabled: aiEnabled ?? true,
           autoBackup: autoBackup ?? true,
           theme: theme || "light",
@@ -133,7 +127,7 @@ export async function PATCH(req: Request) {
         });
     }
 
-    logger.info(`Settings updated for user ${session.user.id}`);
+    logger.info(`Settings updated for user ${sessionUser.id}`);
 
     return NextResponse.json({ message: "Settings updated" }, { status: 200 });
   } catch (error) {

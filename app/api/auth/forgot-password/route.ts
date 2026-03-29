@@ -3,9 +3,11 @@ import db from "@/drizzle/index";
 import { users } from "@/drizzle/db/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
-import { logger } from "@/custom/log/logger";
+import { logger } from "@/lib/logger";
 import { generatePasswordResetToken } from "@/services/token.service";
 import { sendPasswordResetEmail } from "@/services/email.service";
+
+import { rateLimit } from "@/lib/rate-limit";
 
 const forgotPasswordSchema = z.object({
   email: z.string().email(),
@@ -13,6 +15,16 @@ const forgotPasswordSchema = z.object({
 
 export async function POST(req: Request) {
   try {
+    const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
+    const { success } = await rateLimit(`forgot_password_${ip}`, 5, 60 * 60 * 1000); // 5 attempts per hour
+
+    if (!success) {
+      return NextResponse.json(
+        { message: "Too many attempts. Please try again later." },
+        { status: 429 },
+      );
+    }
+
     const body = await req.json();
     const { email } = forgotPasswordSchema.parse(body);
 

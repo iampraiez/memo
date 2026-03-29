@@ -60,13 +60,12 @@ export const notificationService = {
       .equals(userId || "")
       .modify({ read: true });
 
-    // Queue for sync
-    await syncService.queueOperation({
-      operation: "update",
-      entity: "notification",
-      entityId: "all",
-      data: { action: "markAllRead" } as unknown as Record<string, unknown>,
-    });
+    // API Sync
+    try {
+      await apiService.patch("/notifications", { readAll: true });
+    } catch (error) {
+      console.error("[NotificationService] API sync failed:", error);
+    }
 
     return { success: true };
   },
@@ -75,13 +74,12 @@ export const notificationService = {
   markAsRead: async (id: string) => {
     await db.notifications.update(id, { read: true });
 
-    // Queue for sync
-    await syncService.queueOperation({
-      operation: "update",
-      entity: "notification",
-      entityId: id,
-      data: { action: "markRead" } as unknown as Record<string, unknown>,
-    });
+    // API Sync
+    try {
+      await apiService.patch("/notifications", { id });
+    } catch (error) {
+      console.error("[NotificationService] API sync failed:", error);
+    }
 
     return { success: true };
   },

@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
 import db from "@/drizzle/index";
 import { memories, tags, memoryTags, memoryMedia } from "@/drizzle/db/schema";
-import { eq, and, sql, desc } from "drizzle-orm";
-import { logger } from "@/custom/log/logger";
+import { desc, and, eq, inArray, or, lte, isNull } from "drizzle-orm";
+import { logger } from "@/lib/logger";
+import { requireAuth } from "@/lib/api-utils";
+import { rateLimit } from "@/lib/rate-limit";
 import { z } from "zod";
 import { v4 as uuidv4 } from "uuid";
 
@@ -17,35 +18,20 @@ const memorySchema = z.object({
   location: z.string().optional(),
   images: z.array(z.string()).optional(),
   isPublic: z.boolean().optional(),
+  unlockDate: z.string().nullable().optional(),
 });
 
 // GET - Fetch user's memories
 export async function GET(req: Request) {
   try {
-    const session = await auth();
+    const { user, error } = await requireAuth();
+    if (error) return error;
 
-    if (!session?.user?.email) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-    }
-
+    const now = new Date();
     const { searchParams } = new URL(req.url);
     const isPublic = searchParams.get("isPublic");
     const limit = parseInt(searchParams.get("limit") || "100");
     const offset = parseInt(searchParams.get("offset") || "0");
-
-    // Get user ID
-    interface User {
-      id: string;
-      email: string;
-    }
-    const [user] = (await db.query.users.findMany({
-      where: sql`email = ${session.user.email}`,
-      limit: 1,
-    })) as User[];
-
-    if (!user) {
-      return NextResponse.json({ message: "User not found" }, { status: 404 });
-    }
 
     // Build query conditions
     const conditions = [eq(memories.userId, user.id)];
@@ -53,6 +39,11 @@ export async function GET(req: Request) {
     if (isPublic !== null && isPublic !== undefined) {
       conditions.push(eq(memories.isPublic, isPublic === "true"));
     }
+
+    // Filter by unlockDate (Memory Capsules)
+    // Only return if unlockDate is null or in the past
+    const unlockCondition = or(isNull(memories.unlockDate), lte(memories.unlockDate, now));
+    if (unlockCondition) conditions.push(unlockCondition);
 
     // Fetch memories
     const userMemories = await db.query.memories.findMany({
@@ -99,28 +90,21 @@ export async function GET(req: Request) {
 // POST - Create new memory
 export async function POST(req: Request) {
   try {
-    const session = await auth();
+    const { user, error } = await requireAuth();
+    if (error) return error;
 
-    if (!session?.user?.email) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
+    const { success } = await rateLimit(`create_memory_${ip}`, 20, 60 * 1000); // 20 per minute
+
+    if (!success) {
+      return NextResponse.json(
+        { message: "Too many requests. Please try again later." },
+        { status: 429 },
+      );
     }
 
     const body = await req.json();
     const validatedData = memorySchema.parse(body);
-
-    // Get user ID
-    interface User {
-      id: string;
-      email: string;
-    }
-    const [user] = (await db.query.users.findMany({
-      where: sql`email = ${session.user.email}`,
-      limit: 1,
-    })) as User[];
-
-    if (!user) {
-      return NextResponse.json({ message: "User not found" }, { status: 404 });
-    }
 
     // Create memory
     const memoryId = validatedData.id || `mem-${uuidv4()}`;
@@ -135,50 +119,57 @@ export async function POST(req: Request) {
         mood: validatedData.mood,
         location: validatedData.location,
         isPublic: validatedData.isPublic || false,
+        unlockDate: validatedData.unlockDate ? new Date(validatedData.unlockDate) : null,
         createdAt: new Date(),
         updatedAt: new Date(),
       })
       .returning();
 
-    // Handle Tags
+    // Handle Tags (Batch Operations to avoid N+1)
     if (validatedData.tags && validatedData.tags.length > 0) {
-      for (const tagName of validatedData.tags) {
-        let tagId;
-        const existingTag = await db.query.tags.findFirst({
-          where: eq(tags.name, tagName),
-        });
+      const tagNames = validatedData.tags;
 
-        if (existingTag) {
-          tagId = existingTag.id;
-        } else {
-          tagId = uuidv4();
-          await db.insert(tags).values({
-            id: tagId,
-            name: tagName,
-            color: "#3B82F6",
-          });
-        }
+      const existingTags = await db.query.tags.findMany({
+        where: inArray(tags.name, tagNames),
+      });
 
-        await db.insert(memoryTags).values({
+      const existingTagNames = existingTags.map((t) => t.name);
+      const newTagNames = tagNames.filter((t) => !existingTagNames.includes(t));
+
+      let allTagIds: string[] = existingTags.map((t) => t.id);
+
+      if (newTagNames.length > 0) {
+        const newTagsData = newTagNames.map((name) => ({
+          id: uuidv4(),
+          name,
+          color: "#3B82F6",
+        }));
+
+        const insertedTags = await db.insert(tags).values(newTagsData).returning({ id: tags.id });
+        allTagIds = [...allTagIds, ...insertedTags.map((t) => t.id)];
+      }
+
+      if (allTagIds.length > 0) {
+        const memoryTagsData = allTagIds.map((tagId) => ({
           id: uuidv4(),
           memoryId: newMemory.id,
-          tagId: tagId,
-        });
+          tagId,
+        }));
+        await db.insert(memoryTags).values(memoryTagsData);
       }
     }
 
     // Handle Images
     if (validatedData.images && validatedData.images.length > 0) {
-      for (const url of validatedData.images) {
-        await db.insert(memoryMedia).values({
-          id: uuidv4(),
-          memoryId: newMemory.id,
-          url: url,
-          type: "image",
-          filename: "unknown",
-          storageProvider: "local",
-        });
-      }
+      const imagesData = validatedData.images.map((url) => ({
+        id: uuidv4(),
+        memoryId: newMemory.id,
+        url,
+        type: "image",
+        filename: "unknown",
+        storageProvider: "cloudinary",
+      }));
+      await db.insert(memoryMedia).values(imagesData);
     }
 
     // Re-fetch memory with relations to return complete object

@@ -154,3 +154,11 @@ export const useSearchUsers = (query: string) => {
     structuralSharing: true,
   });
 };
+
+export const useOnThisDay = () => {
+  return useQuery({
+    queryKey: ["memories", "on-this-day"],
+    queryFn: () => socialService.getOnThisDay(),
+    staleTime: 1000 * 60 * 60 * 24, // 24 hours
+  });
+};

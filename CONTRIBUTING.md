@@ -11,12 +11,12 @@ By participating in this project, you agree to maintain a respectful and inclusi
 1. **Fork the repository** on GitHub
 2. **Clone your fork** locally
    ```bash
-   git clone https://github.com/yourusername/memory-lane.git
-   cd memory-lane
+   git clone https://github.com/iampraiez/memo.git
+   cd memo
    ```
 3. **Add upstream remote**
    ```bash
-   git remote add upstream https://github.com/original/memory-lane.git
+   git remote add upstream https://github.com/iampraiez/memo.git
    ```
 4. **Install dependencies**
    ```bash

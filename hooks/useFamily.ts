@@ -3,16 +3,16 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/dexie/db";
 import { familyService, FamilyMember } from "@/services/family.service";
 
-export const useFamilyMembers = () => {
+export const useFamilyMembers = (userId: string | undefined) => {
   const members = useLiveQuery(async () => {
-    const userId = await familyService.getCurrentUserId();
     if (!userId) return [];
     return await db.familyMembers.where("userId").equals(userId).toArray();
-  });
+  }, [userId]);
 
   const query = useQuery<{ members: FamilyMember[] }>({
-    queryKey: ["family", "members"],
-    queryFn: () => familyService.getMembers(),
+    queryKey: ["family", "members", userId],
+    queryFn: () => familyService.getMembers(userId!),
+    enabled: !!userId,
     structuralSharing: true,
   });
 
@@ -22,14 +22,27 @@ export const useFamilyMembers = () => {
   };
 };
 
-export const useInviteFamilyMember = () => {
+export const useInviteFamilyMember = (userId: string | undefined) => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (data: { email: string; name?: string; relationship: string }) =>
-      familyService.invite(data),
+      familyService.invite(userId!, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["family", "members"] });
+      queryClient.invalidateQueries({ queryKey: ["family", "members", userId] });
+    },
+  });
+};
+
+export const useRespondToInvite = (userId: string | undefined) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ inviteId, status }: { inviteId: string; status: "accepted" | "declined" }) =>
+      familyService.respondToInvite(userId!, inviteId, status),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["family", "members", userId] });
+      queryClient.invalidateQueries({ queryKey: ["notifications", userId] });
     },
   });
 };

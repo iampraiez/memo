@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
-import { reporters } from "@/custom/log";
+import { reporters } from "@/lib/reporters";
 
 export async function GET(req: Request) {
   try {
-    const { searchParams } = new URL(req.url);
-    const key = searchParams.get("key");
+    const authHeader = req.headers.get("Authorization");
+    const token = authHeader?.startsWith("Bearer ") ? authHeader.substring(7) : null;
 
-    if (process.env.CRON_SECRET && key !== process.env.CRON_SECRET) {
+    if (process.env.CRON_SECRET && token !== process.env.CRON_SECRET) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 

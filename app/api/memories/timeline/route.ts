@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import db from "@/drizzle/index";
 import { memories, follows } from "@/drizzle/db/schema";
-import { and, eq, or, inArray, desc, sql, lt, SQL } from "drizzle-orm";
+import { and, eq, or, inArray, desc, sql, lt, lte, SQL } from "drizzle-orm";
 import { Timeline } from "@/types/types";
 
 export async function GET(req: Request) {
@@ -45,6 +45,7 @@ export async function GET(req: Request) {
         inArray(memories.userId, relevantUserIds),
         or(...whereConditions),
         cursor ? lt(memories.date, new Date(cursor)) : undefined,
+        or(sql`${memories.unlockDate} IS NULL`, lte(memories.unlockDate, new Date())),
       ),
       orderBy: sort === "random" ? sql`RANDOM()` : desc(memories.date),
       limit: limit + 1,

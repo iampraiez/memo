@@ -1,25 +1,21 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { requireAuth } from "@/lib/api-utils";
+import { rateLimit } from "@/lib/rate-limit";
 import { GoogleGenAI } from "@google/genai";
 import { env } from "@/config/env";
-import { logger } from "@/custom/log/logger";
+import { logger } from "@/lib/logger";
 
 const genAI = new GoogleGenAI({ apiKey: env.GEMINI_API_KEY });
 
-async function generateContent(prompt: string) {
-  const result = await genAI.models.generateContent({
-    model: "gemini-2.5-flash",
-    contents: prompt,
-  });
-  console.log("Result:", result);
-  return result.text;
-}
-
 export async function POST(req: Request) {
-  const session = await auth();
+  const { user, error } = await requireAuth();
+  if (error) return error;
 
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
+  const limitResult = await rateLimit(`generate_${user.id}_${ip}`, 20, 60 * 60 * 1000); // 20 requests per hour
+
+  if (!limitResult.success) {
+    return NextResponse.json({ error: "Rate limit exceeded. Try again later." }, { status: 429 });
   }
 
   try {
@@ -60,9 +56,35 @@ Guidelines:
 - Do not invent entirely new events, but rather expand on the feelings and descriptive details implied by the existing text.
 - Return ONLY the expanded content text, no preamble or extra commentary.`;
 
-    const result = (await generateContent(prompt)) as string;
+    const result = await genAI.models.generateContentStream({
+      model: "gemini-2.0-flash",
+      contents: prompt,
+    });
 
-    return NextResponse.json({ content: result });
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream({
+      async start(controller) {
+        try {
+          for await (const chunk of result) {
+            const text = chunk.text;
+            if (text) {
+              controller.enqueue(encoder.encode(text));
+            }
+          }
+          controller.close();
+        } catch (err) {
+          controller.error(err);
+        }
+      },
+    });
+
+    return new Response(stream, {
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+        "Cache-Control": "no-cache",
+        Connection: "keep-alive",
+      },
+    });
   } catch (error) {
     logger.error("Error generating memory content:", error);
     return NextResponse.json({ error: "Failed to generate AI content" }, { status: 500 });

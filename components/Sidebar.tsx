@@ -22,6 +22,8 @@ import { userService } from "@/services/user.service";
 import { socialService } from "@/services/social.service";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import OnThisDay from "@/components/OnThisDay";
+import StreakWidget from "@/components/StreakWidget";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -30,6 +32,7 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClick }) => {
   const { data: session } = useSession();
+  const userId = session?.user?.id;
   const queryClient = useQueryClient();
   const { data: memoriesData } = useMemories();
   const [memoryCount, setCount] = useState<number>(0);
@@ -70,7 +73,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClick }) => {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-[280px] transform border-r border-neutral-200/50 bg-white shadow-2xl transition-all duration-500 ease-in-out sm:w-[320px] lg:w-72 lg:shadow-none",
+          "fixed inset-y-0 left-0 z-50 w-70 transform border-r border-neutral-200/50 bg-white shadow-2xl transition-all duration-500 ease-in-out sm:w-[320px] lg:w-72 lg:shadow-none",
           isOpen ? "translate-x-0" : "-translate-x-full",
           "lg:translate-x-0",
           "lg:pb-8",
@@ -114,10 +117,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClick }) => {
                   href={path}
                   onClick={onClick}
                   onMouseEnter={() => {
-                    if (item.id === "timeline") {
+                    if (item.id === "timeline" && userId) {
                       queryClient.prefetchQuery({
                         queryKey: ["memories", { isPublic: undefined, limit: 100, offset: 0 }],
-                        queryFn: () => memoryService.getAll(),
+                        queryFn: () => memoryService.getAll(userId),
                       });
                     } else if (item.id === "analytics") {
                       queryClient.prefetchQuery({
@@ -158,13 +161,36 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClick }) => {
                     )}
                   />
                   <span>{item.name}</span>
-                  {isActive && (
+                  {item.id === "timeline" && memoryCount > 0 && (
+                    <span className="bg-primary-100 text-primary-700 ml-auto flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] font-bold shadow-sm transition-all hover:bg-neutral-50 lg:hidden">
+                      {memoryCount}
+                    </span>
+                  )}
+                  {item.id === "timeline" && memoryCount > 0 && (
+                    <span className="bg-primary-100 text-primary-700 ml-auto flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] font-bold shadow-sm transition-all hover:bg-neutral-50 lg:hidden">
+                      {memoryCount}
+                    </span>
+                  )}
+                  {item.id === "timeline" && isActive && (
+                    <div className="bg-primary-600 absolute right-4 h-1.5 w-1.5 rounded-full shadow-[0_0_10px_rgba(37,99,235,0.3)]" />
+                  )}
+                  {item.id !== "timeline" && isActive && (
                     <div className="bg-primary-600 absolute right-4 h-1.5 w-1.5 rounded-full shadow-[0_0_10px_rgba(37,99,235,0.3)]" />
                   )}
                 </Link>
               );
             })}
           </nav>
+
+          {/* Streak Widget */}
+          <div className="px-6 py-2">
+            <StreakWidget />
+          </div>
+
+          {/* Nostalgia Widget */}
+          <div className="px-6 py-4">
+            <OnThisDay />
+          </div>
 
           {/* Quick Stats - Enhanced aesthetic */}
           <div className="p-6">

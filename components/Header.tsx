@@ -1,11 +1,10 @@
 import React from "react";
-import { Plus, Cloud, CloudSlash, List, Bell } from "@phosphor-icons/react";
+import { Cloud, CloudSlash, List, Bell } from "@phosphor-icons/react";
 import Button from "./ui/Button";
 import { cn } from "@/lib/utils";
 import UserDropdown from "./UserDropdown";
 
 interface HeaderProps {
-  onCreateMemory: () => void;
   onToggleSidebar: () => void;
   onShowNotifications?: () => void;
   syncStatus: "online" | "offline" | "syncing";
@@ -14,7 +13,6 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({
-  onCreateMemory,
   onToggleSidebar,
   onShowNotifications,
   syncStatus,
@@ -45,6 +43,7 @@ const Header: React.FC<HeaderProps> = ({
               variant="ghost"
               size="icon"
               onClick={onToggleSidebar}
+              aria-label="Toggle navigation menu"
               className="h-10 w-10 rounded-xl transition-all hover:bg-neutral-100 lg:hidden"
             >
               <List weight="bold" className="h-5 w-5 text-neutral-900" />
@@ -82,27 +81,18 @@ const Header: React.FC<HeaderProps> = ({
               size="icon"
               className="relative h-10 w-10 rounded-xl transition-all hover:bg-neutral-100"
               onClick={onShowNotifications}
+              aria-label="View notifications"
             >
               <Bell weight="bold" className="h-5 w-5 text-neutral-700" />
               {notificationCount > 0 && (
                 <>
                   <span className="bg-destructive-500 absolute top-2 right-2 h-2 w-2 rounded-full ring-2 ring-white" />
                   <span className="bg-destructive-500 absolute top-2 right-2 h-2 w-2 animate-ping rounded-full" />
-                  <span className="bg-destructive-500 absolute -top-1 -right-1 flex h-[14px] min-w-[14px] items-center justify-center rounded-full border border-white px-1 text-[8px] font-bold text-white">
+                  <span className="bg-destructive-500 absolute -top-1 -right-1 flex h-3.5 min-w-3.5 items-center justify-center rounded-full border border-white px-1 text-[8px] font-bold text-white">
                     {notificationCount > 9 ? "9+" : notificationCount}
                   </span>
                 </>
               )}
-            </Button>
-
-            {/* Quick Add Button - Master Action Cleaned */}
-            <Button
-              variant="primary"
-              onClick={onCreateMemory}
-              className="bg-primary-900 shadow-primary-900/10 hover:shadow-primary-900/20 group h-10 rounded-xl px-4 shadow-md transition-all hover:shadow-lg active:scale-95 sm:px-5"
-            >
-              <Plus weight="bold" className="h-4 w-4 sm:mr-2" />
-              <span className="hidden text-xs font-bold tracking-tight sm:inline">New Memory</span>
             </Button>
 
             {/* Profile - Integrated Separator */}

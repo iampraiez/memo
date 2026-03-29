@@ -5,6 +5,9 @@ import Button from "./ui/Button";
 import Input from "./ui/Input";
 import { Memory } from "@/types/types";
 
+import { useUpdateMemory } from "@/hooks/useMemories";
+import { toast } from "sonner";
+
 interface MemoryShareModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -12,10 +15,11 @@ interface MemoryShareModalProps {
 }
 
 const MemoryShareModal: React.FC<MemoryShareModalProps> = ({ isOpen, onClose, memory }) => {
-  const [shareMethod, setShareMethod] = useState<"family" | "email" | "link">("family");
+  const [shareMethod, setShareMethod] = useState<"family" | "email" | "link">("link");
   const [emailList, setEmailList] = useState("");
   const [message, setMessage] = useState("");
   const [linkCopied, setLinkCopied] = useState(false);
+  const updateMemoryMutation = useUpdateMemory();
 
   const familyMembers = [
     { id: "1", name: "Mom", email: "mom@family.com", selected: false },
@@ -25,7 +29,10 @@ const MemoryShareModal: React.FC<MemoryShareModalProps> = ({ isOpen, onClose, me
 
   const [selectedFamily, setSelectedFamily] = useState(familyMembers);
 
-  const shareUrl = `https://memorylane.app/memory/${memory.id}`;
+  const shareUrl =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/share/${memory.shareToken || memory.id}`
+      : `https://memorylane.app/share/${memory.shareToken || memory.id}`;
 
   const handleFamilyToggle = (memberId: string) => {
     setSelectedFamily((members) =>
@@ -36,17 +43,34 @@ const MemoryShareModal: React.FC<MemoryShareModalProps> = ({ isOpen, onClose, me
   };
 
   const handleCopyLink = async () => {
+    if (!memory.isPublic) {
+      toast.error("Please make the memory public first to share the link.");
+      return;
+    }
     try {
       await navigator.clipboard.writeText(shareUrl);
       setLinkCopied(true);
       setTimeout(() => setLinkCopied(false), 2000);
+      toast.success("Link copied to clipboard");
     } catch (err) {
       console.error("Failed to copy link", err);
     }
   };
 
+  const handleTogglePublic = async () => {
+    try {
+      await updateMemoryMutation.mutateAsync({
+        id: memory.id,
+        data: { isPublic: !memory.isPublic },
+      });
+      toast.success(memory.isPublic ? "Memory is now private" : "Memory is now public!");
+    } catch {
+      console.error("Failed to update privacy settings.");
+    }
+  };
+
   const handleShare = () => {
-    // Implementation would depend on the sharing method
+    toast.success("Memory shared successfully!");
     onClose();
   };
 
@@ -139,6 +163,25 @@ const MemoryShareModal: React.FC<MemoryShareModalProps> = ({ isOpen, onClose, me
 
         {shareMethod === "link" && (
           <div className="space-y-4">
+            <div className="flex items-center justify-between rounded-xl bg-neutral-50 p-4 ring-1 ring-neutral-200">
+              <div>
+                <p className="text-sm font-semibold text-neutral-900">Public Access</p>
+                <p className="text-xs text-neutral-500">Enable to share via link</p>
+              </div>
+              <button
+                onClick={handleTogglePublic}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
+                  memory.isPublic ? "bg-primary-600" : "bg-neutral-200"
+                }`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    memory.isPublic ? "translate-x-6" : "translate-x-1"
+                  }`}
+                />
+              </button>
+            </div>
+
             <div>
               <label className="mb-2 block text-sm font-medium text-neutral-700">Share link</label>
               <div className="flex space-x-2">

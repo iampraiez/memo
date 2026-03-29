@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import db from "@/drizzle/index";
 import { exportJobs } from "@/drizzle/db/schema";
 import { runExportJob } from "@/jobs/exportJob";
-import { logger } from "@/custom/log/logger";
+import { logger } from "@/lib/logger";
 
 export async function POST() {
   try {

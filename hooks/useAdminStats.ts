@@ -5,7 +5,7 @@ export const useAdminStats = () => {
   return useQuery<AdminStats>({
     queryKey: ["admin", "stats"],
     queryFn: () => adminService.getStats(),
-    refetchInterval: 30000, // Refetch every 30 seconds
+    refetchInterval: 300000, // Refetch every 300 seconds
     structuralSharing: true,
   });
 };

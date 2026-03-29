@@ -14,16 +14,35 @@ export interface FamilyMember {
   role: "member" | "admin";
 }
 
+export interface InviteRequest {
+  email: string;
+  name?: string;
+  relationship: string;
+}
+
+export interface InviteResponse {
+  success: boolean;
+  memberId: string;
+  message?: string;
+}
+
+export interface RespondInviteRequest {
+  inviteId: string;
+  status: "accepted" | "declined";
+}
+
+export interface GenericResponse {
+  success: boolean;
+  message?: string;
+}
+
 export const familyService = {
   // Get family members (offline-first)
-  getMembers: async () => {
-    const userId = await familyService.getCurrentUserId();
+  getMembers: async (userId: string) => {
+    if (!userId) return { members: [] };
 
     // Read from Dexie
-    let members = await db.familyMembers
-      .where("userId")
-      .equals(userId || "")
-      .toArray();
+    let members = await db.familyMembers.where("userId").equals(userId).toArray();
 
     // Background sync if online
     if (syncService.getOnlineStatus()) {
@@ -31,13 +50,18 @@ export const familyService = {
         const response = await apiService.get<{ members: FamilyMember[] }>("/family");
 
         // Update cache
-        for (const member of response.members) {
-          await db.familyMembers.put({
-            ...member,
-            userId: member.userId || "", // Ensure userId is a string
-            _syncStatus: "synced",
-            _lastSync: Date.now(),
-          });
+        if (response.members && response.members.length > 0) {
+          await db.familyMembers.bulkPut(
+            response.members.map((member) => ({
+              ...member,
+              userId: userId, // Ensure we use the current user's ID for local storage
+              _syncStatus: "synced",
+              _lastSync: Date.now(),
+            })),
+          );
+
+          // Re-fetch from Dexie to get refreshed list
+          members = await db.familyMembers.where("userId").equals(userId).toArray();
         }
 
         return response;
@@ -50,13 +74,14 @@ export const familyService = {
   },
 
   // Invite family member (optimistic)
-  invite: async (data: { email: string; name?: string; relationship: string }) => {
-    const userId = await familyService.getCurrentUserId();
+  invite: async (userId: string, data: InviteRequest) => {
+    if (!userId) throw new Error("User ID is required");
+
     const tempId = uuidv4();
 
     const newMember: LocalFamilyMember = {
       id: tempId,
-      userId: userId || "",
+      userId: userId,
       email: data.email,
       name: data.name || data.email,
       relationship: data.relationship,
@@ -69,22 +94,52 @@ export const familyService = {
     // Immediate add to Dexie
     await db.familyMembers.add(newMember);
 
-    // Queue for sync
-    await syncService.queueOperation({
-      operation: "create",
-      entity: "family",
-      entityId: tempId,
-      data: data as unknown as Record<string, unknown>,
-    });
+    try {
+      const response = await apiService.post<InviteResponse, InviteRequest>("/family", data);
 
-    return { success: true };
+      // Update the local record with the real ID from server
+      if (response.memberId && response.memberId !== tempId) {
+        await db.familyMembers.delete(tempId);
+        await db.familyMembers.add({
+          ...newMember,
+          id: response.memberId,
+          _syncStatus: "synced",
+        });
+      } else {
+        await db.familyMembers.update(tempId, { _syncStatus: "synced" });
+      }
+
+      return response;
+    } catch (error) {
+      console.error("[FamilyService] Invite failed:", error);
+      // Keep in pending or mark as failed
+      throw error;
+    }
   },
 
-  // Helper
-  getCurrentUserId: async (): Promise<string | null> => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("currentUserId");
+  respondToInvite: async (userId: string, inviteId: string, status: "accepted" | "declined") => {
+    if (!userId) throw new Error("User ID is required");
+
+    try {
+      const response = await apiService.put<GenericResponse, RespondInviteRequest>("/family", {
+        inviteId,
+        status,
+      });
+
+      // Update local cache
+      if (status === "accepted") {
+        await db.familyMembers.update(inviteId, {
+          status: "accepted",
+          _syncStatus: "synced",
+        });
+      } else {
+        await db.familyMembers.delete(inviteId);
+      }
+
+      return response;
+    } catch (error) {
+      console.error("[FamilyService] Response to invite failed:", error);
+      throw error;
     }
-    return null;
   },
 };

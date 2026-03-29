@@ -4,7 +4,7 @@ import { users } from "@/drizzle/db/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
-import { logger } from "@/custom/log/logger";
+import { logger } from "@/lib/logger";
 import { verifyPasswordResetToken, deletePasswordResetToken } from "@/services/token.service";
 
 const resetPasswordSchema = z.object({

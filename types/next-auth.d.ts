@@ -6,12 +6,14 @@ declare module "next-auth" {
       id: string;
       username?: string | null;
       isOnboarded?: boolean;
+      emailVerified?: Date | string | null;
     } & DefaultSession["user"];
   }
 
   interface User {
     username?: string | null;
     isOnboarded?: boolean;
+    emailVerified?: Date | string | null;
   }
 }
 
@@ -22,5 +24,6 @@ declare module "next-auth/jwt" {
     name?: string | null;
     image?: string | null;
     isOnboarded?: boolean;
+    emailVerified?: Date | string | null;
   }
 }

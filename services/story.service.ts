@@ -1,7 +1,7 @@
+import { v4 as uuidv4 } from "uuid";
 import { apiService } from "./api.service";
 import { db, type LocalStory } from "@/lib/dexie/db";
 import { syncService } from "./sync.service";
-import { v4 as uuidv4 } from "uuid";
 
 export interface StorySettings {
   title: string;
@@ -16,31 +16,29 @@ export interface StorySettings {
 
 export const storyService = {
   // Get all stories (offline-first)
-  getAll: async () => {
-    const userId = await storyService.getCurrentUserId();
+  getAll: async (userId: string) => {
+    if (!userId) return { stories: [] };
 
     // Read from Dexie
-    let stories = await db.stories
-      .where("userId")
-      .equals(userId || "")
-      .reverse()
-      .sortBy("createdAt");
+    let stories = await db.stories.where("userId").equals(userId).reverse().sortBy("createdAt");
 
     // Background sync if online
     if (syncService.getOnlineStatus()) {
       try {
         const response = await apiService.get<{ stories: LocalStory[] }>("/stories");
 
-        // Update cache
-        for (const story of response.stories) {
-          await db.stories.put({
-            ...story,
-            _syncStatus: "synced",
-            _lastSync: Date.now(),
-          });
-        }
+        if (response.stories && response.stories.length > 0) {
+          await db.stories.bulkPut(
+            response.stories.map((story) => ({
+              ...story,
+              _syncStatus: "synced",
+              _lastSync: Date.now(),
+            })),
+          );
 
-        return response;
+          // Re-fetch from Dexie to get the latest synced data
+          stories = await db.stories.where("userId").equals(userId).reverse().sortBy("createdAt");
+        }
       } catch (error) {
         console.error("[StoryService] Sync failed, using cache:", error);
       }
@@ -49,15 +47,16 @@ export const storyService = {
     return { stories };
   },
 
-  create: async (data: StorySettings) => {
-    const userId = await storyService.getCurrentUserId();
+  create: async (userId: string, data: StorySettings) => {
+    if (!userId) throw new Error("User ID is required");
+
     const tempId = uuidv4();
 
     const newStory: LocalStory = {
       id: tempId,
-      userId: userId || "",
+      userId: userId,
       title: data.title,
-      content: `${data.tone} story from ${data.dateRange.start} to ${data.dateRange.end}`,
+      content: "Generating your story...", // Placeholder
       dateRange: data.dateRange,
       tone: data.tone,
       length: data.length,
@@ -69,22 +68,28 @@ export const storyService = {
 
     await db.stories.add(newStory);
 
-    // Queue for sync
-    await syncService.queueOperation({
-      operation: "create",
-      entity: "story",
-      entityId: tempId,
-      data: data as unknown as Record<string, unknown>,
-    });
+    try {
+      const response = await apiService.post<{ story: LocalStory }, StorySettings>(
+        "/stories",
+        data,
+      );
 
-    return { story: { content: newStory.content } };
-  },
+      // Update the local story with the real content and status
+      await db.stories.update(tempId, {
+        ...response.story,
+        _syncStatus: "synced",
+        _lastSync: Date.now(),
+      });
 
-  // Helper
-  getCurrentUserId: async (): Promise<string | null> => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("currentUserId");
+      return response;
+    } catch (error) {
+      console.error("[StoryService] API Creation failed:", error);
+      // Update local story to failed status
+      await db.stories.update(tempId, {
+        status: "failed",
+        _syncStatus: "pending",
+      });
+      throw error;
     }
-    return null;
   },
 };

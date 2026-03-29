@@ -1,8 +1,7 @@
-import "dotenv/config";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import * as schema from "./db/schema";
-import { logger } from "@/custom/log/logger";
+import { logger } from "@/lib/logger";
 import { sql } from "drizzle-orm";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 
@@ -24,10 +23,8 @@ const pool =
 
 const db = globalForDb.db ?? drizzle(pool, { schema });
 
-if (process.env.NODE_ENV !== "production") {
-  globalForDb.pool = pool;
-  globalForDb.db = db;
-}
+globalForDb.pool = pool;
+globalForDb.db = db;
 
 async function testDbConnection() {
   try {

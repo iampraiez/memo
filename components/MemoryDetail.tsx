@@ -7,7 +7,8 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Memory } from "@/types/types";
 import Lightbox from "@/components/ui/Lightbox";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { BookOpen, X } from "@phosphor-icons/react";
 
 interface MemoryDetailProps {
   memoryId: string;
@@ -22,6 +23,18 @@ export default function MemoryDetail({ memoryId, onBack }: MemoryDetailProps) {
   const memory = data?.memory;
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [isReadingMode, setIsReadingMode] = useState(false);
+
+  useEffect(() => {
+    if (isReadingMode) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isReadingMode]);
 
   const moodColors = {
     joyful: "bg-yellow-50 text-yellow-700 border-yellow-100",
@@ -34,7 +47,7 @@ export default function MemoryDetail({ memoryId, onBack }: MemoryDetailProps) {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-[400px] items-center justify-center">
+      <div className="flex min-h-100 items-center justify-center">
         <ArrowsClockwise className="text-primary-600 h-8 w-8 animate-spin" />
       </div>
     );
@@ -66,7 +79,65 @@ export default function MemoryDetail({ memoryId, onBack }: MemoryDetailProps) {
           <ArrowLeft className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" />
           Back
         </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setIsReadingMode(true)}
+          className="bg-primary-50 hover:bg-primary-100 border-primary-200 text-primary-700 font-bold"
+        >
+          <BookOpen className="mr-2 h-4 w-4" />
+          Focus Mode
+        </Button>
       </div>
+
+      {isReadingMode && (
+        <div className="animate-in fade-in fixed inset-0 z-60 flex items-center justify-center overflow-y-auto bg-neutral-50/98 backdrop-blur-md transition-all duration-500">
+          <button
+            onClick={() => setIsReadingMode(false)}
+            className="fixed top-8 right-8 z-70 flex h-12 w-12 items-center justify-center rounded-full bg-white text-neutral-500 shadow-xl transition-all hover:scale-110 hover:text-neutral-900 active:scale-95"
+            aria-label="Exit Reading Mode"
+          >
+            <X size={24} weight="bold" />
+          </button>
+
+          <article className="mx-auto max-w-2xl px-6 py-24 sm:py-32">
+            <header className="mb-16 text-center">
+              <div className="text-primary-600 mb-4 text-xs font-bold tracking-[0.2em] uppercase opacity-70">
+                {new Date(memory.date).toLocaleDateString(undefined, {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </div>
+              <h1 className="font-display text-5xl leading-tight font-bold tracking-tight text-neutral-900 sm:text-6xl">
+                {memory.title}
+              </h1>
+              {memory.location && (
+                <div className="mt-6 flex items-center justify-center text-sm font-medium text-neutral-400">
+                  <MapPin className="mr-2 h-4 w-4" />
+                  {memory.location}
+                </div>
+              )}
+            </header>
+
+            <div
+              className="font-serif text-2xl leading-[1.8] text-neutral-800 antialiased opacity-90 sm:text-3xl lg:text-4xl lg:leading-relaxed"
+              dangerouslySetInnerHTML={{ __html: memory.content }}
+            />
+
+            {memory.summary && (
+              <div className="mt-20 border-t border-neutral-100 pt-20 text-center">
+                <h3 className="text-primary-600 font-display mb-8 text-2xl font-bold italic opacity-40">
+                  The Essence
+                </h3>
+                <p className="font-display text-xl leading-relaxed font-light text-neutral-600 italic sm:text-2xl">
+                  {memory.summary}
+                </p>
+              </div>
+            )}
+          </article>
+        </div>
+      )}
 
       <div className="space-y-8">
         <header className="space-y-4">
@@ -121,24 +192,27 @@ export default function MemoryDetail({ memoryId, onBack }: MemoryDetailProps) {
           </div>
         )}
 
-        <article className="prose prose-neutral max-w-none">
-          <p className="text-xl leading-relaxed font-light whitespace-pre-wrap text-neutral-800">
-            {memory.content}
-          </p>
+        <article className="prose prose-neutral mx-auto max-w-(--ch-65) py-10">
+          <div
+            className="font-serif text-2xl leading-[1.6] text-neutral-800 antialiased opacity-95 sm:text-3xl"
+            dangerouslySetInnerHTML={{ __html: memory.content }}
+          />
         </article>
 
         {memory.summary && (
-          <section className="bg-primary-900 relative overflow-hidden rounded-3xl p-8 text-white">
-            <div className="bg-secondary-400/10 absolute top-0 right-0 -mt-16 -mr-16 h-32 w-32 rounded-full blur-3xl" />
-            <h3 className="text-secondary-400 font-display mb-4 text-xl font-bold italic">
+          <section className="bg-primary-900 relative mx-auto max-w-(--ch-65) overflow-hidden rounded-4xl p-10 text-white shadow-2xl">
+            <div className="bg-secondary-400/10 absolute top-0 right-0 -mt-20 -mr-20 h-40 w-40 rounded-full blur-3xl" />
+            <h3 className="text-secondary-400 font-display mb-6 text-2xl font-bold italic">
               The Reflection
             </h3>
-            <p className="text-primary-50 text-lg leading-relaxed font-light">{memory.summary}</p>
+            <p className="text-primary-50 text-xl leading-relaxed font-light opacity-90">
+              {memory.summary}
+            </p>
           </section>
         )}
 
         {memory.tags && memory.tags.length > 0 && (
-          <div className="border-t border-neutral-100 pt-8">
+          <div className="mx-auto max-w-(--ch-65) border-t border-neutral-100 pt-10">
             <div className="flex flex-wrap gap-2">
               {memory.tags.map((tag) => (
                 <Tag

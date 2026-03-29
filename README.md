@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="public/logo.svg" width="120" height="120" alt="Memo Logo" />
+</p>
+
 # Memory Lane 🌟
 
 > **Your personal history, beautifully preserved.**
@@ -9,17 +13,18 @@ Memory Lane is a modern, AI-powered personal timeline application that helps you
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue)](https://www.typescriptlang.org/)
 [![pnpm](https://img.shields.io/badge/pnpm-10.28-orange)](https://pnpm.io/)
 
-## ✨ Features
+## ✨ Core Platform Features
 
-- **📝 Rich Memory Capture** - Create detailed memories with text, images, tags, and mood tracking
-- **🤖 AI-Powered Stories** - Generate beautiful narratives from your memories using Google Gemini
-- **🔍 Advanced Search** - Full-text search with filters for tags, dates, and moods
-- **📅 Timeline View** - Visualize your life story with an interactive, chronological timeline
-- **👥 Family Sharing** - Share memories with family members and collaborate on your history
-- **🔐 Secure & Private** - End-to-end encryption with NextAuth.js authentication
-- **📱 Progressive Web App** - Install on any device with offline support
-- **📊 Analytics Dashboard** - Insights into your memory patterns and trends
-- **📤 Export Options** - Download your memories as PDF or Word documents
+- **📝 Rich Text Sanctuary** - Beautiful, customized Tiptap editor with elegant serif typography for memories
+- **🤖 AI Heritage Generation** - Google Gemini integration transforms individual memories into cohesive, chaptered narratives
+- **⏳ Digital Memory Capsules** - Server-enforced, time-locked future memories that unlock on specific dates
+- **👥 Family & Circles** - RBAC-secured private sharing and collaborative circles with real-time notifications
+- **⚡ Offline-First Architecture** - Seamless PWA experience powered by Dexie.js (`IndexedDB`) and React Query sync
+- **✨ Premium UI/UX** - Fluid transitions (Framer Motion), Immersive Reading Mode, and gamified streak analytics
+- **📤 Heritage Exports** - Beautifully formatted PDF and DOCX exports with intelligently interspersed imagery
+
+## 📸 Sneak Peek
+*(Add production screenshots here: Dashboard, Immersive Reader, Memory Creation Modal)*
 
 ## 🚀 Quick Start
 
@@ -108,11 +113,17 @@ Memory Lane is a modern, AI-powered personal timeline application that helps you
 - **[NextAuth.js 5](https://next-auth.js.org/)** - Authentication
 - **[Nodemailer](https://nodemailer.com/)** - Email delivery
 
-### State & Data
+### State & Offline Layer
 
-- **[TanStack Query](https://tanstack.com/query)** - Server state management
-- **[Zustand](https://zustand-demo.pmnd.rs/)** - Client state management
-- **[Dexie.js](https://dexie.org/)** - IndexedDB wrapper for offline support
+- **[TanStack Query v5](https://tanstack.com/query)** - Server state and optimistic updates
+- **[Zustand](https://zustand-demo.pmnd.rs/)** - Client UI state management
+- **[Dexie.js](https://dexie.org/)** - Encrypted IndexedDB wrapper for full offline availability
+- **[Next PWA](https://github.com/shadowwalker/next-pwa)** - Service workers (NetworkFirst & CacheFirst strategies)
+
+### Media & Document Workflows
+
+- **[Cloudinary](https://cloudinary.com/)** - Optimized asset CDN and image transformations
+- **[jsPDF & docx](https://github.com/parallax/jsPDF)** - On-device document generation with embedded media
 
 ### AI & Integrations
 
@@ -249,14 +260,16 @@ Key tables:
 3. Add environment variables
 4. Deploy
 
-### Docker
+### Docker (Production Ready)
+
+Memory Lane includes a highly optimized Dockerfile for containerized deployment.
 
 ```bash
-# Build image
-docker build -t memory-lane .
+# Build the production image multi-stage
+docker build -t memory-lane-prod .
 
-# Run container
-docker run -p 3000:3000 --env-file .env memory-lane
+# Run container (injecting env vars from secure vault or .env)
+docker run -d -p 3000:3000 --env-file .env.production --name memory-lane memory-lane-prod
 ```
 
 ### Manual Deployment

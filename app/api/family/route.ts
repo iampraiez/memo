@@ -80,6 +80,15 @@ export async function POST(req: Request) {
       where: eq(users.email, email),
     });
 
+    // Check if already in family
+    const alreadyConnected = await db.query.familyMembers.findFirst({
+      where: (fm, { and, eq }) => and(eq(fm.ownerId, session.user.id), eq(fm.email, email)),
+    });
+
+    if (alreadyConnected) {
+      return NextResponse.json({ error: "Already invited or connected" }, { status: 400 });
+    }
+
     const newMemberId = uuidv4();
     await db.insert(familyMembers).values({
       id: newMemberId,
@@ -100,7 +109,7 @@ export async function POST(req: Request) {
         type: "family_invite",
         title: "Family Invitation",
         message: `${session.user.name || "Someone"} invited you to join their family circle as a ${relationship}.`,
-        relatedId: session.user.id,
+        relatedId: newMemberId,
         read: false,
       });
     }
@@ -112,6 +121,70 @@ export async function POST(req: Request) {
     });
   } catch (error) {
     console.error("Error adding family member:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
+}
+
+export async function PUT(req: Request) {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const { inviteId, status } = await req.json();
+
+    if (!inviteId || !["accepted", "declined"].includes(status)) {
+      return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+    }
+
+    // Find the invite
+    const invite = await db.query.familyMembers.findFirst({
+      where: eq(familyMembers.id, inviteId),
+    });
+
+    if (!invite) {
+      return NextResponse.json({ error: "Invitation not found" }, { status: 404 });
+    }
+
+    // Only the target member can respond
+    if (invite.memberId !== session.user.id) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    if (status === "declined") {
+      // If declined, we can delete the record or mark as declined.
+      // Requirements say "Accept/Decline flow", so marking as declined for now,
+      // or just deleting if we want a clean state. Let's delete to allow re-invite.
+      await db.delete(familyMembers).where(eq(familyMembers.id, inviteId));
+
+      return NextResponse.json({ success: true, message: "Invitation declined" });
+    }
+
+    // Accept invitation
+    await db
+      .update(familyMembers)
+      .set({
+        status: "accepted",
+        joinedAt: new Date(),
+      })
+      .where(eq(familyMembers.id, inviteId));
+
+    // Notify the owner
+    await db.insert(notifications).values({
+      id: uuidv4(),
+      userId: invite.ownerId,
+      type: "family_invite",
+      title: "Invitation Accepted",
+      message: `${session.user.name || "A user"} has accepted your family circle invitation.`,
+      relatedId: session.user.id,
+      read: false,
+    });
+
+    return NextResponse.json({ success: true, message: "Invitation accepted" });
+  } catch (error) {
+    console.error("Error responding to invitation:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

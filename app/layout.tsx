@@ -56,7 +56,19 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         <ErrorBoundary>
           <Providers session={session}>
             {children}
-            <Toaster position="top-right" richColors />
+            <Toaster
+              position="top-right"
+              richColors
+              expand={false}
+              duration={4000}
+              toastOptions={{
+                classNames: {
+                  toast: "font-sans rounded-xl border border-neutral-200 shadow-2xl",
+                  title: "font-bold text-neutral-900",
+                  description: "text-neutral-600",
+                },
+              }}
+            />
           </Providers>
         </ErrorBoundary>
       </body>
