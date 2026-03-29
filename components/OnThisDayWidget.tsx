@@ -63,6 +63,7 @@ export default function OnThisDayWidget({ memories, onMemoryClick }: OnThisDayWi
               src={latestMemory.images[0]}
               alt={latestMemory.title}
               fill
+              sizes="(max-width: 768px) 100vw, 256px"
               className="object-cover transition-transform duration-500 hover:scale-110"
             />
             <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent" />

@@ -16,5 +16,6 @@ export const config = {
     "/api/memories/:path*",
     "/api/analytics/:path*",
     "/api/user/:path*",
+    "/((?!api|_next/static|_next/image|favicon.ico|.*\\.svg|.*\\.png|.*\\.jpg|.*\\.jpeg|.*\\.gif|.*\\.webp).*)",
   ],
 };

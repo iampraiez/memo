@@ -65,6 +65,7 @@ export default function TimelineMapView({ memories, onMemoryClick }: TimelineMap
                         src={memory.images[0]}
                         alt={memory.title}
                         fill
+                        sizes="256px"
                         className="object-cover"
                       />
                     </div>

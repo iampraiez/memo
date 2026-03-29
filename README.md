@@ -24,7 +24,8 @@ Memory Lane is a modern, AI-powered personal timeline application that helps you
 - **📤 Heritage Exports** - Beautifully formatted PDF and DOCX exports with intelligently interspersed imagery
 
 ## 📸 Sneak Peek
-*(Add production screenshots here: Dashboard, Immersive Reader, Memory Creation Modal)*
+
+_(Add production screenshots here: Dashboard, Immersive Reader, Memory Creation Modal)_
 
 ## 🚀 Quick Start
 

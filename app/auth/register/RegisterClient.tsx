@@ -1,7 +1,8 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { signIn } from "next-auth/react";
 import { EnvelopeSimple, Lock, GoogleLogo, ArrowRight, Eye, EyeSlash } from "@phosphor-icons/react";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
@@ -17,6 +18,42 @@ export default function RegisterClient() {
   const [loading, setLoading] = useState(false);
   const [loadingGoogle, setLoadingGoogle] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const googleToken = searchParams.get("google_token");
+    if (googleToken) {
+      handleFinalizeGoogleRegistration(googleToken);
+    }
+
+    const errorMsg = searchParams.get("error");
+    if (errorMsg && errorMsg !== "CredentialsSignin") {
+      toast.error(decodeURIComponent(errorMsg));
+    }
+  }, [searchParams]);
+
+  const handleFinalizeGoogleRegistration = async (token: string) => {
+    setLoadingGoogle(true);
+    try {
+      const res = await signIn("credentials", {
+        redirect: false,
+        token,
+        type: "google-token",
+      });
+
+      if (res?.error) {
+        toast.error("Google authentication failed.");
+        router.replace("/auth/register");
+      } else {
+        // Registration is a new user by definition of the strict intent pipeline.
+        router.push("/onboarding");
+      }
+    } catch {
+      toast.error("An error occurred during Google Sign-up.");
+    } finally {
+      setLoadingGoogle(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,7 +95,7 @@ export default function RegisterClient() {
 
   const handleGoogleSignIn = () => {
     setLoadingGoogle(true);
-    window.location.href = "/api/auth/google/login";
+    window.location.href = "/api/auth/google/login?intent=signup";
   };
 
   return (

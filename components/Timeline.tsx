@@ -245,6 +245,7 @@ const Timeline: React.FC<TimelineProps> = ({
                                                   <MemoryCard
                                                     memory={memory}
                                                     displayMode="grid"
+                                                    priority={memories[0]?.id === memory.id}
                                                     onClick={() => onMemoryClick(memory)}
                                                     onEdit={() => onEditMemory(memory)}
                                                     onDelete={() => onDeleteMemory(memory.id)}
@@ -266,6 +267,7 @@ const Timeline: React.FC<TimelineProps> = ({
                                                   key={memory.id}
                                                   memory={memory}
                                                   displayMode="list"
+                                                  priority={memories[0]?.id === memory.id}
                                                   onClick={() => onMemoryClick(memory)}
                                                   onEdit={() => onEditMemory(memory)}
                                                   onDelete={() => onDeleteMemory(memory.id)}

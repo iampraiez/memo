@@ -9,7 +9,7 @@ import { eq, and } from "drizzle-orm";
 import type { Provider } from "next-auth/providers";
 import brcypt from "bcryptjs";
 import { userExists } from "./query";
-import { verifyGoogleToken, getOrCreateGoogleUser } from "./google-auth";
+import { verifyGoogleToken } from "./google-auth";
 import { env } from "@/config/env";
 
 import { CredentialsSignin } from "next-auth";
@@ -33,7 +33,9 @@ const providers: Provider[] = [
       if (c.type === "google-token" && c.token) {
         try {
           const payload = await verifyGoogleToken(c.token as string);
-          const user = await getOrCreateGoogleUser(payload);
+          if (!payload.email) throw new AuthError("GOOGLE_AUTH_FAILED");
+          const user = await userExists(payload.email);
+          if (!user) throw new AuthError("GOOGLE_AUTH_FAILED");
           return user;
         } catch (error) {
           console.error("Manual Google Auth Error:", error);

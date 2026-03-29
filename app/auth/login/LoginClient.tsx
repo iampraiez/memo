@@ -23,6 +23,11 @@ export default function LoginClient() {
       handleFinalizeGoogleLogin(googleToken);
     }
 
+    const errorMsg = searchParams.get("error");
+    if (errorMsg && errorMsg !== "CredentialsSignin") {
+      toast.error(decodeURIComponent(errorMsg));
+    }
+
     if (searchParams.get("verified") === "true") {
       toast.success("Email verified successfully! You can now sign in.");
       // Clear the session storage or URL to avoid showing the toast twice if needed
@@ -112,7 +117,7 @@ export default function LoginClient() {
 
   const handleGoogleSignIn = () => {
     setLoadingGoogle(true);
-    window.location.href = "/api/auth/google/login";
+    window.location.href = "/api/auth/google/login?intent=login";
   };
 
   return (

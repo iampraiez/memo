@@ -17,7 +17,7 @@ client.transporter.defaults = {
 
 const REDIRECT_URI = `${env.NEXT_PUBLIC_URL}/api/auth/google/callback`;
 
-export function getGoogleAuthUrl() {
+export function getGoogleAuthUrl(intent: "login" | "signup" = "login") {
   return client.generateAuthUrl({
     access_type: "offline",
     scope: [
@@ -25,6 +25,7 @@ export function getGoogleAuthUrl() {
       "https://www.googleapis.com/auth/userinfo.email",
     ],
     redirect_uri: REDIRECT_URI,
+    state: intent,
   });
 }
 
@@ -60,46 +61,66 @@ export async function verifyGoogleToken(token: string) {
   }
 }
 
-export async function getOrCreateGoogleUser(payload: TokenPayload) {
+export async function handleGoogleUser(
+  payload: TokenPayload,
+  intent: "login" | "signup" = "login",
+) {
   const { email, sub: googleId, name, picture } = payload;
   if (!email) throw new Error("Google email is required");
 
   const [user] = await db.select().from(users).where(eq(users.email, email)).limit(1);
 
-  if (user) {
+  if (intent === "login") {
+    if (!user) {
+      throw new Error("No account found with this email. Please sign up first.");
+    }
     const [existingAccount] = await db
       .select()
       .from(accounts)
       .where(and(eq(accounts.provider, "google"), eq(accounts.providerAccountId, googleId)))
       .limit(1);
-    if (existingAccount.provider === "google") {
-      return user;
-    } else {
-      throw new Error(
-        "User with this email already exists but is not linked to Google. Please use the original sign-in method.",
-      );
+
+    // We allow logging in if the user exists. Wait, if the user didn't link google, should we auto link or not allow?
+    // Let's ensure they have a google account, or auto link if user already exists. The user spec:
+    // "if used in login and user doesn't exist it says user doesn't exist if it does user gets logged in"
+    // So we just return the user if they exist securely with Google since Google verified the email.
+    if (!existingAccount) {
+      // Auto-link Google account to existing user with same email
+      await db.insert(accounts).values({
+        userId: user.id,
+        type: "oauth",
+        provider: "google",
+        providerAccountId: googleId,
+      });
     }
+    return user;
+  } else if (intent === "signup") {
+    if (user) {
+      throw new Error("An account with this email already exists. Please log in.");
+    }
+
+    const userId = uuidv4();
+    const [newUser] = await db
+      .insert(users)
+      .values({
+        id: userId,
+        email: email as string,
+        name,
+        image: picture,
+        emailVerified: new Date(),
+      })
+      .returning();
+
+    // Link account
+    await db.insert(accounts).values({
+      userId: newUser.id,
+      type: "oauth",
+      provider: "google",
+      providerAccountId: googleId as string,
+    });
+
+    return newUser;
   }
 
-  const userId = uuidv4();
-  const [newUser] = await db
-    .insert(users)
-    .values({
-      id: userId,
-      email: email as string,
-      name,
-      image: picture,
-      emailVerified: new Date(),
-    })
-    .returning();
-
-  // Link account
-  await db.insert(accounts).values({
-    userId: newUser.id,
-    type: "oauth",
-    provider: "google",
-    providerAccountId: googleId as string,
-  });
-
-  return newUser;
+  throw new Error("Invalid authentication intent.");
 }

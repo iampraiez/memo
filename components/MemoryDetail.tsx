@@ -186,6 +186,7 @@ export default function MemoryDetail({ memoryId, onBack }: MemoryDetailProps) {
                   fill
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 800px"
                   className="object-cover transition-transform duration-700 group-hover:scale-105"
+                  priority={idx === 0}
                 />
               </div>
             ))}

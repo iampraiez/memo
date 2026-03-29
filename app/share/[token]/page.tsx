@@ -70,6 +70,7 @@ export default async function SharePage({ params }: SharePageProps) {
               src={memory.memoryMedia[0].url}
               alt={memory.title}
               fill
+              sizes="(max-width: 1200px) 100vw, 1200px"
               className="object-cover"
               priority
             />

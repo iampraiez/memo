@@ -26,6 +26,7 @@ interface MemoryCardProps {
   onDelete?: (memoryId: string) => void;
   onShareMemory?: (memory: Memory) => void;
   displayMode?: "grid" | "list";
+  priority?: boolean;
 }
 
 const MemoryCard: React.FC<MemoryCardProps> = ({
@@ -36,6 +37,7 @@ const MemoryCard: React.FC<MemoryCardProps> = ({
   onDelete,
   onShareMemory,
   displayMode = "grid",
+  priority = false,
 }) => {
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -166,6 +168,7 @@ const MemoryCard: React.FC<MemoryCardProps> = ({
                 ? "(max-width: 768px) 128px, 192px"
                 : "(max-width: 768px) 100vw, (max-width: 1536px) 50vw, 33vw"
             }
+            priority={priority}
             className="object-cover transition-transform duration-700 group-hover:scale-110"
           />
         ) : (
