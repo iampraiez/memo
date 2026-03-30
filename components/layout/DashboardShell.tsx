@@ -99,7 +99,7 @@ export default function DashboardShell({ children }: DashboardShellProps) {
       <div className="flex">
         <Sidebar isOpen={sidebarOpen} onClick={() => setSidebarOpen(false)} />
 
-        <main className="flex-1 transition-all duration-300 lg:ml-72">
+        <main className="min-w-0 flex-1 overflow-x-hidden transition-all duration-300 lg:ml-72">
           <AnimatePresence mode="wait">
             <motion.div
               key={pathname}

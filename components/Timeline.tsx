@@ -231,8 +231,8 @@ const Timeline: React.FC<TimelineProps> = ({
                                               1100: 2,
                                               700: 1,
                                             }}
-                                            className="-ml-4 flex w-auto"
-                                            columnClassName="pl-4 bg-clip-padding"
+                                            className="-ml-2 flex w-auto sm:-ml-4"
+                                            columnClassName="pl-2 bg-clip-padding sm:pl-4"
                                           >
                                             {groupedMemories[year][month][day]
                                               .sort(
