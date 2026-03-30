@@ -43,6 +43,11 @@ export default function MemoryContentTab({
     setShowStylePicker(false);
     setAiLoading(true);
     setOriginalContent(formData.content);
+    console.log("[AI Generation] Sending payload:", {
+      title: formData.title,
+      content: formData.content,
+      style,
+    });
     try {
       const response = await fetch("/api/memories/generate", {
         method: "POST",

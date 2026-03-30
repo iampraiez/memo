@@ -6,6 +6,8 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import Image from "next/image";
+import { useUpdateMemory } from "@/hooks/useMemories";
+import { toast } from "sonner";
 
 // Fix Leaflet marker icon issue in Next.js
 // @ts-ignore
@@ -23,6 +25,7 @@ interface TimelineMapViewProps {
 
 export default function TimelineMapView({ memories, onMemoryClick }: TimelineMapViewProps) {
   const [mounted, setMounted] = useState(false);
+  const updateMemory = useUpdateMemory();
 
   useEffect(() => {
     setMounted(true);
@@ -34,10 +37,14 @@ export default function TimelineMapView({ memories, onMemoryClick }: TimelineMap
   // For this audit, we'll simulate coordinates if they aren't provided
   // (assuming some might have lat/lng but the type doesn't explicitly show them yet)
   // We'll use a deterministic random for demo purposes based on location string hash
-  const getCoords = (location: string): [number, number] => {
+  const getCoords = (memory: Memory): [number, number] => {
+    if (memory.latitude != null && memory.longitude != null) {
+      return [memory.latitude, memory.longitude];
+    }
+    const loc = memory.location || "Earth";
     let hash = 0;
-    for (let i = 0; i < location.length; i++) {
-      hash = location.charCodeAt(i) + ((hash << 5) - hash);
+    for (let i = 0; i < loc.length; i++) {
+      hash = loc.charCodeAt(i) + ((hash << 5) - hash);
     }
     const lat = (hash % 180) / 2;
     const lng = ((hash * 31) % 360) / 2;
@@ -54,9 +61,34 @@ export default function TimelineMapView({ memories, onMemoryClick }: TimelineMap
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         {memoriesWithCoords.map((memory) => {
-          const coords = getCoords(memory.location || "Earth");
+          const coords = getCoords(memory);
           return (
-            <Marker key={memory.id} position={coords}>
+            <Marker
+              key={memory.id}
+              position={coords}
+              draggable={true}
+              eventHandlers={{
+                dragend: (e) => {
+                  const marker = e.target;
+                  const position = marker.getLatLng();
+                  updateMemory.mutate(
+                    {
+                      id: memory.id,
+                      data: { latitude: position.lat, longitude: position.lng },
+                    },
+                    {
+                      onSuccess: () => {
+                        toast.success("Memory location updated!");
+                      },
+                      onError: () => {
+                        toast.error("Failed to update location.");
+                        marker.setLatLng(coords); // revert
+                      },
+                    },
+                  );
+                },
+              }}
+            >
               <Popup className="premium-popup">
                 <div className="w-64 overflow-hidden rounded-xl bg-white p-0 shadow-xl">
                   {memory.images && memory.images.length > 0 ? (

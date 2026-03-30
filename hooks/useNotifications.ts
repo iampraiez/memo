@@ -36,3 +36,9 @@ export const useMarkAllNotificationsRead = () => {
     mutationFn: () => notificationService.markAllAsRead(),
   });
 };
+
+export const useClearAllNotifications = () => {
+  return useMutation({
+    mutationFn: () => notificationService.clearAll(),
+  });
+};

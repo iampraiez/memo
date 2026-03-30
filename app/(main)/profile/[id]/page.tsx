@@ -13,7 +13,7 @@ import Loading from "@/components/ui/Loading";
 import { Calendar, Heart, ChatCircle, Lock, Globe } from "@phosphor-icons/react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { is404Error } from "@/lib/utils";
+import { is404Error, stripHtml } from "@/lib/utils";
 import { Memory } from "@/types/types";
 
 export default function ProfilePage() {
@@ -219,7 +219,9 @@ export default function ProfilePage() {
                     {new Date(memory.date).toLocaleDateString()}
                   </p>
                   <h3 className="mt-1 line-clamp-1 font-bold text-neutral-900">{memory.title}</h3>
-                  <p className="mt-1 line-clamp-2 text-sm text-neutral-500">{memory.content}</p>
+                  <p className="mt-1 line-clamp-2 text-sm text-neutral-500">
+                    {stripHtml(memory.summary || memory.content)}
+                  </p>
 
                   <div className="mt-3 flex items-center justify-between border-t border-neutral-100 pt-3">
                     <div className="flex items-center space-x-3 text-neutral-400">

@@ -16,7 +16,7 @@ import { Memory } from "@/types/types";
 import Card from "./ui/Card";
 import Tag from "./ui/Tag";
 import Button from "./ui/Button";
-import { cn } from "@/lib/utils";
+import { cn, stripHtml } from "@/lib/utils";
 
 interface MemoryCardProps {
   memory: Memory;
@@ -110,6 +110,12 @@ const MemoryCard: React.FC<MemoryCardProps> = ({
     setShowMenu(!showMenu);
   };
 
+  const getMoodStyle = (mood: string | null | undefined) => {
+    if (!mood) return null;
+    return moodColors[mood as keyof typeof moodColors] || moodColors.reflective;
+  };
+
+  const moodStyle = getMoodStyle(memory.mood);
   const isLocked = memory.unlockDate ? new Date(memory.unlockDate) > new Date() : false;
 
   return (
@@ -118,9 +124,7 @@ const MemoryCard: React.FC<MemoryCardProps> = ({
       className={cn(
         "group cursor-pointer overflow-hidden transition-all duration-300",
         isLocked && "opacity-90 grayscale-[0.5]",
-        memory.mood &&
-          !isLocked &&
-          `border-l-4 ${moodColors[memory.mood as keyof typeof moodColors].border}`,
+        moodStyle && !isLocked && `border-l-4 ${moodStyle.border}`,
         displayMode === "list" ? "flex flex-row items-stretch" : "space-y-0",
       )}
       padding="none"
@@ -128,11 +132,11 @@ const MemoryCard: React.FC<MemoryCardProps> = ({
       href={isLocked ? undefined : href}
     >
       {/* Mood Gradient Overlay */}
-      {memory.mood && !isLocked && (
+      {moodStyle && !isLocked && (
         <div
           className={cn(
             "pointer-events-none absolute inset-0 bg-linear-to-br to-transparent opacity-[0.03]",
-            moodColors[memory.mood as keyof typeof moodColors].accent,
+            moodStyle.accent,
           )}
         />
       )}
@@ -280,18 +284,18 @@ const MemoryCard: React.FC<MemoryCardProps> = ({
           <p className="line-clamp-2 text-xs leading-relaxed text-neutral-600 italic sm:text-sm">
             {isLocked
               ? "This memory has been sealed for the future. Unlock it to relive the moment."
-              : (memory.summary || memory.content)?.replace(/<[^>]*>?/gm, "")}
+              : stripHtml(memory.summary || memory.content)}
           </p>
         </div>
 
         {/* Tags and Mood */}
         <div className="mt-4 flex items-center justify-between">
           <div className="flex flex-wrap gap-1.5 sm:gap-2">
-            {!isLocked && memory.mood && (
+            {moodStyle && !isLocked && (
               <span
                 className={cn(
                   "inline-flex items-center rounded-full border px-1.5 py-0.5 text-[9px] font-bold tracking-wider uppercase sm:px-2 sm:py-1 sm:text-[10px]",
-                  moodColors[memory.mood as keyof typeof moodColors].tag,
+                  moodStyle.tag,
                 )}
               >
                 <Heart className="mr-1 h-2.5 w-2.5 sm:h-3 sm:w-3" weight="fill" />

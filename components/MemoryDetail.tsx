@@ -1,5 +1,15 @@
 "use client";
-import { ArrowLeft, MapPin, Calendar, ArrowsClockwise } from "@phosphor-icons/react";
+import {
+  ArrowLeft,
+  MapPin,
+  Calendar,
+  ArrowsClockwise,
+  BookOpen,
+  X,
+  Heart,
+  Quotes,
+  ShareNetwork,
+} from "@phosphor-icons/react";
 import Button from "@/components/ui/Button";
 import Tag from "@/components/ui/Tag";
 import { useMemory } from "@/hooks/useMemories";
@@ -7,8 +17,8 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Memory } from "@/types/types";
 import Lightbox from "@/components/ui/Lightbox";
+import MemoryShareModal from "@/components/MemoryShareModal";
 import { useState, useEffect } from "react";
-import { BookOpen, X } from "@phosphor-icons/react";
 
 interface MemoryDetailProps {
   memoryId: string;
@@ -21,9 +31,11 @@ export default function MemoryDetail({ memoryId, onBack }: MemoryDetailProps) {
   const router = useRouter();
   const { data, isLoading, error } = useMemory(memoryId);
   const memory = data?.memory;
+  const images = memory?.images || [];
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [isReadingMode, setIsReadingMode] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   useEffect(() => {
     if (isReadingMode) {
@@ -37,17 +49,17 @@ export default function MemoryDetail({ memoryId, onBack }: MemoryDetailProps) {
   }, [isReadingMode]);
 
   const moodColors = {
-    joyful: "bg-yellow-50 text-yellow-700 border-yellow-100",
-    peaceful: "bg-blue-50 text-blue-700 border-blue-100",
-    excited: "bg-orange-50 text-orange-700 border-orange-100",
-    nostalgic: "bg-purple-50 text-purple-700 border-purple-100",
-    grateful: "bg-green-50 text-green-700 border-green-100",
-    reflective: "bg-neutral-50 text-neutral-700 border-neutral-100",
+    joyful: "border-yellow-200 bg-yellow-50 text-yellow-800",
+    peaceful: "border-blue-200 bg-blue-50 text-blue-800",
+    excited: "border-orange-200 bg-orange-50 text-orange-800",
+    nostalgic: "border-purple-200 bg-purple-50 text-purple-800",
+    grateful: "border-green-200 bg-green-50 text-green-800",
+    reflective: "border-neutral-200 bg-neutral-50 text-neutral-800",
   };
 
   if (isLoading) {
     return (
-      <div className="flex min-h-100 items-center justify-center">
+      <div className="flex min-h-[50vh] items-center justify-center">
         <ArrowsClockwise className="text-primary-600 h-8 w-8 animate-spin" />
       </div>
     );
@@ -55,9 +67,9 @@ export default function MemoryDetail({ memoryId, onBack }: MemoryDetailProps) {
 
   if (error || !memory) {
     return (
-      <div className="mx-auto max-w-md py-20 text-center">
-        <p className="text-destructive-600 text-lg font-medium">Memory not found</p>
-        <Button onClick={() => (onBack ? onBack() : router.back())} className="mt-6">
+      <div className="mx-auto max-w-md py-32 text-center">
+        <p className="font-display mb-6 text-2xl text-neutral-500">Memory not found</p>
+        <Button onClick={() => (onBack ? onBack() : router.back())} variant="secondary">
           Go Back
         </Button>
       </div>
@@ -73,80 +85,100 @@ export default function MemoryDetail({ memoryId, onBack }: MemoryDetailProps) {
   };
 
   return (
-    <div className="mx-auto max-w-4xl space-y-8 p-6">
-      <div className="flex items-center justify-between">
-        <Button variant="ghost" onClick={handleBack} className="group">
-          <ArrowLeft className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" />
-          Back
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setIsReadingMode(true)}
-          className="bg-primary-50 hover:bg-primary-100 border-primary-200 text-primary-700 font-bold"
+    <div className="selection:bg-primary-100 selection:text-primary-900 relative mx-auto min-h-screen max-w-5xl rounded-3xl bg-white px-4 py-8 sm:px-6 lg:px-8">
+      {/* Top Actions */}
+      <div className="pointer-events-none sticky top-4 z-40 mb-10 flex items-center justify-between">
+        <button
+          onClick={handleBack}
+          className="group hover:text-primary-600 pointer-events-auto flex h-12 w-12 items-center justify-center rounded-full border border-neutral-100 bg-white/80 text-neutral-600 shadow-[0_8px_30px_rgb(0,0,0,0.08)] backdrop-blur-md transition-all hover:scale-110 active:scale-95"
         >
-          <BookOpen className="mr-2 h-4 w-4" />
-          Focus Mode
-        </Button>
-      </div>
+          <ArrowLeft
+            weight="bold"
+            className="h-5 w-5 transition-transform group-hover:-translate-x-1"
+          />
+        </button>
 
-      {isReadingMode && (
-        <div className="animate-in fade-in fixed inset-0 z-60 flex items-center justify-center overflow-y-auto bg-neutral-50/98 backdrop-blur-md transition-all duration-500">
+        <div className="pointer-events-auto flex items-center space-x-3">
           <button
-            onClick={() => setIsReadingMode(false)}
-            className="fixed top-8 right-8 z-70 flex h-12 w-12 items-center justify-center rounded-full bg-white text-neutral-500 shadow-xl transition-all hover:scale-110 hover:text-neutral-900 active:scale-95"
-            aria-label="Exit Reading Mode"
+            onClick={() => setIsReadingMode(true)}
+            className="group hover:text-primary-600 flex items-center space-x-2 rounded-full border border-neutral-100 bg-white/80 px-5 py-3 font-bold text-neutral-700 shadow-[0_8px_30px_rgb(0,0,0,0.08)] backdrop-blur-md transition-all hover:scale-105 active:scale-95"
           >
-            <X size={24} weight="bold" />
+            <BookOpen
+              weight="fill"
+              className="text-primary-500 group-hover:text-primary-600 h-5 w-5"
+            />
+            <span>Focus Mode</span>
           </button>
 
-          <article className="mx-auto max-w-2xl px-6 py-24 sm:py-32">
-            <header className="mb-16 text-center">
-              <div className="text-primary-600 mb-4 text-xs font-bold tracking-[0.2em] uppercase opacity-70">
-                {new Date(memory.date).toLocaleDateString(undefined, {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}
+          <button
+            onClick={() => setIsShareModalOpen(true)}
+            className="group hover:text-primary-600 flex h-12 w-12 items-center justify-center rounded-full border border-neutral-100 bg-white/80 text-neutral-600 shadow-[0_8px_30px_rgb(0,0,0,0.08)] backdrop-blur-md transition-all hover:scale-110 active:scale-95"
+          >
+            <ShareNetwork weight="bold" className="h-5 w-5" />
+          </button>
+        </div>
+      </div>
+
+      {/* Focus Mode Overlay */}
+      {isReadingMode && (
+        <div className="animate-in fade-in zoom-in-95 selection:bg-primary-200 fixed inset-0 z-100 flex flex-col overflow-y-auto bg-[#FAFAFA] transition-all duration-500">
+          <div className="pointer-events-none sticky top-0 z-50 flex justify-end p-6 md:p-10">
+            <button
+              onClick={() => setIsReadingMode(false)}
+              className="pointer-events-auto flex h-14 w-14 items-center justify-center rounded-full border border-neutral-100 bg-white text-neutral-500 shadow-xl transition-all hover:scale-110 hover:text-neutral-900 active:scale-95"
+              aria-label="Exit Reading Mode"
+            >
+              <X size={24} weight="bold" />
+            </button>
+          </div>
+
+          <article className="mx-auto w-full max-w-3xl flex-1 px-6 pb-32">
+            <header className="mb-16 space-y-8 text-center">
+              <div className="inline-flex items-center space-x-2 rounded-full border border-neutral-100 bg-white px-4 py-2 text-xs font-bold tracking-[0.2em] text-neutral-400 uppercase shadow-sm">
+                <Calendar size={14} className="text-primary-400" />
+                <span>
+                  {new Date(memory.date).toLocaleDateString(undefined, {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </span>
               </div>
-              <h1 className="font-display text-5xl leading-tight font-bold tracking-tight text-neutral-900 sm:text-6xl">
+              <h1 className="font-display text-5xl leading-[1.1] font-bold tracking-tight text-neutral-900 sm:text-6xl md:text-7xl">
                 {memory.title}
               </h1>
               {memory.location && (
-                <div className="mt-6 flex items-center justify-center text-sm font-medium text-neutral-400">
-                  <MapPin className="mr-2 h-4 w-4" />
+                <div className="flex items-center justify-center text-sm font-medium text-neutral-500">
+                  <MapPin className="text-primary-400 mr-2 h-4 w-4" />
                   {memory.location}
                 </div>
               )}
             </header>
 
-            <div
-              className="font-serif text-2xl leading-[1.8] text-neutral-800 antialiased opacity-90 sm:text-3xl lg:text-4xl lg:leading-relaxed"
-              dangerouslySetInnerHTML={{ __html: memory.content }}
-            />
-
             {memory.summary && (
-              <div className="mt-20 border-t border-neutral-100 pt-20 text-center">
-                <h3 className="text-primary-600 font-display mb-8 text-2xl font-bold italic opacity-40">
-                  The Essence
-                </h3>
-                <p className="font-display text-xl leading-relaxed font-light text-neutral-600 italic sm:text-2xl">
-                  {memory.summary}
+              <div className="mb-16 px-4 text-center md:px-12">
+                <p className="font-display text-2xl leading-relaxed text-neutral-600 italic md:text-3xl">
+                  "{memory.summary}"
                 </p>
+                <div className="mx-auto mt-12 h-px w-16 bg-neutral-300" />
               </div>
             )}
+
+            <div
+              className="prose prose-xl md:prose-2xl prose-neutral prose-p:my-8 prose-a:text-primary-600 first-letter:font-display first-letter:text-primary-900 mx-auto font-serif leading-[1.9] text-neutral-800 antialiased first-letter:float-left first-letter:mr-4 first-letter:text-7xl first-letter:font-bold first-line:tracking-widest first-line:uppercase"
+              dangerouslySetInnerHTML={{ __html: memory.content }}
+            />
           </article>
         </div>
       )}
 
-      <div className="space-y-8">
-        <header className="space-y-4">
-          <h1 className="font-display text-4xl leading-tight font-bold tracking-tight text-neutral-900">
-            {memory.title}
-          </h1>
-          <div className="flex flex-wrap items-center gap-6 text-sm font-medium tracking-widest text-neutral-500 uppercase">
-            <div className="flex items-center">
-              <Calendar className="mr-2 h-4 w-4" />
+      {/* Main Content View */}
+      <div className="space-y-12 pb-20">
+        {/* Header Section */}
+        <header className="mx-auto max-w-3xl space-y-8 text-center">
+          <div className="flex flex-wrap items-center justify-center gap-4 text-xs font-bold tracking-widest text-neutral-500 uppercase">
+            <div className="flex items-center rounded-full border border-neutral-100 bg-neutral-50 px-3 py-1.5">
+              <Calendar weight="fill" className="text-primary-400 mr-2 h-4 w-4" />
               {new Date(memory.date).toLocaleDateString(undefined, {
                 year: "numeric",
                 month: "long",
@@ -154,27 +186,35 @@ export default function MemoryDetail({ memoryId, onBack }: MemoryDetailProps) {
               })}
             </div>
             {memory.location && (
-              <div className="flex items-center">
-                <MapPin className="mr-2 h-4 w-4" />
+              <div className="flex items-center rounded-full border border-neutral-100 bg-neutral-50 px-3 py-1.5">
+                <MapPin weight="fill" className="text-primary-400 mr-2 h-4 w-4" />
                 {memory.location}
               </div>
             )}
             {memory.mood && (
-              <span
-                className={`rounded-full border px-3 py-1 text-[10px] font-bold ${moodColors[memory.mood as keyof typeof moodColors] || ""}`}
+              <div
+                className={`flex items-center space-x-1.5 rounded-full border px-3 py-1.5 ${moodColors[memory.mood as keyof typeof moodColors] || "border-neutral-200 bg-neutral-50 text-neutral-600"}`}
               >
-                {memory.mood}
-              </span>
+                <Heart weight="fill" size={14} className="opacity-80" />
+                <span>{memory.mood}</span>
+              </div>
             )}
           </div>
+
+          <h1 className="font-display text-5xl leading-[1.1] font-bold tracking-tight text-neutral-900 md:text-6xl">
+            {memory.title}
+          </h1>
         </header>
 
-        {memory.images && memory.images.length > 0 && (
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            {memory.images.map((img, idx) => (
+        {/* Hero Imagery */}
+        {images.length > 0 && (
+          <div
+            className={`grid gap-4 ${images.length === 1 ? "mx-auto max-w-4xl grid-cols-1" : "grid-cols-1 md:grid-cols-2"}`}
+          >
+            {images.map((img, idx) => (
               <div
                 key={idx}
-                className="group relative aspect-video cursor-zoom-in overflow-hidden rounded-3xl shadow-2xl ring-1 ring-black/5"
+                className={`group relative cursor-zoom-in overflow-hidden rounded-4xl shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] ${images.length === 1 ? "aspect-21/9" : "aspect-square md:aspect-4/3"}`}
                 onClick={() => {
                   setLightboxIndex(idx);
                   setLightboxOpen(true);
@@ -184,57 +224,65 @@ export default function MemoryDetail({ memoryId, onBack }: MemoryDetailProps) {
                   src={img}
                   alt={memory.title}
                   fill
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 800px"
-                  className="object-cover transition-transform duration-700 group-hover:scale-105"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 1000px"
+                  className="object-cover transition-transform duration-1000 group-hover:scale-105"
                   priority={idx === 0}
                 />
+                <div className="absolute inset-0 bg-black/0 transition-colors duration-500 group-hover:bg-black/10" />
               </div>
             ))}
           </div>
         )}
 
-        <article className="prose prose-neutral mx-auto max-w-(--ch-65) py-10">
-          <div
-            className="font-serif text-2xl leading-[1.6] text-neutral-800 antialiased opacity-95 sm:text-3xl"
-            dangerouslySetInnerHTML={{ __html: memory.content }}
-          />
-        </article>
+        {/* Story Section */}
+        <div className="mx-auto max-w-3xl">
+          {memory.summary && (
+            <div className="bg-primary-50/50 border-primary-100/50 relative my-16 rounded-3xl border px-8 py-10 text-center md:px-12">
+              <Quotes
+                weight="fill"
+                className="text-primary-200 border-primary-50 absolute top-0 left-1/2 h-16 w-16 -translate-x-1/2 -translate-y-1/2 rounded-full border bg-white p-2"
+              />
+              <p className="font-display mt-4 text-2xl leading-relaxed text-neutral-700 italic">
+                {memory.summary}
+              </p>
+            </div>
+          )}
 
-        {memory.summary && (
-          <section className="bg-primary-900 relative mx-auto max-w-(--ch-65) overflow-hidden rounded-4xl p-10 text-white shadow-2xl">
-            <div className="bg-secondary-400/10 absolute top-0 right-0 -mt-20 -mr-20 h-40 w-40 rounded-full blur-3xl" />
-            <h3 className="text-secondary-400 font-display mb-6 text-2xl font-bold italic">
-              The Reflection
-            </h3>
-            <p className="text-primary-50 text-xl leading-relaxed font-light opacity-90">
-              {memory.summary}
-            </p>
-          </section>
-        )}
+          <article className="prose prose-lg md:prose-xl prose-neutral prose-p:my-6 prose-a:text-primary-600 hover:prose-a:underline first-letter:font-display first-letter:text-primary-900 mx-auto font-serif leading-[1.8] text-neutral-800 antialiased first-letter:float-left first-letter:mr-3 first-letter:text-6xl first-letter:font-bold">
+            <div dangerouslySetInnerHTML={{ __html: memory.content }} />
+          </article>
 
-        {memory.tags && memory.tags.length > 0 && (
-          <div className="mx-auto max-w-(--ch-65) border-t border-neutral-100 pt-10">
-            <div className="flex flex-wrap gap-2">
+          {/* Tags */}
+          {memory.tags && memory.tags.length > 0 && (
+            <div className="mt-16 flex flex-wrap justify-center gap-2 border-t border-neutral-100 pt-10">
               {memory.tags.map((tag) => (
                 <Tag
                   key={tag}
-                  className="hover:bg-primary-50 text-[10px] tracking-widest uppercase transition-colors"
+                  className="hover:border-primary-200 hover:text-primary-600 rounded-full border border-neutral-200 bg-neutral-50 px-4 py-2 text-xs tracking-widest text-neutral-500 uppercase shadow-sm transition-all hover:bg-white hover:shadow-md"
                 >
-                  {tag}
+                  #{tag}
                 </Tag>
               ))}
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
-      {memory.images && (
+      {images.length > 0 && (
         <Lightbox
-          images={memory.images}
+          images={images}
           currentIndex={lightboxIndex}
           isOpen={lightboxOpen}
           onClose={() => setLightboxOpen(false)}
           onNavigate={setLightboxIndex}
+        />
+      )}
+
+      {memory && (
+        <MemoryShareModal
+          isOpen={isShareModalOpen}
+          onClose={() => setIsShareModalOpen(false)}
+          memory={memory}
         />
       )}
     </div>

@@ -4,6 +4,8 @@ import Modal from "./ui/Modal";
 import Button from "./ui/Button";
 import Input from "./ui/Input";
 import { Memory } from "@/types/types";
+import { stripHtml } from "@/lib/utils";
+import { useFamilyMembers } from "@/hooks/useFamily";
 
 import { useUpdateMemory } from "@/hooks/useMemories";
 import { toast } from "sonner";
@@ -20,14 +22,10 @@ const MemoryShareModal: React.FC<MemoryShareModalProps> = ({ isOpen, onClose, me
   const [message, setMessage] = useState("");
   const [linkCopied, setLinkCopied] = useState(false);
   const updateMemoryMutation = useUpdateMemory();
+  const { data: familyData } = useFamilyMembers(memory.userId);
+  const familyMembers = familyData?.members || [];
 
-  const familyMembers = [
-    { id: "1", name: "Mom", email: "mom@family.com", selected: false },
-    { id: "2", name: "Dad", email: "dad@family.com", selected: false },
-    { id: "3", name: "Sister", email: "sister@family.com", selected: false },
-  ];
-
-  const [selectedFamily, setSelectedFamily] = useState(familyMembers);
+  const [selectedFamilyIds, setSelectedFamilyIds] = useState<Set<string>>(new Set());
 
   const shareUrl =
     typeof window !== "undefined"
@@ -35,11 +33,12 @@ const MemoryShareModal: React.FC<MemoryShareModalProps> = ({ isOpen, onClose, me
       : `https://memorylane.app/share/${memory.shareToken || memory.id}`;
 
   const handleFamilyToggle = (memberId: string) => {
-    setSelectedFamily((members) =>
-      members.map((member) =>
-        member.id === memberId ? { ...member, selected: !member.selected } : member,
-      ),
-    );
+    setSelectedFamilyIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(memberId)) next.delete(memberId);
+      else next.add(memberId);
+      return next;
+    });
   };
 
   const handleCopyLink = async () => {
@@ -81,7 +80,7 @@ const MemoryShareModal: React.FC<MemoryShareModalProps> = ({ isOpen, onClose, me
         <div className="rounded-lg bg-neutral-50 p-4">
           <h3 className="mb-2 font-medium text-neutral-900">{memory.title}</h3>
           <p className="line-clamp-2 text-sm text-neutral-600">
-            {memory.summary || memory.content}
+            {stripHtml(memory.summary || memory.content)}
           </p>
           <div className="mt-2 flex items-center space-x-2">
             <span className="text-xs text-neutral-500">
@@ -125,26 +124,34 @@ const MemoryShareModal: React.FC<MemoryShareModalProps> = ({ isOpen, onClose, me
           <div className="space-y-4">
             <h4 className="font-medium text-neutral-900">Select family members</h4>
             <div className="space-y-2">
-              {selectedFamily.map((member) => (
-                <label
-                  key={member.id}
-                  className="flex cursor-pointer items-center space-x-3 rounded-lg p-3 hover:bg-neutral-50"
-                >
-                  <input
-                    type="checkbox"
-                    checked={member.selected}
-                    onChange={() => handleFamilyToggle(member.id)}
-                    className="text-primary-600 focus:ring-primary-500 h-4 w-4 rounded border-neutral-300"
-                  />
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-neutral-200">
-                    <span className="text-sm font-medium text-neutral-600">{member.name[0]}</span>
-                  </div>
-                  <div>
-                    <p className="font-medium text-neutral-900">{member.name}</p>
-                    <p className="text-sm text-neutral-600">{member.email}</p>
-                  </div>
-                </label>
-              ))}
+              {familyMembers.length === 0 ? (
+                <p className="text-sm text-neutral-500">
+                  No family members found. Add some in the Friends tab!
+                </p>
+              ) : (
+                familyMembers.map((member) => (
+                  <label
+                    key={member.id}
+                    className="flex cursor-pointer items-center space-x-3 rounded-lg p-3 hover:bg-neutral-50"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedFamilyIds.has(member.id)}
+                      onChange={() => handleFamilyToggle(member.id)}
+                      className="text-primary-600 focus:ring-primary-500 h-4 w-4 rounded border-neutral-300"
+                    />
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-neutral-200">
+                      <span className="text-sm font-medium text-neutral-600">
+                        {(member.name || "?")[0]}
+                      </span>
+                    </div>
+                    <div>
+                      <p className="font-medium text-neutral-900">{member.name}</p>
+                      <p className="text-sm text-neutral-600">{member.email}</p>
+                    </div>
+                  </label>
+                ))
+              )}
             </div>
           </div>
         )}

@@ -31,6 +31,8 @@ export interface Memory {
   tags?: string[];
   images?: string[];
   location?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
   isAiGenerated?: boolean | null;
   syncStatus?: "synced" | "pending" | "offline" | null;
   createdAt: string;

@@ -73,8 +73,8 @@ export default function AnalyticsClient({ initialAnalytics }: AnalyticsClientPro
             <StatCard title="Longest Streak" value="0 days" icon={Clock} />
           </div>
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-            <Card className="h-72 bg-white" />
-            <Card className="h-72 bg-white" />
+            <Card className="h-72 bg-white">{null}</Card>
+            <Card className="h-72 bg-white">{null}</Card>
           </div>
         </div>
 

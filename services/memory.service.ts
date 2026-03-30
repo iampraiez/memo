@@ -11,6 +11,8 @@ export interface CreateMemoryData {
   mood?: string | null;
   tags?: string[];
   location?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
   images?: string[];
   isPublic?: boolean;
   unlockDate?: string | null;

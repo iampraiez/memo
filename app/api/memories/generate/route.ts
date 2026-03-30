@@ -25,7 +25,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Title or content is required" }, { status: 400 });
     }
 
-    logger.info(`Generating AI content for memory: ${title}: ${content}`);
+    // Strip HTML tags for the prompt to help the AI focus on text
+    const cleanContent = (content || "").replace(/<[^>]*>?/gm, " ").trim();
+
+    logger.info(
+      `Generating AI content for memory. Title: "${title}", Content snippet: "${cleanContent.slice(0, 50)}..."`,
+    );
 
     const styleGuides: Record<string, string> = {
       narrative:
@@ -43,21 +48,24 @@ export async function POST(req: Request) {
     const styleInstruction = styleGuides[style || "narrative"] || styleGuides.narrative;
 
     const prompt = `You are an expert storyteller and personal historian. 
-Your task is to take the following memory snippet and expand it into a beautiful, evocative, and cohesive narrative.
+Your task is to take the following memory details and expand them into a beautiful, evocative, and cohesive narrative.
+
+IMPORTANT: You MUST use the "Current Content" provided below as your foundation. Do not ignore it. Build your entire story around these specific details and expand on them.
 
 Writing Style: ${styleInstruction}
 
-Current Title: ${title || "Untitled"}
-Current Content: ${content || ""}
+Memory Title: ${title || "Untitled"}
+Current Content: ${cleanContent || "(No initial content provided, please generate based on the title alone)"}
 
 Guidelines:
+- If "Current Content" is provided, it is the absolute source of truth. Expand on the feelings, sensory details, and moments described there.
 - Make it personal, emotional, and vivid.
 - Keep it concise but descriptive (around 150-300 words).
-- Do not invent entirely new events, but rather expand on the feelings and descriptive details implied by the existing text.
-- Return ONLY the expanded content text, no preamble or extra commentary.`;
+- Do not invent entirely new historical facts, but rather expand on the atmosphere and emotions.
+- Return ONLY the expanded content text. No title, no intro, no "Here is your story", just the story itself.`;
 
     const result = await genAI.models.generateContentStream({
-      model: "gemini-2.0-flash",
+      model: "gemini-2.5-flash",
       contents: prompt,
     });
 

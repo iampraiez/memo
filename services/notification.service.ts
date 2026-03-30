@@ -84,6 +84,26 @@ export const notificationService = {
     return { success: true };
   },
 
+  // Clear all notifications
+  clearAll: async () => {
+    const userId = await notificationService.getCurrentUserId();
+
+    // Update Dexie
+    await db.notifications
+      .where("userId")
+      .equals(userId || "")
+      .delete();
+
+    // API Sync
+    try {
+      await apiService.delete("/notifications");
+    } catch (error) {
+      console.error("[NotificationService] API sync failed:", error);
+    }
+
+    return { success: true };
+  },
+
   // Helper
   getCurrentUserId: async (): Promise<string | null> => {
     if (typeof window !== "undefined") {

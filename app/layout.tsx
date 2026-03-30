@@ -61,11 +61,20 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
               richColors
               expand={false}
               duration={4000}
+              closeButton
+              theme="light"
               toastOptions={{
                 classNames: {
-                  toast: "font-sans rounded-xl border border-neutral-200 shadow-2xl",
-                  title: "font-bold text-neutral-900",
-                  description: "text-neutral-600",
+                  toast:
+                    "group font-sans rounded-2xl border border-primary-50 bg-white/90 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] shadow-primary-600/10 p-4",
+                  title: "font-display font-bold text-neutral-900 text-sm",
+                  description: "text-neutral-500 text-xs mt-0.5",
+                  actionButton:
+                    "bg-primary-600 text-white rounded-lg px-3 py-1.5 text-xs font-bold",
+                  cancelButton:
+                    "bg-neutral-100 text-neutral-600 rounded-lg px-3 py-1.5 text-xs font-bold",
+                  success: "text-primary-600 border-primary-100",
+                  error: "text-red-600 border-red-100",
                 },
               }}
             />

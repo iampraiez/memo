@@ -1,9 +1,10 @@
 "use client";
-import React, { useEffect } from "react";
+import React from "react";
 import {
   useNotifications,
   useMarkNotificationRead,
   useMarkAllNotificationsRead,
+  useClearAllNotifications,
 } from "@/hooks/useNotifications";
 import { X, Bell, MessageCircle, Heart, UserPlus, Users, Share } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -19,14 +20,8 @@ interface NotificationPanelProps {
 const NotificationPanel: React.FC<NotificationPanelProps> = ({ isOpen, onClose }) => {
   const { data, isLoading, unreadCount } = useNotifications();
   const markAsRead = useMarkNotificationRead();
-  const { mutate: markAllReadMutate, isPending: isMarkingAllRead } = useMarkAllNotificationsRead();
-
-  // Mark all as read when opened
-  useEffect(() => {
-    if (isOpen && unreadCount > 0 && !isMarkingAllRead) {
-      markAllReadMutate();
-    }
-  }, [isOpen, unreadCount, isMarkingAllRead, markAllReadMutate]);
+  const { mutate: markAllReadMutate } = useMarkAllNotificationsRead();
+  const { mutate: clearAllMutate } = useClearAllNotifications();
 
   if (!isOpen) return null;
 
@@ -129,13 +124,20 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ isOpen, onClose }
 
         {/* Footer */}
         {notifications.length > 0 && (
-          <div className="border-t border-neutral-100 bg-neutral-50/50 p-4">
+          <div className="flex divide-x divide-neutral-200 border-t border-neutral-100 bg-neutral-50/50 p-4">
             <Button
               variant="ghost"
-              className="w-full text-xs font-bold text-neutral-500 hover:text-neutral-900"
+              className="flex-1 text-xs font-bold text-neutral-500 hover:text-neutral-900"
               onClick={() => markAllReadMutate()}
             >
               Mark all as read
+            </Button>
+            <Button
+              variant="ghost"
+              className="text-destructive-500 hover:text-destructive-700 hover:bg-destructive-50 flex-1 text-xs font-bold"
+              onClick={() => clearAllMutate()}
+            >
+              Clear All
             </Button>
           </div>
         )}

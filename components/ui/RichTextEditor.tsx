@@ -1,4 +1,5 @@
 "use client";
+import React from "react";
 
 import { useEditor, EditorContent, Editor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
@@ -161,6 +162,12 @@ export default function RichTextEditor({
       },
     },
   });
+  // Update editor content when value prop changes (e.g. from AI generation)
+  React.useEffect(() => {
+    if (editor && value !== editor.getHTML()) {
+      editor.commands.setContent(value, { emitUpdate: false });
+    }
+  }, [value, editor]);
 
   return (
     <div

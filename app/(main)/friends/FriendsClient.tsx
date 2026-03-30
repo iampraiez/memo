@@ -30,6 +30,7 @@ import InlineDiscussion from "@/components/InlineDiscussion";
 import Modal from "@/components/ui/Modal";
 import { Memory, Reaction, User } from "@/types/types";
 import { toast } from "sonner";
+import { stripHtml } from "@/lib/utils";
 
 interface FriendsClientProps {
   initialMemories: Memory[];
@@ -43,19 +44,11 @@ export default function FriendsClient({ initialMemories }: FriendsClientProps) {
   const [discoverySearch, setDiscoverySearch] = useState("");
   const [isDiscoveryOpen, setIsDiscoveryOpen] = useState(false);
   const [sort, setSort] = useState("date");
-  const [openDiscussions, setOpenDiscussions] = useState<Set<string>>(new Set());
+  const [selectedMemory, setSelectedMemory] = useState<Memory | null>(null);
   const isMounted = useIsMounted();
 
-  const toggleDiscussion = (memoryId: string) => {
-    setOpenDiscussions((prev) => {
-      const next = new Set(prev);
-      if (next.has(memoryId)) {
-        next.delete(memoryId);
-      } else {
-        next.add(memoryId);
-      }
-      return next;
-    });
+  const handleMemoryClick = (memory: Memory) => {
+    setSelectedMemory(memory);
   };
 
   const {
@@ -501,10 +494,14 @@ export default function FriendsClient({ initialMemories }: FriendsClientProps) {
                 </div>
 
                 <div className="space-y-4">
-                  <h2 className="font-display text-2xl font-bold text-neutral-900">
-                    {memory.title}
-                  </h2>
-                  <p className="line-clamp-3 leading-relaxed text-neutral-700">{memory.content}</p>
+                  <Link href={`/memory/${memory.id}`} className="group/content block space-y-4">
+                    <h2 className="font-display group-hover/content:text-primary-600 text-2xl font-bold text-neutral-900 transition-colors">
+                      {memory.title}
+                    </h2>
+                    <p className="line-clamp-3 leading-relaxed text-neutral-700">
+                      {stripHtml(memory.summary || memory.content)}
+                    </p>
+                  </Link>
                   {memory.images?.[0] && (
                     <div className="relative aspect-video overflow-hidden rounded-2xl shadow-lg">
                       <Image
@@ -529,14 +526,13 @@ export default function FriendsClient({ initialMemories }: FriendsClientProps) {
                 </div>
 
                 <Button
-                  variant="secondary"
-                  className="w-full rounded-2xl"
-                  onClick={() => toggleDiscussion(memory.id)}
+                  variant="primary"
+                  className="bg-primary-900 group-hover:bg-primary-600 w-full rounded-2xl shadow-lg transition-all hover:scale-[1.02] active:scale-95"
+                  onClick={() => handleMemoryClick(memory)}
                 >
-                  {openDiscussions.has(memory.id) ? "Hide Discussion" : "View Discussion"}
+                  <ChatCircle size={18} className="mr-2" weight="fill" />
+                  <span>Join Discussion</span>
                 </Button>
-
-                <InlineDiscussion memoryId={memory.id} isOpen={openDiscussions.has(memory.id)} />
               </Card>
             ))}
 
@@ -582,6 +578,74 @@ export default function FriendsClient({ initialMemories }: FriendsClientProps) {
           />
         )}
       </section>
+
+      {/* Memory Details Modal */}
+      <Modal
+        isOpen={!!selectedMemory}
+        onClose={() => setSelectedMemory(null)}
+        title={selectedMemory?.title || "Memory Discussion"}
+        size="lg"
+      >
+        {selectedMemory && (
+          <div className="space-y-6">
+            <div className="flex items-center space-x-3 border-b border-neutral-100 pb-4">
+              <div className="bg-primary-900 text-secondary-400 flex h-10 w-10 items-center justify-center overflow-hidden rounded-full font-bold">
+                {selectedMemory.user?.image ? (
+                  <Image
+                    src={selectedMemory.user.image}
+                    alt={selectedMemory.user.name}
+                    width={40}
+                    height={40}
+                  />
+                ) : (
+                  (selectedMemory.user?.name || "?")[0]
+                )}
+              </div>
+              <div>
+                <p className="font-bold text-neutral-900">{selectedMemory.user?.name}</p>
+                <p className="text-[10px] tracking-widest text-neutral-400 uppercase">
+                  {new Date(selectedMemory.date).toLocaleDateString()}
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {selectedMemory.images?.[0] && (
+                <div className="relative aspect-video overflow-hidden rounded-2xl shadow-md">
+                  <Image
+                    src={selectedMemory.images[0]}
+                    alt={selectedMemory.title}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              )}
+              <div className="prose prose-sm prose-neutral max-w-none">
+                <p className="whitespace-pre-wrap text-neutral-700">
+                  {stripHtml(selectedMemory.content)}
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {selectedMemory.tags?.map((tag) => (
+                  <span
+                    key={tag}
+                    className="rounded-full bg-neutral-50 px-2 py-0.5 text-[10px] font-bold tracking-widest text-neutral-400 uppercase"
+                  >
+                    #{tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div className="-mx-6 -mb-6 bg-neutral-50 p-6">
+              <h4 className="mb-4 text-xs font-bold tracking-widest text-neutral-400 uppercase">
+                Discussion
+              </h4>
+              <InlineDiscussion memoryId={selectedMemory.id} isOpen={true} />
+            </div>
+          </div>
+        )}
+      </Modal>
 
       {/* Invitation Modal */}
       <Modal

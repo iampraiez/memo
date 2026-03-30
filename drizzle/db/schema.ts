@@ -1,4 +1,13 @@
-import { pgTable, text, timestamp, boolean, integer, unique, json } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  timestamp,
+  boolean,
+  integer,
+  unique,
+  json,
+  real,
+} from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
 export const users = pgTable("users", {
@@ -98,6 +107,8 @@ export const memories = pgTable("memories", {
   summary: text("summary"),
   date: timestamp("date").notNull(),
   location: text("location"),
+  latitude: real("latitude"),
+  longitude: real("longitude"),
   mood: text("mood"),
   isPublic: boolean("is_public").notNull().default(false),
   isAiGenerated: boolean("is_ai_generated").notNull().default(false),
