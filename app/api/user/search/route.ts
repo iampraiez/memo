@@ -38,7 +38,10 @@ export async function GET(req: Request) {
         });
 
         const family = await db.query.familyMembers.findFirst({
-          where: and(eq(familyMembers.ownerId, userId), eq(familyMembers.memberId, u.id)),
+          where: or(
+            and(eq(familyMembers.ownerId, userId), eq(familyMembers.memberId, u.id)),
+            and(eq(familyMembers.ownerId, u.id), eq(familyMembers.memberId, userId)),
+          ),
         });
 
         return {

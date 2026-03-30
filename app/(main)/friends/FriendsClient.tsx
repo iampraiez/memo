@@ -119,8 +119,11 @@ export default function FriendsClient({ initialMemories }: FriendsClientProps) {
       m.title.toLowerCase().includes(friendSearch.toLowerCase()),
   );
 
-  const pendingInvites =
-    familyData?.members.filter((m) => m.status === "pending" && m.userId === userId) || [];
+  const receivedInvites =
+    familyData?.members.filter((m) => m.status === "pending" && m.isReceived) || [];
+  const sentInvites =
+    familyData?.members.filter((m) => m.status === "pending" && !m.isReceived) || [];
+  const pendingInvites = [...receivedInvites, ...sentInvites];
 
   // We only show full page loading if we don't even have initial memories
   if (isLoadingTimeline && memories.length === 0) {
@@ -261,49 +264,92 @@ export default function FriendsClient({ initialMemories }: FriendsClientProps) {
 
       {/* Pending Invitations */}
       {pendingInvites.length > 0 && (
-        <div className="space-y-6">
-          <h2 className="px-2 text-sm font-bold tracking-widest text-neutral-400 uppercase">
-            Pending Invitations
-          </h2>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {pendingInvites.map((invite) => (
-              <Card key={invite.id} className="border-primary-100 bg-primary-50/30 p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="bg-primary-900 text-secondary-400 flex h-10 w-10 items-center justify-center overflow-hidden rounded-full font-bold">
-                      {invite.avatar ? (
-                        <Image src={invite.avatar} alt={invite.name} width={40} height={40} />
-                      ) : (
-                        invite.name[0]
-                      )}
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold text-neutral-900">{invite.name}</p>
-                      <p className="text-[10px] text-neutral-500">{invite.relationship}</p>
-                    </div>
-                  </div>
-                  <div className="flex space-x-2">
-                    <Button
-                      size="sm"
-                      variant="primary"
-                      className="h-8 rounded-full px-3 text-[10px] font-bold"
-                      onClick={() => handleRespond(invite.id, "accepted")}
-                    >
-                      Accept
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="h-8 rounded-full px-3 text-[10px] font-bold text-red-500 hover:bg-red-50"
-                      onClick={() => handleRespond(invite.id, "declined")}
-                    >
-                      Decline
-                    </Button>
-                  </div>
-                </div>
-              </Card>
-            ))}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between px-2">
+            <h2 className="text-sm font-bold tracking-widest text-neutral-400 uppercase">
+              Pending Invitations
+            </h2>
+            <span className="rounded-full bg-neutral-100 px-2.5 py-1 text-xs font-bold text-neutral-500">
+              {pendingInvites.length}
+            </span>
           </div>
+
+          {/* --- Received (action required) --- */}
+          {receivedInvites.length > 0 && (
+            <div className="space-y-2">
+              <p className="px-1 text-[10px] font-bold tracking-widest text-neutral-400 uppercase">
+                Awaiting your response
+              </p>
+              <div className="max-h-64 space-y-2 overflow-y-auto pr-1">
+                {receivedInvites.map((invite) => (
+                  <Card key={invite.id} className="border-primary-100 bg-primary-50/30 p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="bg-primary-900 text-secondary-400 flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full font-bold">
+                        {invite.avatar ? (
+                          <Image src={invite.avatar} alt={invite.name} width={40} height={40} />
+                        ) : (
+                          invite.name[0]
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-bold text-neutral-900">{invite.name}</p>
+                        <p className="text-[10px] text-neutral-500">{invite.relationship}</p>
+                      </div>
+                      <div className="flex shrink-0 gap-2">
+                        <Button
+                          size="sm"
+                          variant="primary"
+                          className="h-8 rounded-full px-3 text-[10px] font-bold"
+                          onClick={() => handleRespond(invite.id, "accepted")}
+                        >
+                          Accept
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-8 rounded-full px-3 text-[10px] font-bold text-red-500 hover:bg-red-50"
+                          onClick={() => handleRespond(invite.id, "declined")}
+                        >
+                          Decline
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* --- Sent (waiting for them) --- */}
+          {sentInvites.length > 0 && (
+            <div className="space-y-2">
+              <p className="px-1 text-[10px] font-bold tracking-widest text-neutral-400 uppercase">
+                Waiting for a response
+              </p>
+              <div className="max-h-48 space-y-2 overflow-y-auto pr-1">
+                {sentInvites.map((invite) => (
+                  <Card key={invite.id} className="border-neutral-100 p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-neutral-100 font-bold text-neutral-500">
+                        {invite.avatar ? (
+                          <Image src={invite.avatar} alt={invite.name} width={40} height={40} />
+                        ) : (
+                          invite.name[0]
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-bold text-neutral-900">{invite.name}</p>
+                        <p className="text-[10px] text-neutral-500">{invite.relationship}</p>
+                      </div>
+                      <span className="shrink-0 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[10px] font-bold text-amber-600">
+                        Pending
+                      </span>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 

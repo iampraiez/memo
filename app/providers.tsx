@@ -26,10 +26,14 @@ export function Providers({
       new QueryClient({
         defaultOptions: {
           queries: {
-            staleTime: 1000 * 60, // 1 minute
+            // 5 minutes — pages that were recently loaded show their cached data
+            // instantly on navigation without triggering a blocking refetch.
+            staleTime: 1000 * 60 * 5, // 5 minutes
             gcTime: 1000 * 60 * 60 * 24, // 24 hours
             refetchOnWindowFocus: false,
-            refetchOnMount: true,
+            // false = use cache immediately on mount, no blocking network request
+            refetchOnMount: false,
+            refetchOnReconnect: true, // still refresh after going offline → online
             retry: 1,
           },
           mutations: {

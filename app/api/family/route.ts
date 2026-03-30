@@ -44,12 +44,15 @@ export async function GET() {
         return {
           id: rel.id,
           userId: targetUserId,
+          ownerId: rel.ownerId,
           name: userDetails?.name || rel.name,
           email: userDetails?.email || rel.email,
           avatar: userDetails?.image,
           relationship: rel.relationship,
           status: rel.status,
           role: rel.role,
+          // isReceived = true means the current user got the invite (they are memberId)
+          isReceived: rel.memberId === userId,
         };
       }),
     );

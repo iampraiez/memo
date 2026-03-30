@@ -6,12 +6,15 @@ import { v4 as uuidv4 } from "uuid";
 export interface FamilyMember {
   id: string;
   userId: string | null;
+  ownerId?: string;
   name: string;
   email: string;
   avatar?: string;
   relationship: string;
   status: "pending" | "accepted";
   role: "member" | "admin";
+  /** true when the current user is the recipient of the invite (not the sender) */
+  isReceived?: boolean;
 }
 
 export interface InviteRequest {

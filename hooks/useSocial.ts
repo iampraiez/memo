@@ -112,6 +112,8 @@ export const useFollowUser = () => {
       queryClient.invalidateQueries({ queryKey: ["profile", userId] });
       queryClient.invalidateQueries({ queryKey: ["followers"] });
       queryClient.invalidateQueries({ queryKey: ["following"] });
+      // Refresh the search results so the Follow/Unfollow button updates in the dropdown
+      queryClient.invalidateQueries({ queryKey: ["users", "search"] });
     },
   });
 };
@@ -124,6 +126,8 @@ export const useUnfollowUser = () => {
       queryClient.invalidateQueries({ queryKey: ["profile", userId] });
       queryClient.invalidateQueries({ queryKey: ["followers"] });
       queryClient.invalidateQueries({ queryKey: ["following"] });
+      // Refresh the search results so the Follow/Unfollow button updates in the dropdown
+      queryClient.invalidateQueries({ queryKey: ["users", "search"] });
     },
   });
 };

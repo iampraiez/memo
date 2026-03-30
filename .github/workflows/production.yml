@@ -83,11 +83,20 @@ jobs:
         run: pnpm build
         env:
           # Production environment variables (Mocked for CI build phase)
-          DATABASE_URL: postgresql://ci_user:ci_password@localhost:5432/ci_db
-          AUTH_SECRET: ${{ secrets.AUTH_SECRET || 'ci_secret_placeholder' }}
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY || 'ci_gemini_placeholder' }}
           NODE_ENV: production
-          NEXT_PUBLIC_APP_URL: https://memo-lane.vercel.app
+          DATABASE_URL: postgresql://ci_user:ci_password@localhost:5432/ci_db
+          AUTH_SECRET: ${{ secrets.AUTH_SECRET || 'ci_secret_placeholder_32_chars_long_minimum' }}
+          AUTH_URL: https://memo-lane.vercel.app
+          AUTH_GOOGLE_ID: ${{ secrets.AUTH_GOOGLE_ID || 'ci_google_id' }}
+          AUTH_GOOGLE_SECRET: ${{ secrets.AUTH_GOOGLE_SECRET || 'ci_google_secret' }}
+          EMAIL_USER: ci@example.com
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY || 'ci_vapid_private_key' }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY || 'ci_gemini_placeholder' }}
+          CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME || 'ci_cloud_name' }}
+          CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY || 'ci_api_key' }}
+          CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET || 'ci_api_secret' }}
+          NEXT_PUBLIC_VAPID_PUBLIC_KEY: ${{ secrets.NEXT_PUBLIC_VAPID_PUBLIC_KEY || 'ci_vapid_public_key' }}
+          NEXT_PUBLIC_URL: https://memo-lane.vercel.app
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
