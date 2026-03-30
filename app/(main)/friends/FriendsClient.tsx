@@ -218,7 +218,6 @@ export default function FriendsClient({ initialMemories }: FriendsClientProps) {
                       member.name[0]
                     )}
                   </div>
-                  <div className="bg-success-500 absolute -right-1 -bottom-1 h-4 w-4 rounded-full border-2 border-white shadow-sm" />
                 </div>
                 <div className="max-w-18">
                   <p className="truncate text-xs font-bold text-neutral-900">{member.name}</p>
