@@ -209,6 +209,7 @@ export default function SettingsPage() {
                             src={localAvatar}
                             alt="Profile"
                             fill
+                            sizes="96px"
                             className="object-cover transition-transform duration-700 group-hover:scale-110"
                           />
                         ) : (

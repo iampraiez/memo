@@ -511,6 +511,7 @@ export default function FriendsClient({ initialMemories }: FriendsClientProps) {
                         src={memory.images[0]}
                         alt={memory.title}
                         fill
+                        sizes="(max-width: 768px) 100vw, 672px"
                         className="object-cover"
                       />
                     </div>

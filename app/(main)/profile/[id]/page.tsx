@@ -190,6 +190,7 @@ export default function ProfilePage() {
                       src={memory.images[0]}
                       alt={memory.title}
                       fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       className="object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                     <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent" />
@@ -229,7 +230,7 @@ export default function ProfilePage() {
                       </span>
                     </div>
                     {memory.tags && memory.tags.length > 0 && (
-                      <span className="max-w-[120px] truncate rounded-full bg-neutral-100 px-2 py-0.5 text-[10px] font-medium text-neutral-500">
+                      <span className="max-w-30 truncate rounded-full bg-neutral-100 px-2 py-0.5 text-[10px] font-medium text-neutral-500">
                         #{memory.tags[0]}
                       </span>
                     )}
