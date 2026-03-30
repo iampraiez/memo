@@ -40,7 +40,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error following user:", error);
+    console.error("Error following user. Details:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

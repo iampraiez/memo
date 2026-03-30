@@ -254,13 +254,13 @@ class SyncService {
     switch (op) {
       case "create":
         if (data?.action === "follow") {
-          console.log("[Sync] Syncing user follow:", id);
+          console.log("[Sync] Syncing user follow. ID to send:", id);
           await apiService.post("/user/follow", { userId: id });
         }
         break;
       case "delete":
         if (data?.action === "unfollow") {
-          console.log("[Sync] Syncing user unfollow:", id);
+          console.log("[Sync] Syncing user unfollow. ID to send:", id);
           await apiService.post("/user/unfollow", { userId: id });
         }
         break;
