@@ -8,7 +8,7 @@ const withPWA = require("next-pwa")({
   disable: process.env.NODE_ENV === "development",
   // Rule B + E: offline fallback document for when network fails and page isn't cached
   fallbacks: {
-    document: "/_offline",
+    document: "/offline",
   },
   runtimeCaching: [
     {

@@ -238,7 +238,15 @@ const OnboardingFlow: React.FC = () => {
       toast.success("Welcome to your Sanctuary!");
     } catch (error: unknown) {
       console.error("Onboarding error:", error);
-      toast.error("Failed to complete setup. Please try again.");
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      const message =
+        error instanceof Error ? error.message : "Failed to complete setup. Please try again.";
+
+      toast.error(message);
+      // If the error is about username, go back to the profile step so the user can fix it
+      if (message.toLowerCase().includes("username")) {
+        setCurrentStep(1); // profile step
+      }
     } finally {
       setIsSubmitting(false);
     }
