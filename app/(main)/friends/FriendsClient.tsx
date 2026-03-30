@@ -1,6 +1,15 @@
 "use client";
 import { useState } from "react";
-import { Users, Heart, ChatCircle, MagnifyingGlass, CaretDown } from "@phosphor-icons/react";
+import {
+  Users,
+  Heart,
+  ChatCircle,
+  MagnifyingGlass,
+  CaretDown,
+  UserPlus,
+  ArrowRight,
+  X,
+} from "@phosphor-icons/react";
 import Loading from "@/components/ui/Loading";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
@@ -20,6 +29,7 @@ import Select from "@/components/ui/Select";
 import InlineDiscussion from "@/components/InlineDiscussion";
 import Modal from "@/components/ui/Modal";
 import { Memory, Reaction, User } from "@/types/types";
+import { toast } from "sonner";
 
 interface FriendsClientProps {
   initialMemories: Memory[];
@@ -31,6 +41,7 @@ export default function FriendsClient({ initialMemories }: FriendsClientProps) {
 
   const [friendSearch, setFriendSearch] = useState("");
   const [discoverySearch, setDiscoverySearch] = useState("");
+  const [isDiscoveryOpen, setIsDiscoveryOpen] = useState(false);
   const [sort, setSort] = useState("date");
   const [openDiscussions, setOpenDiscussions] = useState<Set<string>>(new Set());
   const isMounted = useIsMounted();
@@ -66,19 +77,25 @@ export default function FriendsClient({ initialMemories }: FriendsClientProps) {
   const [updatingUserId, setUpdatingUserId] = useState<string | null>(null);
   const [invitingUserId, setInvitingUserId] = useState<string | null>(null);
 
-  const handleFollow = async (userId: string) => {
-    setUpdatingUserId(userId);
+  const handleFollow = async (user: User) => {
+    setUpdatingUserId(user.id);
     try {
-      await followMutation.mutateAsync(userId);
+      await followMutation.mutateAsync(user.id);
+      toast.success(`You are now following ${user.name}`);
+    } catch {
+      toast.error("Failed to follow user");
     } finally {
       setUpdatingUserId(null);
     }
   };
 
-  const handleUnfollow = async (userId: string) => {
-    setUpdatingUserId(userId);
+  const handleUnfollow = async (user: User) => {
+    setUpdatingUserId(user.id);
     try {
-      await unfollowMutation.mutateAsync(userId);
+      await unfollowMutation.mutateAsync(user.id);
+      toast.info(`Stopped following ${user.name}`);
+    } catch {
+      toast.error("Failed to unfollow user");
     } finally {
       setUpdatingUserId(null);
     }
@@ -101,14 +118,26 @@ export default function FriendsClient({ initialMemories }: FriendsClientProps) {
         name: selectedUserToInvite.name ?? undefined,
         relationship: inviteRelationship,
       });
+      toast.success(`Invitation sent to ${selectedUserToInvite.name}`);
       setSelectedUserToInvite(null);
+    } catch {
+      toast.error("Failed to send invitation");
     } finally {
       setInvitingUserId(null);
     }
   };
 
-  const handleRespond = async (inviteId: string, status: "accepted" | "declined") => {
-    await respondMutation.mutateAsync({ inviteId, status });
+  const handleRespond = async (inviteId: string, name: string, status: "accepted" | "declined") => {
+    try {
+      await respondMutation.mutateAsync({ inviteId, status });
+      toast.success(
+        status === "accepted"
+          ? `Welcome ${name} to the circle!`
+          : `Invitation from ${name} declined`,
+      );
+    } catch {
+      toast.error("Failed to respond to invitation");
+    }
   };
 
   const memories = timelineData?.pages.flatMap((page) => page.memories) || [];
@@ -119,252 +148,298 @@ export default function FriendsClient({ initialMemories }: FriendsClientProps) {
       m.title.toLowerCase().includes(friendSearch.toLowerCase()),
   );
 
+  const acceptedMembers = familyData?.members.filter((m) => m.status === "accepted") || [];
   const receivedInvites =
     familyData?.members.filter((m) => m.status === "pending" && m.isReceived) || [];
   const sentInvites =
     familyData?.members.filter((m) => m.status === "pending" && !m.isReceived) || [];
   const pendingInvites = [...receivedInvites, ...sentInvites];
 
-  // We only show full page loading if we don't even have initial memories
   if (isLoadingTimeline && memories.length === 0) {
     return <Loading fullPage text="Curating your sanctuary circle..." />;
   }
 
   return (
     <div className="mx-auto max-w-4xl space-y-12 p-6">
-      <header className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
+      <header className="flex flex-col justify-between gap-6 md:flex-row md:items-start">
         <div>
           <h1 className="font-display text-4xl font-bold tracking-tight text-neutral-900">
             Sanctuary Circle
           </h1>
-          <p className="mt-2 text-neutral-600">
-            Discover and connect with the keepers of shared heritage
-          </p>
+          <p className="mt-2 text-neutral-600">Our shared heritage in one space</p>
         </div>
-        <div className="w-48">
-          <Select
-            options={[
-              { value: "date", label: "Latest Moments" },
-              { value: "random", label: "Surprise Me" },
-            ]}
-            value={sort}
-            onChange={setSort}
-          />
+        <div className="flex items-center gap-3">
+          <Button
+            variant={isDiscoveryOpen ? "primary" : "secondary"}
+            size="sm"
+            onClick={() => setIsDiscoveryOpen(!isDiscoveryOpen)}
+            className="rounded-2xl"
+          >
+            <UserPlus size={20} className="mr-2" />
+            Find Keepers
+          </Button>
+          <div className="w-44">
+            <Select
+              options={[
+                { value: "date", label: "Latest Moments" },
+                { value: "random", label: "Surprise Me" },
+              ]}
+              value={sort}
+              onChange={setSort}
+            />
+          </div>
         </div>
       </header>
 
-      <div className="group relative mx-auto max-w-2xl">
-        <div className="relative">
-          <MagnifyingGlass className="group-focus-within:text-primary-500 absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 text-neutral-400 transition-colors" />
-          <input
-            type="text"
-            placeholder="Find people by @username..."
-            value={discoverySearch}
-            onChange={(e) => setDiscoverySearch(e.target.value)}
-            className="shadow-soft focus:ring-primary-500 w-full rounded-2xl border border-neutral-100 bg-white py-4 pr-4 pl-12 text-sm font-medium transition-all focus:ring-2"
-          />
-          {isLoadingDiscovery && (
-            <div className="absolute top-1/2 right-4 -translate-y-1/2">
-              <div className="border-primary-500 h-4 w-4 animate-spin rounded-full border-2 border-t-transparent" />
-            </div>
-          )}
-        </div>
-
-        {/* Real-time Search Results Dropdown */}
-        {discoverySearch.length >= 2 && discoveryData?.users && (
-          <div className="animate-in fade-in slide-in-from-top-2 absolute top-full right-0 left-0 z-20 mt-2 overflow-hidden rounded-2xl border border-neutral-100 bg-white shadow-xl duration-200">
-            {discoveryData.users.length > 0 ? (
-              <div className="divide-y divide-neutral-50">
-                {(
-                  discoveryData.users as (User & {
-                    isFollowing?: boolean;
-                    familyStatus?: string | null;
-                  })[]
-                )
-                  .slice(0, 5)
-                  .map((user) => (
-                    <div
-                      key={user.id}
-                      className="group/item flex items-center justify-between p-4 transition-colors hover:bg-neutral-50"
-                    >
-                      <Link
-                        href={`/profile/${user.username || user.id}`}
-                        className="flex flex-1 items-center space-x-3"
-                      >
-                        <div className="bg-primary-900 text-secondary-400 flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border-2 border-white font-bold shadow-sm">
-                          {user.image ? (
-                            <Image
-                              src={user.image}
-                              alt={user.name || "User"}
-                              width={40}
-                              height={40}
-                            />
-                          ) : (
-                            (user.name || "?")[0]
-                          )}
-                        </div>
-                        <div>
-                          <p className="group-hover/item:text-primary-600 text-sm font-bold text-neutral-900 transition-colors">
-                            {user.name}
-                          </p>
-                          <p className="text-[10px] font-bold tracking-widest text-neutral-400 uppercase">
-                            @{user.username || user.id.slice(0, 8)}
-                          </p>
-                        </div>
-                      </Link>
-                      <div className="flex items-center space-x-2">
-                        <Button
-                          variant={user.isFollowing ? "ghost" : "primary"}
-                          size="sm"
-                          className="h-8 rounded-full px-4 text-[10px] font-bold"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            user.isFollowing ? handleUnfollow(user.id) : handleFollow(user.id);
-                          }}
-                          loading={updatingUserId === user.id}
-                        >
-                          {user.isFollowing ? "Unfollow" : "Follow"}
-                        </Button>
-                        <Button
-                          variant={user.familyStatus ? "ghost" : "secondary"}
-                          size="sm"
-                          disabled={!!user.familyStatus}
-                          className="h-8 rounded-full px-4 text-[10px] font-bold"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handleInvite(user);
-                          }}
-                          loading={invitingUserId === user.id}
-                        >
-                          {user.familyStatus === "accepted"
-                            ? "In Circle"
-                            : user.familyStatus === "pending"
-                              ? "Invited"
-                              : "Invite to Circle"}
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                {discoveryData.users.length > 5 && (
-                  <div className="bg-neutral-50/50 p-3 text-center">
-                    <p className="text-[10px] font-bold tracking-widest text-neutral-400 uppercase">
-                      Showing top 5 matches
-                    </p>
+      {/* Sanctuary Circle Members - Horizontal List */}
+      {acceptedMembers.length > 0 && (
+        <section className="space-y-4">
+          <div className="flex items-center justify-between px-2">
+            <h2 className="text-xs font-bold tracking-widest text-neutral-400 uppercase">
+              Current Circle
+            </h2>
+            <Link
+              href="/settings"
+              className="text-primary-600 hover:text-primary-700 text-xs font-bold"
+            >
+              Manage Circle
+            </Link>
+          </div>
+          <div className="no-scrollbar -mx-6 flex space-x-6 overflow-x-auto px-6 pb-4">
+            {acceptedMembers.map((member) => (
+              <Link
+                key={member.id}
+                href={`/profile/${member.userId || member.email}`}
+                className="group flex flex-col items-center space-y-2 text-center"
+              >
+                <div className="relative">
+                  <div className="bg-primary-900 text-secondary-400 flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border-2 border-white font-bold shadow-lg transition-transform group-hover:scale-105">
+                    {member.avatar ? (
+                      <Image src={member.avatar} alt={member.name} width={64} height={64} />
+                    ) : (
+                      member.name[0]
+                    )}
                   </div>
-                )}
-              </div>
-            ) : (
-              <div className="p-8 text-center text-sm font-medium text-neutral-400 italic">
-                No matches found in the sanctuary.
+                  <div className="bg-success-500 absolute -right-1 -bottom-1 h-4 w-4 rounded-full border-2 border-white shadow-sm" />
+                </div>
+                <div className="max-w-18">
+                  <p className="truncate text-xs font-bold text-neutral-900">{member.name}</p>
+                  <p className="truncate text-[10px] text-neutral-400">{member.relationship}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Discovery Section - Toggleable */}
+      {isDiscoveryOpen && (
+        <div className="animate-in fade-in slide-in-from-top-4 relative mx-auto max-w-2xl duration-300">
+          <div className="relative">
+            <MagnifyingGlass className="group-focus-within:text-primary-500 absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 text-neutral-400 transition-colors" />
+            <input
+              type="text"
+              placeholder="Search by name or @username..."
+              value={discoverySearch}
+              onChange={(e) => setDiscoverySearch(e.target.value)}
+              className="shadow-soft focus:ring-primary-500 w-full rounded-2xl border border-neutral-100 bg-white py-4 pr-4 pl-12 text-sm font-medium transition-all focus:ring-2"
+              autoFocus
+            />
+            {isLoadingDiscovery && (
+              <div className="absolute top-1/2 right-4 -translate-y-1/2">
+                <div className="border-primary-500 h-4 w-4 animate-spin rounded-full border-2 border-t-transparent" />
               </div>
             )}
           </div>
-        )}
-      </div>
 
-      {/* Pending Invitations */}
-      {pendingInvites.length > 0 && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between px-2">
-            <h2 className="text-sm font-bold tracking-widest text-neutral-400 uppercase">
-              Pending Invitations
-            </h2>
-            <span className="rounded-full bg-neutral-100 px-2.5 py-1 text-xs font-bold text-neutral-500">
-              {pendingInvites.length}
-            </span>
-          </div>
-
-          {/* --- Received (action required) --- */}
-          {receivedInvites.length > 0 && (
-            <div className="space-y-2">
-              <p className="px-1 text-[10px] font-bold tracking-widest text-neutral-400 uppercase">
-                Awaiting your response
-              </p>
-              <div className="max-h-64 space-y-2 overflow-y-auto pr-1">
-                {receivedInvites.map((invite) => (
-                  <Card key={invite.id} className="border-primary-100 bg-primary-50/30 p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="bg-primary-900 text-secondary-400 flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full font-bold">
-                        {invite.avatar ? (
-                          <Image src={invite.avatar} alt={invite.name} width={40} height={40} />
-                        ) : (
-                          invite.name[0]
-                        )}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-bold text-neutral-900">{invite.name}</p>
-                        <p className="text-[10px] text-neutral-500">{invite.relationship}</p>
-                      </div>
-                      <div className="flex shrink-0 gap-2">
-                        <Button
-                          size="sm"
-                          variant="primary"
-                          className="h-8 rounded-full px-3 text-[10px] font-bold"
-                          onClick={() => handleRespond(invite.id, "accepted")}
+          {/* Real-time Search Results Dropdown */}
+          {discoverySearch.length >= 2 && discoveryData?.users && (
+            <div className="animate-in fade-in slide-in-from-top-2 absolute top-full right-0 left-0 z-20 mt-2 overflow-hidden rounded-2xl border border-neutral-100 bg-white shadow-2xl duration-200">
+              {discoveryData.users.length > 0 ? (
+                <div className="divide-y divide-neutral-50">
+                  {(
+                    discoveryData.users as (User & {
+                      isFollowing?: boolean;
+                      familyStatus?: string | null;
+                    })[]
+                  )
+                    .slice(0, 5)
+                    .map((user) => (
+                      <div
+                        key={user.id}
+                        className="group/item flex items-center justify-between p-4 transition-colors hover:bg-neutral-50"
+                      >
+                        <Link
+                          href={`/profile/${user.username || user.id}`}
+                          className="flex flex-1 items-center space-x-3"
                         >
-                          Accept
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="h-8 rounded-full px-3 text-[10px] font-bold text-red-500 hover:bg-red-50"
-                          onClick={() => handleRespond(invite.id, "declined")}
-                        >
-                          Decline
-                        </Button>
+                          <div className="bg-primary-900 text-secondary-400 flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border-2 border-white font-bold shadow-sm">
+                            {user.image ? (
+                              <Image
+                                src={user.image}
+                                alt={user.name || "User"}
+                                width={40}
+                                height={40}
+                              />
+                            ) : (
+                              (user.name || "?")[0]
+                            )}
+                          </div>
+                          <div>
+                            <p className="group-hover/item:text-primary-600 text-sm font-bold text-neutral-900 transition-colors">
+                              {user.name}
+                            </p>
+                            <p className="text-[10px] font-bold tracking-widest text-neutral-400 uppercase">
+                              @{user.username || user.id.slice(0, 8)}
+                            </p>
+                          </div>
+                        </Link>
+                        <div className="flex items-center space-x-2">
+                          <Button
+                            variant={user.isFollowing ? "ghost" : "primary"}
+                            size="sm"
+                            className="h-8 rounded-full px-4 text-[10px] font-bold"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              user.isFollowing ? handleUnfollow(user) : handleFollow(user);
+                            }}
+                            loading={updatingUserId === user.id}
+                          >
+                            {user.isFollowing ? "Unfollow" : "Follow"}
+                          </Button>
+                          <Button
+                            variant={user.familyStatus ? "ghost" : "secondary"}
+                            size="sm"
+                            disabled={!!user.familyStatus}
+                            className="h-8 rounded-full px-4 text-[10px] font-bold"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              handleInvite(user);
+                            }}
+                            loading={invitingUserId === user.id}
+                          >
+                            {user.familyStatus === "accepted"
+                              ? "In Circle"
+                              : user.familyStatus === "pending"
+                                ? "Invited"
+                                : "Invite"}
+                          </Button>
+                        </div>
                       </div>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* --- Sent (waiting for them) --- */}
-          {sentInvites.length > 0 && (
-            <div className="space-y-2">
-              <p className="px-1 text-[10px] font-bold tracking-widest text-neutral-400 uppercase">
-                Waiting for a response
-              </p>
-              <div className="max-h-48 space-y-2 overflow-y-auto pr-1">
-                {sentInvites.map((invite) => (
-                  <Card key={invite.id} className="border-neutral-100 p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-neutral-100 font-bold text-neutral-500">
-                        {invite.avatar ? (
-                          <Image src={invite.avatar} alt={invite.name} width={40} height={40} />
-                        ) : (
-                          invite.name[0]
-                        )}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-bold text-neutral-900">{invite.name}</p>
-                        <p className="text-[10px] text-neutral-500">{invite.relationship}</p>
-                      </div>
-                      <span className="shrink-0 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[10px] font-bold text-amber-600">
-                        Pending
-                      </span>
-                    </div>
-                  </Card>
-                ))}
-              </div>
+                    ))}
+                </div>
+              ) : (
+                <div className="p-8 text-center text-sm font-medium text-neutral-400 italic">
+                  No keepers found matches that name.
+                </div>
+              )}
             </div>
           )}
         </div>
       )}
 
+      {/* Pending Invitations */}
+      {pendingInvites.length > 0 && (
+        <section className="space-y-4">
+          <div className="flex items-center justify-between px-2">
+            <h2 className="text-xs font-bold tracking-widest text-neutral-400 uppercase">
+              Proposals
+            </h2>
+            <span className="bg-primary-100 text-primary-700 rounded-full px-2.5 py-1 text-xs leading-none font-bold">
+              {pendingInvites.length}
+            </span>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            {/* Received */}
+            {receivedInvites.map((invite) => (
+              <Card
+                key={invite.id}
+                className="border-primary-100 bg-primary-50/20 p-4 transition-all hover:shadow-md"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="bg-primary-900 text-secondary-400 flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full font-bold">
+                    {invite.avatar ? (
+                      <Image src={invite.avatar} alt={invite.name} width={40} height={40} />
+                    ) : (
+                      invite.name[0]
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-bold text-neutral-900">{invite.name}</p>
+                    <p className="text-[10px] text-neutral-500">{invite.relationship}</p>
+                  </div>
+                  <div className="flex shrink-0 gap-2">
+                    <Button
+                      size="sm"
+                      variant="primary"
+                      className="h-8 w-8 rounded-full p-0"
+                      onClick={() => handleRespond(invite.id, invite.name, "accepted")}
+                    >
+                      <ArrowRight size={14} />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-8 w-8 rounded-full p-0 text-red-500 hover:bg-red-50"
+                      onClick={() => handleRespond(invite.id, invite.name, "declined")}
+                    >
+                      <X size={14} />
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+            ))}
+
+            {/* Sent */}
+            {sentInvites.map((invite) => (
+              <Card key={invite.id} className="border-neutral-100 bg-white p-4 opacity-80">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-neutral-100 font-bold text-neutral-400">
+                    {invite.avatar ? (
+                      <Image src={invite.avatar} alt={invite.name} width={40} height={40} />
+                    ) : (
+                      invite.name[0]
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-bold text-neutral-900">{invite.name}</p>
+                    <p className="text-[10px] text-neutral-500">{invite.relationship}</p>
+                  </div>
+                  <span className="shrink-0 rounded-full border border-neutral-100 bg-neutral-50 px-2 py-1 text-[8px] font-bold tracking-widest text-neutral-400 uppercase">
+                    Awaiting
+                  </span>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* Feed */}
-      <div className="space-y-8">
-        <h2 className="px-2 text-sm font-bold tracking-widest text-neutral-400 uppercase">
-          {sort === "random" ? "Serendipitous Moments" : "Chronicles Feed"}
-        </h2>
+      <section className="space-y-8">
+        <div className="flex items-center justify-between px-2">
+          <h2 className="text-xs font-bold tracking-widest text-neutral-400 uppercase">
+            {sort === "random" ? "Serendipitous Moments" : "Chronicles Feed"}
+          </h2>
+          <div className="group relative">
+            <MagnifyingGlass className="absolute top-1/2 left-3 h-3.5 w-3.5 -translate-y-1/2 text-neutral-400" />
+            <input
+              type="text"
+              placeholder="Filter by name..."
+              value={friendSearch}
+              onChange={(e) => setFriendSearch(e.target.value)}
+              className="w-32 rounded-full border border-transparent bg-neutral-50 py-1.5 pr-4 pl-8 text-xs transition-all focus:w-48 focus:border-neutral-200 focus:bg-white"
+            />
+          </div>
+        </div>
 
         {!isMounted ? (
           <div className="flex justify-center p-12">
             <Loading text="Syncing Feed..." />
           </div>
         ) : filteredMemories.length > 0 ? (
-          <>
+          <div className="space-y-6">
             {filteredMemories.map((memory: Memory) => (
               <Card
                 key={memory.id}
@@ -393,8 +468,12 @@ export default function FriendsClient({ initialMemories }: FriendsClientProps) {
                       <p className="font-bold text-neutral-900">
                         {memory.user?.name || "Anonymous"}
                       </p>
-                      <p className="text-xs tracking-widest text-neutral-500 uppercase">
-                        {new Date(memory.date).toLocaleDateString()}
+                      <p className="text-[10px] tracking-widest text-neutral-400 uppercase">
+                        {new Date(memory.date).toLocaleDateString(undefined, {
+                          month: "long",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
                       </p>
                     </div>
                   </Link>
@@ -440,7 +519,7 @@ export default function FriendsClient({ initialMemories }: FriendsClientProps) {
                     {memory.tags?.map((tag: string) => (
                       <span
                         key={tag}
-                        className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-bold tracking-wider text-neutral-600 uppercase"
+                        className="rounded-full bg-neutral-100 px-3 py-1 text-[10px] font-bold tracking-widest text-neutral-600 uppercase"
                       >
                         #{tag}
                       </span>
@@ -487,21 +566,21 @@ export default function FriendsClient({ initialMemories }: FriendsClientProps) {
                 You've reached the end of the chronicles.
               </div>
             )}
-          </>
+          </div>
         ) : (
           <EmptyState
-            icon={<Users className="text-secondary-400 h-12 w-12" weight="duotone" />}
+            icon={<Users className="h-16 w-16 text-neutral-200" weight="duotone" />}
             title="A Quiet Circle"
             description={
               friendSearch
                 ? "No memories match your filter."
-                : "Start following other sanctuary keepers to see their shared heritage here."
+                : "Start follow other keepers or invite family to see their shared moments here."
             }
-            actionLabel={friendSearch ? "Clear Search" : undefined}
-            onAction={friendSearch ? () => setFriendSearch("") : undefined}
+            actionLabel={friendSearch ? "Clear Search" : "Find Someone"}
+            onAction={friendSearch ? () => setFriendSearch("") : () => setIsDiscoveryOpen(true)}
           />
         )}
-      </div>
+      </section>
 
       {/* Invitation Modal */}
       <Modal

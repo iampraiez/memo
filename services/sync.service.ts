@@ -250,8 +250,20 @@ class SyncService {
     }
   }
 
-  private async syncUser<T>(op: string, id: string, data: T) {
+  private async syncUser<T extends { action?: string }>(op: string, id: string, data: T) {
     switch (op) {
+      case "create":
+        if (data?.action === "follow") {
+          console.log("[Sync] Syncing user follow:", id);
+          await apiService.post("/user/follow", { userId: id });
+        }
+        break;
+      case "delete":
+        if (data?.action === "unfollow") {
+          console.log("[Sync] Syncing user unfollow:", id);
+          await apiService.post("/user/unfollow", { userId: id });
+        }
+        break;
       case "update":
         console.log("[Sync] Syncing user update:", data);
         await apiService.patch("/user/settings", data);
