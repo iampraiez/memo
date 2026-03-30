@@ -19,7 +19,7 @@ Memory Lane is a modern, AI-powered personal timeline application that helps you
 - **🤖 AI Heritage Generation** - Google Gemini integration transforms individual memories into cohesive, chaptered narratives
 - **⏳ Digital Memory Capsules** - Server-enforced, time-locked future memories that unlock on specific dates
 - **👥 Family & Circles** - RBAC-secured private sharing and collaborative circles with real-time notifications
-- **⚡ Offline-First Architecture** - Seamless PWA experience powered by Dexie.js (`IndexedDB`) and React Query sync
+- **⚡ Pure Server-Side Architecture** - High-reliability state model powered by direct PostgreSQL synchronization and React Query hydration
 - **✨ Premium UI/UX** - Fluid transitions (Framer Motion), Immersive Reading Mode, and gamified streak analytics
 - **📤 Heritage Exports** - Beautifully formatted PDF and DOCX exports with intelligently interspersed imagery
 
@@ -109,17 +109,15 @@ _(Add production screenshots here: Dashboard, Immersive Reader, Memory Creation 
 
 ### Backend & Database
 
-- **[PostgreSQL](https://www.postgresql.org/)** - Primary database
+- **[PostgreSQL](https://www.postgresql.org/)** - Primary database (Single Source of Truth)
 - **[Drizzle ORM](https://orm.drizzle.team/)** - Type-safe database toolkit
 - **[NextAuth.js 5](https://next-auth.js.org/)** - Authentication
 - **[Nodemailer](https://nodemailer.com/)** - Email delivery
 
-### State & Offline Layer
+### State Management
 
-- **[TanStack Query v5](https://tanstack.com/query)** - Server state and optimistic updates
+- **[TanStack Query v5](https://tanstack.com/query)** - Pure server-side state model with direct API synchronization
 - **[Zustand](https://zustand-demo.pmnd.rs/)** - Client UI state management
-- **[Dexie.js](https://dexie.org/)** - Encrypted IndexedDB wrapper for full offline availability
-- **[Next PWA](https://github.com/shadowwalker/next-pwa)** - Service workers (NetworkFirst & CacheFirst strategies)
 
 ### Media & Document Workflows
 

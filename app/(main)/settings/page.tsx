@@ -10,9 +10,6 @@ import {
   Check,
   X,
   Spinner,
-  Shield,
-  Sparkle,
-  Database,
   Camera,
 } from "@phosphor-icons/react";
 import Image from "next/image";
@@ -25,7 +22,6 @@ import { useUserSettings, useUpdateUserSettings } from "@/hooks/useUserSettings"
 import Loading from "@/components/ui/Loading";
 import { toast } from "sonner";
 import { apiService } from "@/services/api.service";
-import { cn } from "@/lib/utils";
 
 export default function SettingsPage() {
   const [mounted, setMounted] = useState(false);
@@ -43,11 +39,6 @@ export default function SettingsPage() {
   const [localBio, setLocalBio] = useState("");
   const [localUsername, setLocalUsername] = useState("");
 
-  // Preference states
-  const [localAiEnabled, setLocalAiEnabled] = useState(true);
-  const [localPrivacyMode, setLocalPrivacyMode] = useState("private");
-  const [localAutoBackup, setLocalAutoBackup] = useState(true);
-
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -58,9 +49,6 @@ export default function SettingsPage() {
       setLocalAvatar(settings.image || "");
       setLocalBio(settings.bio || "");
       setLocalUsername(settings.username || "");
-      setLocalAiEnabled(settings.preferences?.aiEnabled ?? true);
-      setLocalPrivacyMode(settings.preferences?.privacyMode || "private");
-      setLocalAutoBackup(settings.preferences?.autoBackup ?? true);
     }
   }, [settings]);
 
@@ -98,34 +86,6 @@ export default function SettingsPage() {
         setLocalUsername(settings.username || "");
       }
       toast.error("Failed to update profile");
-    }
-  };
-
-  const handleUpdatePreference = async (key: string, value: boolean | string) => {
-    try {
-      if (!settings) return;
-
-      const updatedPreferences = {
-        ...settings.preferences,
-        aiEnabled: key === "aiEnabled" ? (value as boolean) : localAiEnabled,
-        privacyMode: (key === "privacyMode" ? (value as string) : localPrivacyMode) as
-          | "private"
-          | "selective"
-          | "family",
-        autoBackup: key === "autoBackup" ? (value as boolean) : localAutoBackup,
-      };
-
-      await updateSettings.mutateAsync({
-        preferences: updatedPreferences,
-      });
-
-      if (key === "aiEnabled") setLocalAiEnabled(value as boolean);
-      if (key === "privacyMode") setLocalPrivacyMode(value as "private" | "selective" | "family");
-      if (key === "autoBackup") setLocalAutoBackup(value as boolean);
-
-      toast.success("Preferences updated");
-    } catch {
-      toast.error("Failed to update preferences");
     }
   };
 
@@ -339,111 +299,6 @@ export default function SettingsPage() {
                   </div>
                 </div>
               )}
-            </div>
-          </Card>
-        </section>
-
-        {/* Preferences Section */}
-        <section className="space-y-4">
-          <div className="flex items-center space-x-2 px-1">
-            <Sparkle weight="duotone" className="text-primary-600 h-5 w-5" />
-            <h2 className="text-sm font-bold tracking-widest text-neutral-400 uppercase">
-              Sanctuary Pulse
-            </h2>
-          </div>
-          <Card>
-            <div className="divide-y divide-neutral-100">
-              {/* Privacy Mode */}
-              <div className="flex flex-col justify-between gap-4 p-6 sm:flex-row sm:items-center">
-                <div className="space-y-1">
-                  <div className="flex items-center space-x-2">
-                    <Shield weight="duotone" className="h-5 w-5 text-neutral-900" />
-                    <h3 className="font-bold text-neutral-900">Privacy Mode</h3>
-                  </div>
-                  <p className="text-sm text-neutral-500">
-                    Control who can discover and see your memories.
-                    <span className="ml-2 inline-flex items-center rounded-sm bg-neutral-100 px-1.5 py-0.5 text-[8px] font-bold tracking-widest text-neutral-400 uppercase">
-                      Next Update
-                    </span>
-                  </p>
-                </div>
-                <div className="flex items-center rounded-xl bg-neutral-100 p-1">
-                  {["private", "sanctuary"].map((mode) => (
-                    <button
-                      key={mode}
-                      onClick={() => handleUpdatePreference("privacyMode", mode)}
-                      className={cn(
-                        "rounded-lg px-4 py-2 text-xs font-bold capitalize transition-all",
-                        localPrivacyMode === mode
-                          ? "text-primary-900 bg-white shadow-sm"
-                          : "text-neutral-500 hover:text-neutral-900",
-                      )}
-                    >
-                      {mode === "sanctuary" ? "Sanctuary Circle" : "Private"}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* AI Features */}
-              <div className="flex items-center justify-between p-6">
-                <div className="space-y-1">
-                  <div className="flex items-center space-x-2">
-                    <Sparkle weight="duotone" className="h-5 w-5 text-neutral-900" />
-                    <h3 className="font-bold text-neutral-900">AI Enhancement</h3>
-                  </div>
-                  <p className="text-sm text-neutral-500">
-                    Let AI help organize and summarize your moments.
-                    <span className="ml-2 inline-flex items-center rounded-sm bg-neutral-100 px-1.5 py-0.5 text-[8px] font-bold tracking-widest text-neutral-400 uppercase">
-                      Next Update
-                    </span>
-                  </p>
-                </div>
-                <button
-                  onClick={() => handleUpdatePreference("aiEnabled", !localAiEnabled)}
-                  className={cn(
-                    "relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
-                    localAiEnabled ? "bg-primary-900" : "bg-neutral-200",
-                  )}
-                >
-                  <span
-                    className={cn(
-                      "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
-                      localAiEnabled ? "translate-x-5" : "translate-x-0",
-                    )}
-                  />
-                </button>
-              </div>
-
-              {/* Auto Backup */}
-              <div className="flex items-center justify-between p-6">
-                <div className="space-y-1">
-                  <div className="flex items-center space-x-2">
-                    <Database weight="duotone" className="h-5 w-5 text-neutral-900" />
-                    <h3 className="font-bold text-neutral-900">Auto Preservation</h3>
-                  </div>
-                  <p className="text-sm text-neutral-500">
-                    Automatically sync your media to secure cloud storage.
-                    <span className="ml-2 inline-flex items-center rounded-sm bg-neutral-100 px-1.5 py-0.5 text-[8px] font-bold tracking-widest text-neutral-400 uppercase">
-                      Next Update
-                    </span>
-                  </p>
-                </div>
-                <button
-                  onClick={() => handleUpdatePreference("autoBackup", !localAutoBackup)}
-                  className={cn(
-                    "relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
-                    localAutoBackup ? "bg-primary-900" : "bg-neutral-200",
-                  )}
-                >
-                  <span
-                    className={cn(
-                      "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
-                      localAutoBackup ? "translate-x-5" : "translate-x-0",
-                    )}
-                  />
-                </button>
-              </div>
             </div>
           </Card>
         </section>

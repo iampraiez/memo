@@ -2,12 +2,9 @@
 import React, { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
-import Button from "@/components/ui/Button";
-import OfflineBanner from "@/components/ui/OfflineBanner";
 import NotificationPanel from "@/components/NotificationPanel";
 import { useNotifications } from "@/hooks/useNotifications";
 import { usePathname } from "next/navigation";
-import { useSync } from "@/components/providers/SyncProvider";
 import CreateMemoryModal from "@/components/CreateMemoryModal";
 import { useCreateMemory, useUpdateMemory, useStreak } from "@/hooks/useMemories";
 import { CreateMemoryData } from "@/services/memory.service";
@@ -15,6 +12,7 @@ import { Trophy, Star } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus } from "@phosphor-icons/react";
+import Button from "@/components/ui/Button";
 
 interface DashboardShellProps {
   children: React.ReactNode;
@@ -26,7 +24,6 @@ export default function DashboardShell({ children }: DashboardShellProps) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [mounted, setMounted] = useState(false);
   const { unreadCount } = useNotifications();
-  const { isOnline } = useSync();
   const pathname = usePathname();
   const createMemoryMutation = useCreateMemory();
   const updateMemoryMutation = useUpdateMemory();
@@ -91,10 +88,8 @@ export default function DashboardShell({ children }: DashboardShellProps) {
       <Header
         onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
         onShowNotifications={() => setShowNotifications(!showNotifications)}
-        syncStatus={mounted ? (isOnline ? "online" : "offline") : "offline"}
         notificationCount={unreadCount}
       />
-      {mounted && <OfflineBanner />}
 
       <div className="flex">
         <Sidebar isOpen={sidebarOpen} onClick={() => setSidebarOpen(false)} />

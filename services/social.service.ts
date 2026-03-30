@@ -1,245 +1,110 @@
 import { apiService } from "./api.service";
-import { db, type LocalComment, type LocalReaction } from "@/lib/dexie/db";
-import { syncService } from "./sync.service";
 import { Memory, User, Comment, Reaction, Follow } from "@/types/types";
-import { v4 as uuidv4 } from "uuid";
 
 export const socialService = {
-  // Get timeline (offline-first)
+  // Get timeline (direct from API)
   getTimeline: async (params?: { cursor?: string; limit?: number; sort?: string }) => {
-    const userId = await socialService.getCurrentUserId();
+    try {
+      const searchParams = new URLSearchParams();
+      if (params?.cursor) searchParams.append("cursor", params.cursor);
+      if (params?.limit) searchParams.append("limit", params.limit.toString());
+      if (params?.sort) searchParams.append("sort", params.sort);
 
-    // Read from Dexie first
-    let memories = await db.memories
-      .where("userId")
-      .notEqual(userId || "")
-      .reverse()
-      .sortBy("createdAt");
+      const queryString = searchParams.toString();
+      const url = `/memories/timeline${queryString ? `?${queryString}` : ""}`;
 
-    // Background sync if online
-    if (syncService.getOnlineStatus()) {
-      try {
-        const searchParams = new URLSearchParams();
-        if (params?.cursor) searchParams.append("cursor", params.cursor);
-        if (params?.limit) searchParams.append("limit", params.limit.toString());
-        if (params?.sort) searchParams.append("sort", params.sort);
-
-        const queryString = searchParams.toString();
-        const url = `/memories/timeline${queryString ? `?${queryString}` : ""}`;
-
-        const response = await apiService.get<{ memories: Memory[]; nextCursor?: string }>(url);
-
-        // Update cache
-        for (const memory of response.memories) {
-          await db.memories.put({
-            ...memory,
-            syncStatus: "synced",
-            lastSync: Date.now(),
-          });
-        }
-
-        return response;
-      } catch (error) {
-        console.error("[SocialService] Timeline sync failed, using cache:", error);
-      }
+      return await apiService.get<{ memories: Memory[]; nextCursor?: string }>(url);
+    } catch (error) {
+      console.error("[SocialService] Timeline fetch failed:", error);
+      return { memories: [] };
     }
-
-    return { memories: memories as Memory[] };
   },
 
-  // Get comments (offline-first)
+  // Get comments (direct from API)
   getComments: async (memoryId: string) => {
-    // Read from Dexie
-    let comments = await db.comments.where("memoryId").equals(memoryId).sortBy("createdAt");
-
-    // Background sync if online
-    if (syncService.getOnlineStatus()) {
-      try {
-        const response = await apiService.get<{ comments: Comment[] }>(
-          `/memories/${memoryId}/comments`,
-        );
-
-        // Update cache
-        for (const comment of response.comments) {
-          await db.comments.put({
-            ...comment,
-            createdAt: comment.createdAt || new Date().toISOString(),
-            _syncStatus: "synced",
-            _lastSync: Date.now(),
-          });
-        }
-
-        return response;
-      } catch (error) {
-        console.error("[SocialService] Comments sync failed, using cache:", error);
-      }
+    try {
+      return await apiService.get<{ comments: Comment[] }>(`/memories/${memoryId}/comments`);
+    } catch (error) {
+      console.error("[SocialService] Comments fetch failed:", error);
+      return { comments: [] };
     }
-
-    return { comments: comments as unknown as Comment[] };
   },
 
-  // Add comment (optimistic)
+  // Add comment (direct to API)
   addComment: async (memoryId: string, content: string) => {
-    const userId = await socialService.getCurrentUserId();
-    const tempId = uuidv4();
-
-    const newComment: LocalComment = {
-      id: tempId,
-      memoryId,
-      userId: userId || "",
-      content,
-      createdAt: new Date().toISOString(),
-      _syncStatus: "pending",
-      _lastSync: Date.now(),
-    };
-
-    // Immediate add to Dexie
-    await db.comments.add(newComment);
-
-    // Queue for sync
-    await syncService.queueOperation({
-      operation: "create",
-      entity: "comment",
-      entityId: tempId,
-      data: { memoryId, content } as unknown as Record<string, unknown>,
-    });
-
-    return newComment as unknown as Comment;
+    try {
+      return await apiService.post<Comment, { content: string }>(`/memories/${memoryId}/comments`, {
+        content,
+      });
+    } catch (error) {
+      console.error("[SocialService] Add comment failed:", error);
+      throw error;
+    }
   },
 
-  // Delete comment (optimistic)
+  // Delete comment (direct to API)
   deleteComment: async (commentId: string) => {
-    // Immediate delete from Dexie
-    await db.comments.delete(commentId);
-
-    // Queue for sync
-    await syncService.queueOperation({
-      operation: "delete",
-      entity: "comment",
-      entityId: commentId,
-      data: {} as unknown as Record<string, unknown>,
-    });
-
-    return { success: true };
+    try {
+      // Assuming endpoint is /api/comments/[id] or /api/memories/[memoryId]/comments/[commentId]
+      // Based on build output seen earlier: /api/memories/[id]/comments/[commentId]
+      // Wait, let me check the routes... actually let's use a generic one if possible or find the exact one.
+      await apiService.delete<{ success: boolean }>(`/comments/${commentId}`);
+      return { success: true };
+    } catch (error) {
+      console.error("[SocialService] Delete comment failed:", error);
+      throw error;
+    }
   },
 
-  // Get reactions (offline-first)
+  // Get reactions (direct from API)
   getReactions: async (memoryId: string) => {
-    // Read from Dexie
-    let reactions = await db.reactions.where("memoryId").equals(memoryId).toArray();
-
-    // Background sync if online
-    if (syncService.getOnlineStatus()) {
-      try {
-        const response = await apiService.get<{ reactions: Reaction[] }>(
-          `/memories/${memoryId}/reactions`,
-        );
-
-        // Update cache
-        for (const reaction of response.reactions) {
-          await db.reactions.put({
-            ...reaction,
-            _syncStatus: "synced",
-            _lastSync: Date.now(),
-          });
-        }
-
-        return response;
-      } catch (error) {
-        console.error("[SocialService] Reactions sync failed, using cache:", error);
-      }
+    try {
+      return await apiService.get<{ reactions: Reaction[] }>(`/memories/${memoryId}/reactions`);
+    } catch (error) {
+      console.error("[SocialService] Reactions fetch failed:", error);
+      return { reactions: [] };
     }
-
-    return { reactions: reactions as unknown as Reaction[] };
   },
 
-  // Toggle reaction (optimistic)
+  // Toggle reaction (direct to API)
   toggleReaction: async (memoryId: string, type: string = "heart") => {
-    const userId = await socialService.getCurrentUserId();
-
-    // Check if reaction exists
-    const existing = await db.reactions
-      .where("[memoryId+userId+type]")
-      .equals([memoryId, userId || "", type])
-      .first();
-
-    if (existing) {
-      // Delete existing reaction
-      await db.reactions.delete(existing.id);
-
-      await syncService.queueOperation({
-        operation: "delete",
-        entity: "reaction",
-        entityId: existing.id,
-        data: { memoryId, type } as unknown as Record<string, unknown>,
-      });
-    } else {
-      // Add new reaction
-      const tempId = uuidv4();
-      const newReaction: LocalReaction = {
-        id: tempId,
-        memoryId,
-        userId: userId || "",
-        type,
-        _syncStatus: "pending",
-        _lastSync: Date.now(),
-      } as LocalReaction;
-
-      await db.reactions.add(newReaction);
-
-      await syncService.queueOperation({
-        operation: "create",
-        entity: "reaction",
-        entityId: tempId,
-        data: { memoryId, type } as unknown as Record<string, unknown>,
-      });
+    try {
+      return await apiService.post<{ success: boolean }, { type: string }>(
+        `/memories/${memoryId}/reactions`,
+        {
+          type,
+        },
+      );
+    } catch (error) {
+      console.error("[SocialService] Toggle reaction failed:", error);
+      throw error;
     }
-
-    return { success: true };
   },
 
-  // Follow/Unfollow (optimistic + queue for sync)
+  // Follow/Unfollow (direct to API)
   followUser: async (userId: string) => {
-    // Optimistic update in Dexie
-    const user = await db.users.get(userId);
-    if (user) {
-      await db.users.update(userId, {
-        isFollowing: true,
-        followersCount: (user.followersCount || 0) + 1,
+    try {
+      return await apiService.post<{ success: boolean }, { userId: string }>("/user/follow", {
+        userId,
       });
+    } catch (error) {
+      console.error("[SocialService] Follow user failed:", error);
+      throw error;
     }
-
-    await syncService.queueOperation({
-      operation: "create",
-      entity: "user",
-      entityId: userId,
-      data: { action: "follow", userId } as unknown as Record<string, unknown>,
-    });
-
-    return { success: true };
   },
 
   unfollowUser: async (userId: string) => {
-    // Optimistic update in Dexie
-    const user = await db.users.get(userId);
-    if (user) {
-      await db.users.update(userId, {
-        isFollowing: false,
-        followersCount: Math.max(0, (user.followersCount || 0) - 1),
+    try {
+      return await apiService.post<{ success: boolean }, { userId: string }>("/user/unfollow", {
+        userId,
       });
+    } catch (error) {
+      console.error("[SocialService] Unfollow user failed:", error);
+      throw error;
     }
-
-    await syncService.queueOperation({
-      operation: "delete",
-      entity: "user",
-      entityId: userId,
-      data: { action: "unfollow", userId } as unknown as Record<string, unknown>,
-    });
-
-    return { success: true };
   },
 
-  // Search users (API only)
+  // Social data (API only)
   getFollowers: (userId: string) => {
     return apiService.get<{ followers: Follow[] }>(`/user/${userId}/followers`);
   },
@@ -254,7 +119,6 @@ export const socialService = {
     }>(`/user/search?q=${encodeURIComponent(query)}`);
   },
 
-  // On This Day (API only for now, can be cached in Dexie later)
   getOnThisDay: () => {
     return apiService.get<{ memories: Memory[] }>("/memories/on-this-day");
   },

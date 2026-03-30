@@ -23,12 +23,6 @@ export const metadata: Metadata = {
   title: "Memory Lane - Your Personal Timeline",
   description:
     "Capture, organize, and rediscover your most precious memories with AI-powered insights",
-  manifest: "/manifest.json",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "default",
-    title: "Memory Lane",
-  },
   robots: "index, follow",
   keywords: ["memory", "timeline", "AI", "personal history", "family memories"],
   openGraph: {

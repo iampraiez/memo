@@ -1,17 +1,31 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import db from "@/drizzle/index";
-import { memories, follows } from "@/drizzle/db/schema";
-import { and, eq, desc } from "drizzle-orm";
+import { memories, follows, users } from "@/drizzle/db/schema";
+import { and, eq, desc, or } from "drizzle-orm";
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
-  const { id: targetUserId } = await params;
+  const { id: targetIdentifier } = await params;
 
   try {
+    // 1. Resolve targetIdentifier to a specific user
+    const user = await db.query.users.findFirst({
+      where: or(
+        eq(users.id, targetIdentifier),
+        eq(users.username, targetIdentifier),
+        eq(users.email, targetIdentifier),
+      ),
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    const targetUserId = user.id;
     const isOwner = session?.user?.id === targetUserId;
 
-    // Check if the current user follows this profile (for access to private memories)
+    // 2. Check if the current user follows this profile (for access to private memories)
     let isFollowing = false;
     if (session?.user?.id && !isOwner) {
       const followRecord = await db.query.follows.findFirst({
@@ -20,14 +34,16 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
       isFollowing = !!followRecord;
     }
 
+    // 3. Fetch memories
     const userMemories = await db.query.memories.findMany({
       where: and(
         eq(memories.userId, targetUserId),
-        // An owner sees all their memories; followers/visitors see only public ones
+        // An owner sees all their memories; visitors see only public ones
+        // (In the future, followers might see more, but for now it's public only)
         isOwner ? undefined : eq(memories.isPublic, true),
       ),
       orderBy: [desc(memories.date)],
-      limit: 20,
+      limit: 50, // Increased limit for better UX
       with: {
         memoryMedia: true,
         memoryTags: {

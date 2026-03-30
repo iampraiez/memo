@@ -156,11 +156,13 @@ export default function AnalyticsClient({ initialAnalytics }: AnalyticsClientPro
           <h2 className="font-display text-xl font-bold text-neutral-900">Emotional Balance</h2>
           <div className="flex w-full justify-center">
             <MoodChart
-              data={analytics.topMoods.map((m) => ({
-                mood: m.mood,
-                percentage: m.percentage,
-                count: m.count,
-              }))}
+              data={analytics.topMoods.map(
+                (m: { mood: string; percentage: number; count: number }) => ({
+                  mood: m.mood,
+                  percentage: m.percentage,
+                  count: m.count,
+                }),
+              )}
             />
           </div>
         </Card>

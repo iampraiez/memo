@@ -19,12 +19,13 @@ import EmptyState from "@/components/ui/EmptyState";
 import { jsPDF } from "jspdf";
 import { Document, Paragraph, Packer, TextRun, ImageRun, IImageOptions } from "docx";
 import { useStories, useCreateStory } from "@/hooks/useStories";
-import { db, Memory as LocalMemory } from "@/lib/dexie/db";
 import { toast } from "sonner";
 import Loading from "@/components/ui/Loading";
 import { useSession } from "next-auth/react";
 import { cn } from "@/lib/utils";
-import { LocalStory } from "@/lib/dexie/db";
+import { useQueryClient } from "@tanstack/react-query";
+import { memoryService } from "@/services/memory.service";
+import { type Story, type Memory } from "@/types/types";
 
 interface StorySettings {
   dateRange: {
@@ -52,10 +53,11 @@ export default function StoriesPage() {
     includeimages: true,
   });
 
-  const [selectedStory, setSelectedStory] = useState<LocalStory | null>(null);
+  const [selectedStory, setSelectedStory] = useState<Story | null>(null);
   const [showGenerator, setShowGenerator] = useState(true);
   const [fileName, setFileName] = useState("my_story");
   const isOnline = useNetworkStatus();
+  const queryClient = useQueryClient();
   const { data: storiesData, isLoading: storiesLoading } = useStories(userId);
   const createStoryMutation = useCreateStory(userId);
 
@@ -135,27 +137,9 @@ export default function StoriesPage() {
         setStreamingContent(accumulatedContent);
       }
 
-      const storyId = response.headers.get("X-Story-Id");
-      if (storyId) {
-        // Manually update Dexie to reflect the new story immediately
-        // This ensures the library shows it without waiting for a full sync
-        await db.stories.add({
-          id: storyId,
-          userId: userId!,
-          title: fileName || "My Memory Story",
-          content: accumulatedContent,
-          tone: settings.tone,
-          length: settings.length,
-          dateRange: settings.dateRange,
-          status: "ready",
-          createdAt: new Date().toISOString(),
-        });
-      }
-
+      // No need to manually update local DB, React Query handle it via invalidation
       toast.success("Story generated successfully!");
-      // Trigger a re-fetch of stories to include the new one in the sidebar
-      // storiesData.refetch() or handled by react-query indirectly if we used the mutation
-      // But since we bypassed the mutation, we should probably manually refresh the list.
+      queryClient.invalidateQueries({ queryKey: ["stories", userId] });
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : "Failed to generate story";
       console.error("Story generation failed:", error);
@@ -199,14 +183,12 @@ export default function StoriesPage() {
     let storyImages: string[] = [];
     if (settings.includeimages) {
       try {
-        const memories = await db.memories
-          .where("date")
-          .between(selectedStory.dateRange.start, selectedStory.dateRange.end, true, true)
-          .toArray();
-        storyImages = (memories.flatMap((m: LocalMemory) => m.images || []) as string[]).slice(
-          0,
-          5,
+        const { memories } = await memoryService.getAll(userId || "");
+        // Filter by date range (simple client-side filter for export)
+        const rangeMemories = memories.filter(
+          (m) => m.date >= selectedStory.dateRange.start && m.date <= selectedStory.dateRange.end,
         );
+        storyImages = rangeMemories.flatMap((m: Memory) => m.images || []).slice(0, 5);
       } catch (err) {
         console.error("Failed to fetch memories for export:", err);
       }

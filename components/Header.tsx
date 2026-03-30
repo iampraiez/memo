@@ -1,5 +1,5 @@
 import React from "react";
-import { Cloud, CloudSlash, List, Bell } from "@phosphor-icons/react";
+import { List, Bell } from "@phosphor-icons/react";
 import Button from "./ui/Button";
 import { cn } from "@/lib/utils";
 import UserDropdown from "./UserDropdown";
@@ -7,7 +7,6 @@ import UserDropdown from "./UserDropdown";
 interface HeaderProps {
   onToggleSidebar: () => void;
   onShowNotifications?: () => void;
-  syncStatus: "online" | "offline" | "syncing";
   notificationCount?: number;
   className?: string;
 }
@@ -15,18 +14,9 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({
   onToggleSidebar,
   onShowNotifications,
-  syncStatus,
   notificationCount = 0,
   className,
 }) => {
-  const syncIcons = {
-    online: Cloud,
-    offline: CloudSlash,
-    syncing: Cloud,
-  };
-
-  const SyncIcon = syncIcons[syncStatus];
-
   return (
     <header
       className={cn(
@@ -48,33 +38,10 @@ const Header: React.FC<HeaderProps> = ({
             >
               <List weight="bold" className="h-5 w-5 text-neutral-900" />
             </Button>
-            ...
           </div>
 
           {/* Right Section */}
           <div className="flex items-center space-x-2 sm:space-x-3">
-            {/* Sync Status - Refined Pill */}
-            <div
-              className={cn(
-                "hidden items-center space-x-2 rounded-full px-3 py-1.5 text-[10px] font-bold tracking-widest uppercase transition-all sm:flex",
-                syncStatus === "online" &&
-                  "border border-emerald-100/50 bg-emerald-50 text-emerald-700",
-                syncStatus === "offline" &&
-                  "border border-neutral-200/50 bg-neutral-100 text-neutral-500",
-                syncStatus === "syncing" &&
-                  "text-primary-700 bg-primary-50 border-primary-100/50 border",
-              )}
-            >
-              <SyncIcon className={cn("h-3 w-3", syncStatus === "syncing" && "animate-spin")} />
-              <span className="hidden lg:inline">
-                {syncStatus === "online"
-                  ? "Cloud Active"
-                  : syncStatus === "offline"
-                    ? "Local Mode"
-                    : "Syncing"}
-              </span>
-            </div>
-
             {/* Notifications - Refined Icon Button */}
             <Button
               variant="ghost"

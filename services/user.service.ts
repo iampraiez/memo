@@ -1,6 +1,4 @@
 import { apiService } from "./api.service";
-import { db, type LocalUser } from "@/lib/dexie/db";
-import { syncService } from "./sync.service";
 import { AxiosError } from "axios";
 
 export interface UserSettings {
@@ -26,106 +24,50 @@ export interface UserSettings {
 
 export const userService = {
   getSettings: async () => {
-    const userId = await userService.getCurrentUserId();
-    const cachedUser = await db.users.get(userId || "");
-    if (syncService.getOnlineStatus()) {
-      try {
-        const res = await apiService.get<UserSettings>("/user/settings");
-
-        await db.users.put({
-          ...res,
-          isOnboarded: true,
-          _syncStatus: "synced",
-          _lastSync: Date.now(),
-        } as unknown as LocalUser);
-
-        return res;
-      } catch (error) {
-        console.error("[UserService] Fetch settings failed, using cache:", error);
-        if (cachedUser) {
-          return cachedUser as unknown as UserSettings;
-        }
-      }
-    }
-
-    if (!cachedUser) {
-      // Fallback or empty state
+    try {
+      return await apiService.get<UserSettings>("/user/settings");
+    } catch (error) {
+      console.error("[UserService] Fetch settings failed:", error);
       return null as unknown as UserSettings;
     }
-
-    return cachedUser as unknown as UserSettings;
   },
 
-  // Update settings (optimistic)
+  // Update settings (direct)
   updateSettings: async (data: Partial<UserSettings> & { image?: string; avatar?: string }) => {
-    const userId = await userService.getCurrentUserId();
-    if (!userId) throw new Error("User not authenticated");
-
-    const existing = await db.users.get(userId);
-
     // Normalize image field (handle both 'image' and 'avatar' keys)
     const normalizedData = { ...data };
     if (data.avatar && !data.image) {
       normalizedData.image = data.avatar;
     }
 
-    if (existing) {
-      const updated: LocalUser = {
-        ...existing,
-        ...normalizedData,
-        _syncStatus: "pending",
-        _lastSync: Date.now(),
-      };
-      await db.users.put(updated);
+    try {
+      return await apiService.patch<UserSettings, Partial<UserSettings> & { image?: string }>(
+        "/user/settings",
+        normalizedData,
+      );
+    } catch (error) {
+      console.error("[UserService] Update settings failed:", error);
+      throw error;
     }
-
-    await syncService.queueOperation({
-      operation: "update",
-      entity: "user",
-      entityId: userId,
-      data: normalizedData as unknown as Record<string, unknown>,
-    });
-
-    return normalizedData as UserSettings;
   },
 
-  // Profile is usually dynamic, but we can cache viewed profiles
   getProfile: async (userId: string) => {
-    // Try cache first
-    const cached = await db.users.get(userId);
-
-    if (syncService.getOnlineStatus()) {
-      try {
-        const res = await apiService.get<
-          UserSettings & {
-            followersCount: number;
-            followingCount: number;
-            memoriesCount: number;
-            isFollowing: boolean;
-          }
-        >(`/user/profile/${userId}`);
-
-        await db.users.put({
-          ...res,
-          isOnboarded: true,
-          _syncStatus: "synced",
-          _lastSync: Date.now(),
-        } as unknown as LocalUser);
-
-        return res;
-      } catch (error) {
-        if (error instanceof AxiosError && error.status === 404) {
-          throw error;
+    try {
+      return await apiService.get<
+        UserSettings & {
+          followersCount: number;
+          followingCount: number;
+          memoriesCount: number;
+          isFollowing: boolean;
         }
-        console.error("[UserService] Get profile failed:", error);
+      >(`/user/profile/${userId}`);
+    } catch (error) {
+      if (error instanceof AxiosError && error.status === 404) {
+        throw error;
       }
+      console.error("[UserService] Get profile failed:", error);
+      throw error;
     }
-
-    if (cached) {
-      return cached;
-    }
-
-    throw new Error("Profile not available offline");
   },
 
   // Helper

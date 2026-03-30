@@ -1,13 +1,9 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import dynamic from "next/dynamic";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { persistQueryClient } from "@tanstack/react-query-persist-client";
-import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
-import * as idb from "idb-keyval";
 import { SessionProvider } from "next-auth/react";
 import { Session } from "next-auth";
-import { SyncProvider } from "@/components/providers/SyncProvider";
 
 const ReactQueryDevtools = dynamic(
   () => import("@tanstack/react-query-devtools").then((mod) => mod.ReactQueryDevtools),
@@ -26,14 +22,10 @@ export function Providers({
       new QueryClient({
         defaultOptions: {
           queries: {
-            // 5 minutes — pages that were recently loaded show their cached data
-            // instantly on navigation without triggering a blocking refetch.
-            staleTime: 1000 * 60 * 5, // 5 minutes
-            gcTime: 1000 * 60 * 60 * 24, // 24 hours
-            refetchOnWindowFocus: false,
-            // false = use cache immediately on mount, no blocking network request
-            refetchOnMount: false,
-            refetchOnReconnect: true, // still refresh after going offline → online
+            staleTime: 1000 * 30, // 30 seconds - reduced for fresher data
+            refetchOnWindowFocus: true,
+            refetchOnMount: true,
+            refetchOnReconnect: true,
             retry: 1,
           },
           mutations: {
@@ -43,41 +35,11 @@ export function Providers({
       }),
   );
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const persister = createAsyncStoragePersister({
-        storage: {
-          getItem: async (key) => await idb.get(key),
-          setItem: async (key, value) => await idb.set(key, value),
-          removeItem: async (key) => await idb.del(key),
-        },
-      });
-
-      persistQueryClient({
-        queryClient,
-        persister,
-        maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
-      });
-
-      // Explicit SW Registration
-      if ("serviceWorker" in navigator && process.env.NODE_ENV === "production") {
-        window.addEventListener("load", () => {
-          navigator.serviceWorker
-            .register("/sw.js")
-            .then((reg) => console.log("SW registered:", reg))
-            .catch((err) => console.error("SW registration failed:", err));
-        });
-      }
-    }
-  }, [queryClient]);
-
   return (
     <SessionProvider session={session}>
       <QueryClientProvider client={queryClient}>
-        <SyncProvider>
-          {children}
-          {process.env.NODE_ENV === "development" && <ReactQueryDevtools initialIsOpen={false} />}
-        </SyncProvider>
+        {children}
+        {process.env.NODE_ENV === "development" && <ReactQueryDevtools initialIsOpen={false} />}
       </QueryClientProvider>
     </SessionProvider>
   );

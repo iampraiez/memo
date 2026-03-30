@@ -1,6 +1,4 @@
 import { apiService } from "./api.service";
-import { db, type LocalNotification } from "@/lib/dexie/db";
-import { syncService } from "./sync.service";
 
 export interface Notification {
   id: string;
@@ -14,94 +12,49 @@ export interface Notification {
 }
 
 export const notificationService = {
-  // Get notifications (offline-first)
+  // Get notifications (direct from API)
   getAll: async () => {
-    const userId = await notificationService.getCurrentUserId();
-
-    // Read from Dexie
-    let notifications = await db.notifications
-      .where("userId")
-      .equals(userId || "")
-      .reverse()
-      .sortBy("createdAt");
-
-    // Background sync if online
-    if (syncService.getOnlineStatus()) {
-      try {
-        const response = await apiService.get<{
-          notifications: Notification[];
-        }>("/notifications");
-
-        // Update cache
-        for (const notification of response.notifications) {
-          await db.notifications.put({
-            ...notification,
-            _syncStatus: "synced",
-            _lastSync: Date.now(),
-          } as LocalNotification);
-        }
-
-        return response;
-      } catch (error) {
-        console.error("[NotificationService] Sync failed, using cache:", error);
-      }
+    try {
+      return await apiService.get<{
+        notifications: Notification[];
+      }>("/notifications");
+    } catch (error) {
+      console.error("[NotificationService] Fetch failed:", error);
+      return { notifications: [] };
     }
-
-    return { notifications: notifications as Notification[] };
   },
 
-  // Mark all as read (optimistic)
+  // Mark all as read (direct to API)
   markAllAsRead: async () => {
-    const userId = await notificationService.getCurrentUserId();
-
-    // Update Dexie
-    await db.notifications
-      .where("userId")
-      .equals(userId || "")
-      .modify({ read: true });
-
-    // API Sync
     try {
       await apiService.patch("/notifications", { readAll: true });
+      return { success: true };
     } catch (error) {
-      console.error("[NotificationService] API sync failed:", error);
+      console.error("[NotificationService] Mark all as read failed:", error);
+      throw error;
     }
-
-    return { success: true };
   },
 
-  // Mark one as read (optimistic)
+  // Mark one as read (direct to API)
   markAsRead: async (id: string) => {
-    await db.notifications.update(id, { read: true });
-
-    // API Sync
     try {
       await apiService.patch("/notifications", { id });
+      return { success: true };
     } catch (error) {
-      console.error("[NotificationService] API sync failed:", error);
+      console.error("[NotificationService] Mark as read failed:", error);
+      throw error;
     }
-
-    return { success: true };
   },
 
-  // Clear all notifications
+  // Clear all notifications (direct to API)
   clearAll: async () => {
-    const userId = await notificationService.getCurrentUserId();
-
-    // Update Dexie
-    await db.notifications
-      .where("userId")
-      .equals(userId || "")
-      .delete();
-
-    // API Sync
     try {
       await apiService.delete("/notifications");
+      return { success: true };
     } catch (error) {
-      console.error("[NotificationService] API sync failed:", error);
+      console.error("[NotificationService] Clear failed:", error);
+      throw error;
     }
-
-    return { success: true };
   },
 
   // Helper

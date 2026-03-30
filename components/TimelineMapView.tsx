@@ -1,13 +1,14 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { Memory } from "@/types/types";
-import { MapPin, Calendar, ArrowRight } from "@phosphor-icons/react";
+import { MapPin, Calendar, ArrowRight, PencilSimple, Check } from "@phosphor-icons/react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import Image from "next/image";
 import { useUpdateMemory } from "@/hooks/useMemories";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 // Fix Leaflet marker icon issue in Next.js
 // @ts-ignore
@@ -25,6 +26,7 @@ interface TimelineMapViewProps {
 
 export default function TimelineMapView({ memories, onMemoryClick }: TimelineMapViewProps) {
   const [mounted, setMounted] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
   const updateMemory = useUpdateMemory();
 
   useEffect(() => {
@@ -33,10 +35,7 @@ export default function TimelineMapView({ memories, onMemoryClick }: TimelineMap
 
   // Filter memories with location data
   const memoriesWithCoords = memories.filter((m) => m.location);
-  // Note: For a real app, we'd geocode these locations.
-  // For this audit, we'll simulate coordinates if they aren't provided
-  // (assuming some might have lat/lng but the type doesn't explicitly show them yet)
-  // We'll use a deterministic random for demo purposes based on location string hash
+
   const getCoords = (memory: Memory): [number, number] => {
     if (memory.latitude != null && memory.longitude != null) {
       return [memory.latitude, memory.longitude];
@@ -53,9 +52,47 @@ export default function TimelineMapView({ memories, onMemoryClick }: TimelineMap
 
   if (!mounted) return null;
 
+  const worldBounds: L.LatLngBoundsExpression = [
+    [-90, -180],
+    [90, 180],
+  ];
+
   return (
     <div className="relative z-0 h-[calc(100vh-280px)] w-full overflow-hidden rounded-3xl border border-neutral-200 bg-neutral-100 shadow-inner">
-      <MapContainer center={[20, 0]} zoom={2} scrollWheelZoom={true} className="h-full w-full">
+      {/* Edit Mode Toggle */}
+      <div className="absolute top-4 right-4 z-1000">
+        <button
+          onClick={() => setIsEditMode(!isEditMode)}
+          className={cn(
+            "flex items-center space-x-2 rounded-2xl px-4 py-2 text-sm font-bold shadow-lg transition-all active:scale-95",
+            isEditMode
+              ? "bg-emerald-600 text-white hover:bg-emerald-700"
+              : "bg-white/90 text-neutral-900 backdrop-blur-md hover:bg-white",
+          )}
+        >
+          {isEditMode ? (
+            <>
+              <Check weight="bold" />
+              <span>Finish Editing</span>
+            </>
+          ) : (
+            <>
+              <PencilSimple weight="bold" />
+              <span>Edit Pins</span>
+            </>
+          )}
+        </button>
+      </div>
+
+      <MapContainer
+        center={[20, 0]}
+        zoom={2}
+        minZoom={2}
+        maxBounds={worldBounds}
+        maxBoundsViscosity={1.0}
+        scrollWheelZoom={true}
+        className="h-full w-full"
+      >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -66,7 +103,7 @@ export default function TimelineMapView({ memories, onMemoryClick }: TimelineMap
             <Marker
               key={memory.id}
               position={coords}
-              draggable={true}
+              draggable={isEditMode}
               eventHandlers={{
                 dragend: (e) => {
                   const marker = e.target;
@@ -90,7 +127,7 @@ export default function TimelineMapView({ memories, onMemoryClick }: TimelineMap
               }}
             >
               <Popup className="premium-popup">
-                <div className="w-64 overflow-hidden rounded-xl bg-white p-0 shadow-xl">
+                <div className="w-64 overflow-hidden rounded-xl border-0 bg-white p-0 shadow-xl">
                   {memory.images && memory.images.length > 0 ? (
                     <div className="relative h-32 w-full">
                       <Image
@@ -107,11 +144,11 @@ export default function TimelineMapView({ memories, onMemoryClick }: TimelineMap
                     </div>
                   )}
                   <div className="p-4">
-                    <h3 className="font-display text-lg font-bold text-neutral-900">
+                    <h3 className="font-display truncate text-lg font-bold text-neutral-900">
                       {memory.title}
                     </h3>
                     <div className="mt-1 flex items-center space-x-2 text-[10px] font-bold text-neutral-400 uppercase">
-                      <Calendar size={12} />
+                      <Calendar size={12} weight="bold" />
                       <span>{new Date(memory.date).toLocaleDateString()}</span>
                     </div>
                     <p className="mt-2 line-clamp-2 text-sm text-neutral-600">
@@ -122,7 +159,7 @@ export default function TimelineMapView({ memories, onMemoryClick }: TimelineMap
                       className="text-primary-600 mt-4 flex items-center space-x-1 text-xs font-bold transition-all hover:translate-x-1"
                     >
                       <span>Relive memory</span>
-                      <ArrowRight size={14} />
+                      <ArrowRight size={14} weight="bold" />
                     </button>
                   </div>
                 </div>

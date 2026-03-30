@@ -141,7 +141,7 @@ export interface Analytics {
   longestStreak: number;
   topMoods: { mood: string; count: number; percentage: number }[];
   topTags: { tag: string; count: number; percentage: number }[];
-  monthlyActivity: { month: string; memories: number }[];
+  monthlyActivity: { label: string; count: number }[];
   weeklyPattern: { day: string; memories: number }[];
   heatmap?: Record<string, number>;
   tagClusters?: { tag: string; related: { name: string; count: number }[] }[];
@@ -149,6 +149,7 @@ export interface Analytics {
 
 export interface Story {
   id: string;
+  userId: string;
   title: string;
   content: string;
   dateRange: { start: string; end: string };
@@ -156,6 +157,17 @@ export interface Story {
   length: "short" | "medium" | "long";
   status: "generating" | "ready" | "error";
   createdAt: string;
+}
+
+export interface StorySettings {
+  title: string;
+  dateRange: {
+    start: string;
+    end: string;
+  };
+  tone: "reflective" | "celebratory" | "nostalgic";
+  length: "short" | "medium" | "long";
+  includeimages: boolean;
 }
 
 export interface Comment {

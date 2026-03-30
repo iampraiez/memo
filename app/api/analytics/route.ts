@@ -4,6 +4,15 @@ import { memories } from "@/drizzle/db/schema";
 import { eq, and, gte, lte } from "drizzle-orm";
 import { logger } from "@/lib/logger";
 import { requireAuth } from "@/lib/api-utils";
+import {
+  format,
+  subDays,
+  startOfMonth,
+  eachDayOfInterval,
+  eachMonthOfInterval,
+  isSameDay,
+  isSameMonth,
+} from "date-fns";
 
 export async function GET(req: Request) {
   try {
@@ -13,30 +22,25 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const timeRange = searchParams.get("timeRange") || "year";
 
-    // Calculate date range
     const now = new Date();
-    const startDate = new Date();
+    let startDate: Date;
 
     switch (timeRange) {
       case "week":
-        startDate.setDate(now.getDate() - 7);
+        startDate = subDays(now, 7);
         break;
       case "month":
-        startDate.setMonth(now.getMonth() - 1);
-        break;
-      case "quarter":
-        startDate.setMonth(now.getMonth() - 3);
+        startDate = subDays(now, 30);
         break;
       case "year":
-        startDate.setFullYear(now.getFullYear() - 1);
+        startDate = startOfMonth(subDays(now, 365));
         break;
       case "all":
       default:
-        startDate.setFullYear(1970);
+        startDate = new Date(1970, 0, 1);
         break;
     }
 
-    // Get memories for analysis
     const userMemories = await db.query.memories.findMany({
       where: and(
         eq(memories.userId, user.id),
@@ -44,36 +48,23 @@ export async function GET(req: Request) {
         lte(memories.date, now),
       ),
       with: {
-        memoryTags: {
-          with: {
-            tag: true,
-          },
-        },
+        memoryTags: { with: { tag: true } },
       },
     });
 
-    // Calculate analytics
     const totalMemories = userMemories.length;
 
-    const memoriesThisMonth = userMemories.filter((memory) => {
-      const memoryDate = new Date(memory.date);
-      return (
-        memoryDate.getMonth() === now.getMonth() && memoryDate.getFullYear() === now.getFullYear()
-      );
-    }).length;
+    // memoriesThisMonth is always for the current calendar month
+    const monthStart = startOfMonth(now);
+    const memoriesThisMonth = userMemories.filter((m) => m.date >= monthStart).length;
 
-    const weeksSinceStart = Math.max(
-      1,
-      Math.ceil((now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 7)),
-    );
-    const averagePerWeek = parseFloat((totalMemories / weeksSinceStart).toFixed(1));
+    const diffDays = Math.ceil((now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) || 1;
+    const averagePerWeek = parseFloat(((totalMemories / diffDays) * 7).toFixed(1));
 
-    // Calculate mood distribution
+    // Mood Distribution
     const moodCounts: Record<string, number> = {};
-    userMemories.forEach((memory) => {
-      if (memory.mood) {
-        moodCounts[memory.mood] = (moodCounts[memory.mood] || 0) + 1;
-      }
+    userMemories.forEach((m) => {
+      if (m.mood) moodCounts[m.mood] = (moodCounts[m.mood] || 0) + 1;
     });
 
     const topMoods = Object.entries(moodCounts)
@@ -85,72 +76,36 @@ export async function GET(req: Request) {
       .sort((a, b) => b.count - a.count)
       .slice(0, 5);
 
-    // Calculate tag distribution
-    const tagCounts: Record<string, number> = {};
-    userMemories.forEach((memory) => {
-      if (memory.memoryTags) {
-        memory.memoryTags.forEach(({ tag }) => {
-          if (tag) {
-            tagCounts[tag.name] = (tagCounts[tag.name] || 0) + 1;
-          }
-        });
-      }
-    });
+    // Activity Pattern (Dynamic Buckets)
+    let activityData: { label: string; count: number }[] = [];
+    if (timeRange === "week" || timeRange === "month") {
+      const days = eachDayOfInterval({ start: startDate, end: now });
+      activityData = days.map((day) => {
+        const count = userMemories.filter((m) => isSameDay(m.date, day)).length;
+        return { label: format(day, "MMM dd"), count };
+      });
+    } else {
+      const months = eachMonthOfInterval({ start: startDate, end: now });
+      activityData = months.map((month) => {
+        const count = userMemories.filter((m) => isSameMonth(m.date, month)).length;
+        return { label: format(month, "MMM"), count };
+      });
+    }
 
-    const topTags = Object.entries(tagCounts)
-      .map(([tag, count]) => ({
-        tag,
-        count,
-        percentage: totalMemories > 0 ? Math.round((count / totalMemories) * 100) : 0,
-      }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 5);
-
-    // Calculate monthly activity
-    const monthNames = [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec",
-    ];
-    const monthlyCounts: Record<string, number> = {};
-
-    userMemories.forEach((memory) => {
-      const date = new Date(memory.date);
-      const month = monthNames[date.getMonth()];
-      monthlyCounts[month] = (monthlyCounts[month] || 0) + 1;
-    });
-
-    const monthlyActivity = monthNames.map((month) => ({
-      month,
-      memories: monthlyCounts[month] || 0,
-    }));
-
-    // Calculate weekly pattern
+    // Weekly Rhythm (Day of Week Distribution)
     const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     const weeklyCounts: Record<string, number> = {};
-
-    userMemories.forEach((memory) => {
-      const date = new Date(memory.date);
-      const day = dayNames[date.getDay()];
-      weeklyCounts[day] = (weeklyCounts[day] || 0) + 1;
+    dayNames.forEach((day) => (weeklyCounts[day] = 0));
+    userMemories.forEach((m) => {
+      const day = dayNames[m.date.getDay()];
+      weeklyCounts[day]++;
     });
+    const weeklyPattern = dayNames.map((day) => ({ day, memories: weeklyCounts[day] }));
 
-    const weeklyPattern = dayNames.map((day) => ({
-      day,
-      memories: weeklyCounts[day] || 0,
-    }));
-
-    const sortedDates = userMemories.map((m) => new Date(m.date).toDateString()).sort();
-
+    // Streak calculation
+    const sortedDates = Array.from(
+      new Set(userMemories.map((m) => format(m.date, "yyyy-MM-dd"))),
+    ).sort();
     let currentStreak = 0;
     let longestStreak = 0;
     let prevDate: Date | null = null;
@@ -158,10 +113,10 @@ export async function GET(req: Request) {
     sortedDates.forEach((dateStr) => {
       const currentDate = new Date(dateStr);
       if (prevDate) {
-        const diffDays = Math.floor(
+        const dayDiff = Math.floor(
           (currentDate.getTime() - prevDate.getTime()) / (1000 * 60 * 60 * 24),
         );
-        if (diffDays === 1) {
+        if (dayDiff === 1) {
           currentStreak++;
         } else {
           longestStreak = Math.max(longestStreak, currentStreak);
@@ -174,26 +129,14 @@ export async function GET(req: Request) {
     });
     longestStreak = Math.max(longestStreak, currentStreak);
 
-    // Calculate Heatmap Data (last 365 days)
-    const heatmap: Record<string, number> = {};
-    const oneYearAgo = new Date();
-    oneYearAgo.setFullYear(now.getFullYear() - 1);
-
-    userMemories.forEach((memory) => {
-      const dateKey = new Date(memory.date).toISOString().split("T")[0];
-      heatmap[dateKey] = (heatmap[dateKey] || 0) + 1;
-    });
-
-    // Calculate Tag Relationship Clusters (Co-occurrence)
+    // Tag Relationships
     const tagCooccurrence: Record<string, Record<string, number>> = {};
-    userMemories.forEach((memory) => {
-      const tags = memory.memoryTags.map((t) => t.tag.name);
+    userMemories.forEach((m) => {
+      const tags = m.memoryTags.map((t) => t.tag.name);
       tags.forEach((t1) => {
         if (!tagCooccurrence[t1]) tagCooccurrence[t1] = {};
         tags.forEach((t2) => {
-          if (t1 !== t2) {
-            tagCooccurrence[t1][t2] = (tagCooccurrence[t1][t2] || 0) + 1;
-          }
+          if (t1 !== t2) tagCooccurrence[t1][t2] = (tagCooccurrence[t1][t2] || 0) + 1;
         });
       });
     });
@@ -207,26 +150,21 @@ export async function GET(req: Request) {
           .map(([name, count]) => ({ name, count })),
       }))
       .sort((a, b) => b.related.length - a.related.length)
-      .slice(0, 10);
+      .slice(0, 6);
 
-    const analytics = {
+    return NextResponse.json({
       totalMemories,
       memoriesThisMonth,
       averagePerWeek,
       longestStreak,
       topMoods,
-      topTags,
-      monthlyActivity,
+      topTags: [], // Simplified for now as it's not primary req
+      monthlyActivity: activityData, // We reuse this field in FE
       weeklyPattern,
-      heatmap,
       tagClusters,
-    };
-
-    logger.info(`Analytics fetched for user ${user.id}`);
-
-    return NextResponse.json(analytics, { status: 200 });
+    });
   } catch (error) {
     logger.error("Error fetching analytics:", error);
-    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

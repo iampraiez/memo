@@ -1,14 +1,8 @@
 import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
-import { useLiveQuery } from "dexie-react-hooks";
-import { db } from "@/lib/dexie/db";
 import { Memory, Comment, Reaction } from "@/types/types";
 import { socialService } from "@/services/social.service";
 
 export const useTimelineMemories = (sort: string = "date", initialData?: Memory[]) => {
-  // We can use useLiveQuery to get all "other" memories if we want real-time timeline,
-  // but for infinite scroll, React Query is still useful for cursor management.
-  // The socialService.getTimeline now reads from Dexie.
-
   return useInfiniteQuery({
     queryKey: ["memories", "timeline", sort],
     queryFn: ({ pageParam }) =>
@@ -21,27 +15,16 @@ export const useTimelineMemories = (sort: string = "date", initialData?: Memory[
           pageParams: [undefined],
         }
       : undefined,
-    structuralSharing: true,
   });
 };
 
 export const useComments = (memoryId: string) => {
-  const comments = useLiveQuery(
-    () => db.comments.where("memoryId").equals(memoryId).sortBy("createdAt"),
-    [memoryId],
-  );
-
-  const query = useQuery<{ comments: Comment[] }>({
+  return useQuery<{ comments: Comment[] }>({
     queryKey: ["comments", memoryId],
     queryFn: () => socialService.getComments(memoryId),
     enabled: !!memoryId,
-    structuralSharing: true,
+    staleTime: 1000 * 60, // 1 minute
   });
-
-  return {
-    ...query,
-    data: comments ? { comments: comments as Comment[] } : query.data,
-  };
 };
 
 export const useAddComment = () => {
@@ -58,22 +41,12 @@ export const useAddComment = () => {
 };
 
 export const useReactions = (memoryId: string) => {
-  const reactions = useLiveQuery(
-    () => db.reactions.where("memoryId").equals(memoryId).toArray(),
-    [memoryId],
-  );
-
-  const query = useQuery<{ reactions: Reaction[] }>({
+  return useQuery<{ reactions: Reaction[] }>({
     queryKey: ["reactions", memoryId],
     queryFn: () => socialService.getReactions(memoryId),
     enabled: !!memoryId,
-    structuralSharing: true,
+    staleTime: 1000 * 60, // 1 minute
   });
-
-  return {
-    ...query,
-    data: reactions ? { reactions: reactions as Reaction[] } : query.data,
-  };
 };
 
 export const useToggleReaction = () => {
@@ -112,7 +85,6 @@ export const useFollowUser = () => {
       queryClient.invalidateQueries({ queryKey: ["profile", userId] });
       queryClient.invalidateQueries({ queryKey: ["followers"] });
       queryClient.invalidateQueries({ queryKey: ["following"] });
-      // Refresh the search results so the Follow/Unfollow button updates in the dropdown
       queryClient.invalidateQueries({ queryKey: ["users", "search"] });
     },
   });
@@ -126,7 +98,6 @@ export const useUnfollowUser = () => {
       queryClient.invalidateQueries({ queryKey: ["profile", userId] });
       queryClient.invalidateQueries({ queryKey: ["followers"] });
       queryClient.invalidateQueries({ queryKey: ["following"] });
-      // Refresh the search results so the Follow/Unfollow button updates in the dropdown
       queryClient.invalidateQueries({ queryKey: ["users", "search"] });
     },
   });
@@ -137,7 +108,7 @@ export const useFollowers = (userId: string) => {
     queryKey: ["followers", userId],
     queryFn: () => socialService.getFollowers(userId),
     enabled: !!userId,
-    structuralSharing: true,
+    staleTime: 1000 * 60 * 5,
   });
 };
 
@@ -146,7 +117,7 @@ export const useFollowing = (userId: string) => {
     queryKey: ["following", userId],
     queryFn: () => socialService.getFollowing(userId),
     enabled: !!userId,
-    structuralSharing: true,
+    staleTime: 1000 * 60 * 5,
   });
 };
 
@@ -155,7 +126,7 @@ export const useSearchUsers = (query: string) => {
     queryKey: ["users", "search", query],
     queryFn: () => socialService.searchUsers(query),
     enabled: query.length >= 2,
-    structuralSharing: true,
+    staleTime: 1000 * 60,
   });
 };
 

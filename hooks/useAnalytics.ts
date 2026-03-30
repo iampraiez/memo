@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { analyticsService, Analytics } from "@/services/analytics.service";
+import { analyticsService } from "@/services/analytics.service";
+import { Analytics } from "@/types/types";
 
 export const useAnalytics = (timeRange: string = "year") => {
   return useQuery<Analytics>({
