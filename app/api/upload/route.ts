@@ -42,6 +42,7 @@ export async function POST(req: Request) {
     });
 
     const urls = await Promise.all(uploadPromises);
+    logger.info("Upload successful", { urls });
 
     return NextResponse.json({ urls });
   } catch (error: unknown) {

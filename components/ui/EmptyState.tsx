@@ -20,19 +20,20 @@ export default function EmptyState({
   description,
   actionLabel,
   onAction,
+  actionVariant = "primary",
   className,
-}: EmptyStateProps) {
+}: EmptyStateProps & { actionVariant?: "primary" | "secondary" | "ghost" | "destructive" }) {
   return (
     <div
       className={cn(
-        "animate-fade-in flex min-h-[460px] flex-col items-center justify-center p-8 text-center",
+        "animate-fade-in flex min-h-115 flex-col items-center justify-center p-8 text-center",
         className,
       )}
     >
       {/* Premium Graphic Element */}
       <div className="relative mb-10">
         <div className="bg-primary-100/50 absolute inset-0 scale-150 animate-pulse rounded-full blur-3xl" />
-        <div className="from-primary-900 to-primary-700 relative flex h-24 w-24 rotate-3 items-center justify-center rounded-3xl bg-gradient-to-br shadow-2xl">
+        <div className="from-primary-900 to-primary-700 relative flex h-24 w-24 rotate-3 items-center justify-center rounded-3xl bg-linear-to-br shadow-2xl">
           {icon || <Sparkle className="h-12 w-12 text-white" weight="duotone" />}
         </div>
         <div className="bg-secondary-400 absolute -right-2 -bottom-2 flex h-10 w-10 -rotate-12 items-center justify-center rounded-xl shadow-lg">
@@ -49,8 +50,13 @@ export default function EmptyState({
         <div className="pt-8">
           <Button
             size="lg"
+            variant={actionVariant}
             onClick={onAction}
-            className="shadow-primary-900/10 rounded-full px-8 py-6 shadow-xl transition-all duration-300 hover:scale-105"
+            className={cn(
+              "rounded-full px-8 py-6 transition-all duration-300 hover:scale-105",
+              actionVariant === "primary" && "shadow-primary-900/10 shadow-xl",
+              actionVariant === "secondary" && "border-neutral-200 shadow-sm",
+            )}
           >
             {actionLabel}
           </Button>

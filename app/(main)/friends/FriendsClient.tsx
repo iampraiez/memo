@@ -579,6 +579,7 @@ export default function FriendsClient({ initialMemories }: FriendsClientProps) {
                 : "Start follow other keepers or invite family to see their shared moments here."
             }
             actionLabel={friendSearch ? "Clear Search" : "Find Someone"}
+            actionVariant="secondary"
             onAction={friendSearch ? () => setFriendSearch("") : () => setIsDiscoveryOpen(true)}
           />
         )}

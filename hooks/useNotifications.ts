@@ -13,6 +13,7 @@ export const useNotifications = () => {
   const query = useQuery<{ notifications: Notification[] }>({
     queryKey: ["notifications"],
     queryFn: () => notificationService.getAll(),
+    refetchInterval: 30000, // Poll every 30 seconds for a "streamed" feel
     structuralSharing: true,
   });
 

@@ -198,8 +198,17 @@ export const socialService = {
     return { success: true };
   },
 
-  // Follow/Unfollow (queue for sync)
+  // Follow/Unfollow (optimistic + queue for sync)
   followUser: async (userId: string) => {
+    // Optimistic update in Dexie
+    const user = await db.users.get(userId);
+    if (user) {
+      await db.users.update(userId, {
+        isFollowing: true,
+        followersCount: (user.followersCount || 0) + 1,
+      });
+    }
+
     await syncService.queueOperation({
       operation: "create",
       entity: "user",
@@ -211,6 +220,15 @@ export const socialService = {
   },
 
   unfollowUser: async (userId: string) => {
+    // Optimistic update in Dexie
+    const user = await db.users.get(userId);
+    if (user) {
+      await db.users.update(userId, {
+        isFollowing: false,
+        followersCount: Math.max(0, (user.followersCount || 0) - 1),
+      });
+    }
+
     await syncService.queueOperation({
       operation: "delete",
       entity: "user",

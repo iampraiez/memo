@@ -57,14 +57,22 @@ export const userService = {
   },
 
   // Update settings (optimistic)
-  updateSettings: async (data: Partial<UserSettings>) => {
+  updateSettings: async (data: Partial<UserSettings> & { image?: string; avatar?: string }) => {
     const userId = await userService.getCurrentUserId();
-    const existing = await db.users.get(userId || "");
+    if (!userId) throw new Error("User not authenticated");
+
+    const existing = await db.users.get(userId);
+
+    // Normalize image field (handle both 'image' and 'avatar' keys)
+    const normalizedData = { ...data };
+    if (data.avatar && !data.image) {
+      normalizedData.image = data.avatar;
+    }
 
     if (existing) {
       const updated: LocalUser = {
         ...existing,
-        ...data, // data is Partial<UserSettings>, spreading it is fine
+        ...normalizedData,
         _syncStatus: "pending",
         _lastSync: Date.now(),
       };
@@ -74,11 +82,11 @@ export const userService = {
     await syncService.queueOperation({
       operation: "update",
       entity: "user",
-      entityId: userId || "current",
-      data: data as unknown as Record<string, unknown>,
+      entityId: userId,
+      data: normalizedData as unknown as Record<string, unknown>,
     });
 
-    return data as UserSettings; // Cast to UserSettings is appropriate here
+    return normalizedData as UserSettings;
   },
 
   // Profile is usually dynamic, but we can cache viewed profiles

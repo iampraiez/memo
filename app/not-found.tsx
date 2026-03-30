@@ -12,8 +12,8 @@ export default function NotFound() {
         {/* Graphic */}
         <div className="relative mx-auto h-48 w-48">
           <div className="bg-primary-100/50 absolute inset-0 animate-pulse rounded-full blur-3xl" />
-          <div className="relative rotate-6 rounded-[2rem] border border-neutral-100 bg-white p-8 shadow-xl transition-transform duration-500 hover:rotate-0">
-            <span className="font-display from-primary-600 to-secondary-600 bg-gradient-to-br bg-clip-text text-8xl font-bold text-transparent">
+          <div className="relative rotate-6 rounded-4xl border border-neutral-100 bg-white p-8 shadow-xl transition-transform duration-500 hover:rotate-0">
+            <span className="font-display from-primary-600 to-secondary-600 bg-linear-to-br bg-clip-text text-8xl font-bold text-transparent">
               404
             </span>
           </div>

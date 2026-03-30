@@ -236,15 +236,30 @@ export default function SettingsPage() {
                       const file = e.target.files?.[0];
                       if (!file) return;
                       const uploadToast = toast.loading("Uploading your portrait...");
-                      try {
-                        const urls = await apiService.uploadFiles(file);
-                        if (!urls.length) throw new Error();
-                        setLocalAvatar(urls[0]);
-                        toast.success("Portrait updated", { id: uploadToast });
-                      } catch {
-                        toast.error("Upload failed", { id: uploadToast });
-                      }
-                    }}
+                        try {
+                          const urls = await apiService.uploadFiles(file);
+                          if (!urls.length) throw new Error();
+                          
+                          const newAvatar = urls[0];
+                          setLocalAvatar(newAvatar);
+                          
+                          // Use the mutation for optimistic updates and query invalidation
+                          await updateSettings.mutateAsync({ avatar: newAvatar });
+                          
+                          // Explicit session update for immediate header reflection (Perfect UX)
+                          await updateSession({
+                            ...session,
+                            user: {
+                              ...session?.user,
+                              image: newAvatar,
+                            },
+                          });
+
+                          toast.success("Portrait updated", { id: uploadToast });
+                        } catch {
+                          toast.error("Upload failed", { id: uploadToast });
+                        }
+                      }}
                     className="hidden"
                     id="avatar-upload"
                   />
@@ -347,6 +362,9 @@ export default function SettingsPage() {
                   </div>
                   <p className="text-sm text-neutral-500">
                     Control who can discover and see your memories.
+                    <span className="ml-2 inline-flex items-center rounded-sm bg-neutral-100 px-1.5 py-0.5 text-[8px] font-bold tracking-widest text-neutral-400 uppercase">
+                      Next Update
+                    </span>
                   </p>
                 </div>
                 <div className="flex items-center rounded-xl bg-neutral-100 p-1">
@@ -376,6 +394,9 @@ export default function SettingsPage() {
                   </div>
                   <p className="text-sm text-neutral-500">
                     Let AI help organize and summarize your moments.
+                    <span className="ml-2 inline-flex items-center rounded-sm bg-neutral-100 px-1.5 py-0.5 text-[8px] font-bold tracking-widest text-neutral-400 uppercase">
+                      Next Update
+                    </span>
                   </p>
                 </div>
                 <button
@@ -403,6 +424,9 @@ export default function SettingsPage() {
                   </div>
                   <p className="text-sm text-neutral-500">
                     Automatically sync your media to secure cloud storage.
+                    <span className="ml-2 inline-flex items-center rounded-sm bg-neutral-100 px-1.5 py-0.5 text-[8px] font-bold tracking-widest text-neutral-400 uppercase">
+                      Next Update
+                    </span>
                   </p>
                 </div>
                 <button
