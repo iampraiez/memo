@@ -9,6 +9,7 @@ import {
   UserPlus,
   ArrowRight,
   X,
+  Trash,
 } from "@phosphor-icons/react";
 import Loading from "@/components/ui/Loading";
 import Card from "@/components/ui/Card";
@@ -21,6 +22,7 @@ import {
 } from "@/hooks/useSocial";
 import { useFamilyMembers, useInviteFamilyMember, useRespondToInvite } from "@/hooks/useFamily";
 import { useSession } from "next-auth/react";
+import { useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
 import { useIsMounted } from "@/hooks/useIsMounted";
@@ -31,6 +33,7 @@ import Modal from "@/components/ui/Modal";
 import { Memory, Reaction, User } from "@/types/types";
 import { toast } from "sonner";
 import { stripHtml } from "@/lib/utils";
+import { apiService } from "@/services/api.service";
 
 interface FriendsClientProps {
   initialMemories: Memory[];
@@ -38,6 +41,7 @@ interface FriendsClientProps {
 
 export default function FriendsClient({ initialMemories }: FriendsClientProps) {
   const { data: session } = useSession();
+  const queryClient = useQueryClient();
   const userId = session?.user?.id || undefined;
 
   const [friendSearch, setFriendSearch] = useState("");
@@ -45,6 +49,7 @@ export default function FriendsClient({ initialMemories }: FriendsClientProps) {
   const [isDiscoveryOpen, setIsDiscoveryOpen] = useState(false);
   const [sort, setSort] = useState("date");
   const [selectedMemory, setSelectedMemory] = useState<Memory | null>(null);
+  const [isCircleManageOpen, setIsCircleManageOpen] = useState(false);
   const isMounted = useIsMounted();
 
   const handleMemoryClick = (memory: Memory) => {
@@ -191,12 +196,12 @@ export default function FriendsClient({ initialMemories }: FriendsClientProps) {
             <h2 className="text-xs font-bold tracking-widest text-neutral-400 uppercase">
               Current Circle
             </h2>
-            <Link
-              href="/settings"
+            <button
+              onClick={() => setIsCircleManageOpen(true)}
               className="text-primary-600 hover:text-primary-700 text-xs font-bold"
             >
               Manage Circle
-            </Link>
+            </button>
           </div>
           <div className="no-scrollbar -mx-6 flex space-x-6 overflow-x-auto px-6 pb-4">
             {acceptedMembers.map((member) => (
@@ -647,7 +652,102 @@ export default function FriendsClient({ initialMemories }: FriendsClientProps) {
         )}
       </Modal>
 
-      {/* Invitation Modal */}
+      {/* Circle Management Modal */}
+      <Modal
+        isOpen={isCircleManageOpen}
+        onClose={() => setIsCircleManageOpen(false)}
+        title="Sanctuary Circle Management"
+        size="md"
+      >
+        <div className="space-y-8">
+          {/* Current Members */}
+          <section className="space-y-4">
+            <h3 className="text-xs font-bold tracking-widest text-neutral-400 uppercase">
+              Keepers in Circle
+            </h3>
+            <div className="divide-y divide-neutral-50 rounded-2xl border border-neutral-100 p-2">
+              {acceptedMembers.length === 0 ? (
+                <div className="py-8 text-center text-sm text-neutral-400 italic">
+                  No one has joined your circle yet.
+                </div>
+              ) : (
+                acceptedMembers.map((member) => (
+                  <div key={member.id} className="flex items-center justify-between p-3">
+                    <div className="flex items-center space-x-3">
+                      <div className="bg-primary-100 text-primary-900 flex h-10 w-10 items-center justify-center rounded-full font-bold">
+                        {member.avatar ? (
+                          <Image src={member.avatar} alt={member.name} width={40} height={40} />
+                        ) : (
+                          member.name[0]
+                        )}
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-neutral-900">{member.name}</p>
+                        <p className="text-[10px] tracking-widest text-neutral-400 uppercase">
+                          {member.relationship}
+                        </p>
+                      </div>
+                    </div>
+                    {/* Could add 'Revoke' button here if needed */}
+                  </div>
+                ))
+              )}
+            </div>
+          </section>
+
+          {/* Pending Invitations */}
+          <section className="space-y-4">
+            <h3 className="text-xs font-bold tracking-widest text-neutral-400 uppercase">
+              Sent Invitations
+            </h3>
+            <div className="divide-y divide-neutral-50 rounded-2xl border border-neutral-100 p-2">
+              {sentInvites.length === 0 ? (
+                <div className="py-8 text-center text-sm text-neutral-400 italic">
+                  No active invitations.
+                </div>
+              ) : (
+                sentInvites.map((invite) => (
+                  <div key={invite.id} className="flex items-center justify-between p-3">
+                    <div className="flex items-center space-x-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full border border-neutral-100 bg-neutral-50 font-bold text-neutral-400">
+                        {invite.name[0]}
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-neutral-900">{invite.name}</p>
+                        <p className="text-[10px] text-neutral-500">{invite.email}</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={async () => {
+                        try {
+                          await apiService.delete(`/family?id=${invite.id}`);
+                          toast.success("Invitation revoked");
+                          queryClient.invalidateQueries({ queryKey: ["family", userId] });
+                        } catch {
+                          toast.error("Failed to revoke invitation");
+                        }
+                      }}
+                      className="rounded-full p-2 text-neutral-400 hover:bg-red-50 hover:text-red-500"
+                      title="Revoke Invitation"
+                    >
+                      <Trash size={18} />
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+          </section>
+
+          <Button
+            variant="secondary"
+            className="w-full rounded-xl"
+            onClick={() => setIsCircleManageOpen(false)}
+          >
+            Done
+          </Button>
+        </div>
+      </Modal>
+
       <Modal
         isOpen={!!selectedUserToInvite}
         onClose={() => setSelectedUserToInvite(null)}

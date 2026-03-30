@@ -47,6 +47,9 @@ export default function ProfilePage() {
     mutationFn: () => socialService.followUser(userId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["profile", userId] });
+      if (session?.user?.id) {
+        queryClient.invalidateQueries({ queryKey: ["profile", session.user.id] });
+      }
       toast.success("Followed user!");
     },
   });
@@ -55,6 +58,9 @@ export default function ProfilePage() {
     mutationFn: () => socialService.unfollowUser(userId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["profile", userId] });
+      if (session?.user?.id) {
+        queryClient.invalidateQueries({ queryKey: ["profile", session.user.id] });
+      }
       toast.success("Unfollowed user");
     },
   });

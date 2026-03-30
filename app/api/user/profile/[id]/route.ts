@@ -10,7 +10,11 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 
   try {
     const user = await db.query.users.findFirst({
-      where: or(eq(users.id, targetIdentifier), eq(users.username, targetIdentifier)),
+      where: or(
+        eq(users.id, targetIdentifier),
+        eq(users.username, targetIdentifier),
+        eq(users.email, targetIdentifier),
+      ),
     });
 
     if (!user) {

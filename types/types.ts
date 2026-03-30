@@ -11,6 +11,21 @@ export interface OnboardingFlowProps {
   onComplete: () => void;
 }
 
+export interface FamilyMember {
+  id: string;
+  userId: string | null;
+  ownerId: string;
+  name: string;
+  username?: string | null;
+  email: string;
+  avatar?: string | null;
+  relationship: string;
+  status: "pending" | "accepted" | "declined";
+  role: "admin" | "member";
+  isReceived: boolean;
+  joinedAt?: string | null;
+}
+
 export interface FamilyMemories {
   id: string;
   memoryId: string;

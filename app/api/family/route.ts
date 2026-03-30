@@ -46,6 +46,7 @@ export async function GET() {
           userId: targetUserId,
           ownerId: rel.ownerId,
           name: userDetails?.name || rel.name,
+          username: userDetails?.username,
           email: userDetails?.email || rel.email,
           avatar: userDetails?.image,
           relationship: rel.relationship,
@@ -188,6 +189,43 @@ export async function PUT(req: Request) {
     return NextResponse.json({ success: true, message: "Invitation accepted" });
   } catch (error) {
     console.error("Error responding to invitation:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: Request) {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      return NextResponse.json({ error: "Missing invitation ID" }, { status: 400 });
+    }
+
+    const invite = await db.query.familyMembers.findFirst({
+      where: eq(familyMembers.id, id),
+    });
+
+    if (!invite) {
+      return NextResponse.json({ error: "Invitation not found" }, { status: 404 });
+    }
+
+    // Only the owner or the member can delete/revoke
+    if (invite.ownerId !== session.user.id && invite.memberId !== session.user.id) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    await db.delete(familyMembers).where(eq(familyMembers.id, id));
+
+    return NextResponse.json({ success: true, message: "Invitation revoked/removed" });
+  } catch (error) {
+    console.error("Error revoking invitation:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
