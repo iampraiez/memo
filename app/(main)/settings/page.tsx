@@ -236,30 +236,30 @@ export default function SettingsPage() {
                       const file = e.target.files?.[0];
                       if (!file) return;
                       const uploadToast = toast.loading("Uploading your portrait...");
-                        try {
-                          const urls = await apiService.uploadFiles(file);
-                          if (!urls.length) throw new Error();
-                          
-                          const newAvatar = urls[0];
-                          setLocalAvatar(newAvatar);
-                          
-                          // Use the mutation for optimistic updates and query invalidation
-                          await updateSettings.mutateAsync({ avatar: newAvatar });
-                          
-                          // Explicit session update for immediate header reflection (Perfect UX)
-                          await updateSession({
-                            ...session,
-                            user: {
-                              ...session?.user,
-                              image: newAvatar,
-                            },
-                          });
+                      try {
+                        const urls = await apiService.uploadFiles(file);
+                        if (!urls.length) throw new Error();
 
-                          toast.success("Portrait updated", { id: uploadToast });
-                        } catch {
-                          toast.error("Upload failed", { id: uploadToast });
-                        }
-                      }}
+                        const newAvatar = urls[0];
+                        setLocalAvatar(newAvatar);
+
+                        // Use the mutation for optimistic updates and query invalidation
+                        await updateSettings.mutateAsync({ avatar: newAvatar });
+
+                        // Explicit session update for immediate header reflection (Perfect UX)
+                        await updateSession({
+                          ...session,
+                          user: {
+                            ...session?.user,
+                            image: newAvatar,
+                          },
+                        });
+
+                        toast.success("Portrait updated", { id: uploadToast });
+                      } catch {
+                        toast.error("Upload failed", { id: uploadToast });
+                      }
+                    }}
                     className="hidden"
                     id="avatar-upload"
                   />

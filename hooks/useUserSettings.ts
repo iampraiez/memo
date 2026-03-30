@@ -27,7 +27,8 @@ export const useUpdateUserSettings = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (settings: Partial<UserSettings>) => userService.updateSettings(settings),
+    mutationFn: (settings: Partial<UserSettings> & { avatar?: string }) =>
+      userService.updateSettings(settings),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["userSettings"] });
     },
