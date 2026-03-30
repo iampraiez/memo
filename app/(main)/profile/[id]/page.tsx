@@ -74,7 +74,7 @@ export default function ProfilePage() {
 
   if (!profile) return null;
 
-  const isOwnProfile = session?.user?.id === userId;
+  const isOwnProfile = session?.user?.id === profile.id;
   const profileMemories = memoriesData?.memories || [];
 
   return (
@@ -102,6 +102,9 @@ export default function ProfilePage() {
 
           <div className="flex-1 space-y-2 text-center md:text-left">
             <h1 className="font-display text-3xl font-bold text-neutral-900">{profile.name}</h1>
+            {profile.username && (
+              <p className="text-sm font-medium text-neutral-500">@{profile.username}</p>
+            )}
             <div className="flex items-center justify-center space-x-4 text-sm text-neutral-500 md:justify-start">
               <span className="flex items-center">
                 <Calendar className="mr-1" /> Joined{" "}

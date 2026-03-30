@@ -170,10 +170,10 @@ export default function FriendsClient({ initialMemories }: FriendsClientProps) {
         </div>
         <div className="flex items-center gap-3">
           <Button
-            variant={isDiscoveryOpen ? "primary" : "secondary"}
+            variant={isDiscoveryOpen ? "primary" : "ghost"}
             size="sm"
             onClick={() => setIsDiscoveryOpen(!isDiscoveryOpen)}
-            className="rounded-2xl"
+            className="rounded-2xl text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900"
           >
             <UserPlus size={20} className="mr-2" />
             Find Keepers

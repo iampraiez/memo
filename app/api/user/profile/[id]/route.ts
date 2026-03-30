@@ -2,20 +2,22 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import db from "@/drizzle/index";
 import { users, follows, memories } from "@/drizzle/db/schema";
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, or, sql } from "drizzle-orm";
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
-  const { id: targetUserId } = await params;
+  const { id: targetIdentifier } = await params;
 
   try {
     const user = await db.query.users.findFirst({
-      where: eq(users.id, targetUserId),
+      where: or(eq(users.id, targetIdentifier), eq(users.username, targetIdentifier)),
     });
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
+
+    const targetUserId = user.id;
 
     // Count followers
     const followers = await db
@@ -47,6 +49,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     return NextResponse.json({
       id: user.id,
       name: user.name,
+      username: user.username,
       email: user.email,
       image: user.image,
       bio: user.bio,

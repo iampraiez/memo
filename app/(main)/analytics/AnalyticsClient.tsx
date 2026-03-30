@@ -48,25 +48,66 @@ export default function AnalyticsClient({ initialAnalytics }: AnalyticsClientPro
 
   if (analytics.totalMemories === 0) {
     return (
-      <div className="mx-auto flex min-h-[70vh] max-w-4xl flex-col items-center justify-center space-y-8 p-6 text-center">
-        <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-[2.5rem] border border-neutral-100 bg-neutral-50 shadow-inner">
-          <ChartBar className="h-12 w-12 text-neutral-300" />
+      <div className="relative mx-auto min-h-[80vh] max-w-6xl overflow-hidden p-6">
+        {/* Header - Fade out */}
+        <div className="flex items-center justify-between opacity-40">
+          <div>
+            <h1 className="font-display text-3xl font-bold text-neutral-900">
+              Analytics & Insights
+            </h1>
+            <p className="mt-1 text-neutral-600">
+              Discover patterns and insights from your memories
+            </p>
+          </div>
+          <div className="pointer-events-none w-48 opacity-50">
+            <Select options={timeRangeOptions} value={timeRange} onChange={() => {}} />
+          </div>
         </div>
-        <h1 className="font-display text-3xl font-bold tracking-tight text-neutral-900">
-          Your Sanctuary is Quiet
-        </h1>
-        <p className="mx-auto mt-2 max-w-md leading-relaxed text-neutral-500">
-          Your personal growth and emotional patterns will bloom here once you start capturing your
-          memories.
-        </p>
-        <div className="pt-8">
-          <Button
-            variant="primary"
-            onClick={() => router.push("/timeline")}
-            className="shadow-primary-900/20 h-12 rounded-2xl px-8 shadow-lg"
-          >
-            Start Your Archive
-          </Button>
+
+        {/* Blurred background content */}
+        <div className="pointer-events-none mt-8 opacity-30 blur-md grayscale-[0.5] transition-all duration-1000 select-none">
+          <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+            <StatCard title="Total memories" value="0" icon={Calendar} />
+            <StatCard title="This Month" value="0" icon={TrendUp} />
+            <StatCard title="Weekly Average" value="0" icon={ChartBar} />
+            <StatCard title="Longest Streak" value="0 days" icon={Clock} />
+          </div>
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+            <Card className="h-72 bg-white" />
+            <Card className="h-72 bg-white" />
+          </div>
+        </div>
+
+        {/* Glassmorphic Overlay CTA */}
+        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center p-6 text-center">
+          <div className="animate-in fade-in zoom-in group relative duration-700">
+            {/* Glowing background */}
+            <div className="from-primary-400 via-secondary-400 to-primary-600 absolute -inset-1 rounded-[3rem] bg-linear-to-r opacity-20 blur-2xl transition-all duration-1000 group-hover:opacity-40 group-hover:blur-3xl" />
+
+            <Card className="relative flex max-w-lg flex-col items-center justify-center space-y-6 rounded-3xl border border-white/50 bg-white/70 p-10 shadow-2xl backdrop-blur-2xl">
+              <div className="from-primary-50 to-secondary-50 mb-2 flex h-20 w-20 items-center justify-center rounded-full border border-white bg-linear-to-br shadow-inner">
+                <ChartBar weight="duotone" className="text-primary-600 h-10 w-10" />
+              </div>
+              <div className="space-y-2">
+                <h1 className="font-display text-3xl font-bold tracking-tight text-neutral-900">
+                  Awaiting Your First Story
+                </h1>
+                <p className="mx-auto text-sm leading-relaxed text-neutral-600">
+                  Your personal growth, mood patterns, and emotional rhythms will unlock here once
+                  you start capturing moments in your timeline.
+                </p>
+              </div>
+              <div className="w-full pt-4">
+                <Button
+                  variant="primary"
+                  onClick={() => router.push("/timeline")}
+                  className="shadow-primary-900/20 h-14 w-full rounded-2xl text-base shadow-xl transition-all active:scale-95"
+                >
+                  Start Your Archive
+                </Button>
+              </div>
+            </Card>
+          </div>
         </div>
       </div>
     );
