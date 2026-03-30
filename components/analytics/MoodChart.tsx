@@ -13,14 +13,12 @@ export default function MoodChart({ data }: MoodChartProps) {
   // If no data, show empty state or handle gracefully
   if (!data || data.length === 0) {
     return (
-      <div className="flex h-[300px] items-center justify-center text-neutral-400">
-        No mood data yet
-      </div>
+      <div className="flex h-75 items-center justify-center text-neutral-400">No mood data yet</div>
     );
   }
 
   return (
-    <div className="h-[300px] w-full">
+    <div className="h-75 w-full">
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Pie
@@ -37,7 +35,10 @@ export default function MoodChart({ data }: MoodChartProps) {
             ))}
           </Pie>
           <Tooltip
-            formatter={(value: number | string | undefined) => [`${value ?? 0} memories`, "Count"]}
+            formatter={(value: number | string | ReadonlyArray<number | string> | undefined) => [
+              `${value?.toString() ?? "0"} memories`,
+              "Count",
+            ]}
             contentStyle={{ borderRadius: "8px", border: "none" }}
           />
           <Legend

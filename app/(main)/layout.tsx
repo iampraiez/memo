@@ -10,5 +10,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
     redirect("/login");
   }
 
+  // Redirect users who haven't completed onboarding
+  if (!session.user.isOnboarded) {
+    redirect("/onboarding");
+  }
+
   return <DashboardShell>{children}</DashboardShell>;
 }
