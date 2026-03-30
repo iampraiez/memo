@@ -6,58 +6,23 @@
 
 export default function OfflinePage() {
   return (
-    <html lang="en">
-      <body
-        style={{
-          margin: 0,
-          fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-          background: "#0f0f13",
-          color: "#e4e4e7",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          minHeight: "100vh",
-        }}
-      >
-        <div style={{ textAlign: "center", maxWidth: "400px", padding: "2rem" }}>
-          <div style={{ fontSize: "4rem", marginBottom: "1rem" }}>📡</div>
-          <h1
-            style={{
-              fontSize: "1.75rem",
-              fontWeight: 700,
-              marginBottom: "0.75rem",
-              color: "#a5b4fc",
-            }}
-          >
-            You&apos;re offline
-          </h1>
-          <p
-            style={{
-              color: "#a1a1aa",
-              lineHeight: 1.6,
-              marginBottom: "2rem",
-            }}
-          >
-            Memory Lane couldn&apos;t load this page. Check your connection and try again — your
-            previously visited pages are still available.
-          </p>
-          <button
-            onClick={() => window.location.reload()}
-            style={{
-              background: "#6366f1",
-              color: "#fff",
-              border: "none",
-              borderRadius: "8px",
-              padding: "0.75rem 2rem",
-              fontSize: "1rem",
-              fontWeight: 600,
-              cursor: "pointer",
-            }}
-          >
-            Try again
-          </button>
-        </div>
-      </body>
-    </html>
+    <div className="flex min-h-screen flex-col items-center justify-center bg-neutral-950 p-6 text-center">
+      <div className="max-w-md space-y-6">
+        <div className="animate-bounce text-6xl">📡</div>
+        <h1 className="font-display text-4xl font-bold tracking-tight text-white">
+          You&apos;re Offline
+        </h1>
+        <p className="text-lg leading-relaxed text-neutral-400">
+          Memory Lane couldn&apos;t connect to the sanctuary. Check your connection or explore your
+          cached memories.
+        </p>
+        <button
+          onClick={() => window.location.reload()}
+          className="shadow-primary-900/20 bg-primary-600 hover:bg-primary-700 rounded-2xl px-8 py-4 font-bold text-white shadow-lg transition-all hover:scale-105 active:scale-95"
+        >
+          Re-establish Connection
+        </button>
+      </div>
+    </div>
   );
 }

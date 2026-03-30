@@ -17,8 +17,11 @@ class ApiService {
   private client: AxiosInstance;
 
   constructor() {
+    const isBrowser = typeof window !== "undefined";
+    const baseURL = isBrowser ? "/api" : `${env.NEXT_PUBLIC_URL}/api`;
+
     this.client = axios.create({
-      baseURL: `${env.NEXT_PUBLIC_URL}/api`,
+      baseURL,
       timeout: 15000,
       headers: {
         "Content-Type": "application/json",
