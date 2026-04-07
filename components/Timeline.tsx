@@ -56,39 +56,48 @@ const Timeline: React.FC<TimelineProps> = ({
     };
   }, [hasNextPage, fetchNextPage, isFetchingNextPage]);
 
-  // Initialize state from sessionStorage if available, else default
-  const [expandedYears, setExpandedYears] = useState<Set<number>>(() => {
-    if (typeof window !== "undefined") {
-      const saved = sessionStorage.getItem("timeline_expanded_years");
-      if (saved) return new Set(JSON.parse(saved));
-    }
-    return new Set([new Date().getFullYear()]);
-  });
+  // Initialize state with defaults for server-side consistency
+  const [expandedYears, setExpandedYears] = useState<Set<number>>(new Set());
+  const [expandedMonths, setExpandedMonths] = useState<Set<string>>(new Set());
+  const [isMounted, setIsMounted] = useState(false);
 
-  const [expandedMonths, setExpandedMonths] = useState<Set<string>>(() => {
-    if (typeof window !== "undefined") {
-      const saved = sessionStorage.getItem("timeline_expanded_months");
-      if (saved) return new Set(JSON.parse(saved));
-    }
-    return new Set();
-  });
-
-  // Sync state changes to sessionStorage
+  // Load state from sessionStorage and set initial expansion on mount
   useEffect(() => {
+    setIsMounted(true);
+
+    const savedYears = sessionStorage.getItem("timeline_expanded_years");
+    const savedMonths = sessionStorage.getItem("timeline_expanded_months");
+
+    if (savedYears) {
+      setExpandedYears(new Set(JSON.parse(savedYears)));
+    } else {
+      // Default to current year if nothing saved
+      setExpandedYears(new Set([new Date().getUTCFullYear()]));
+    }
+
+    if (savedMonths) {
+      setExpandedMonths(new Set(JSON.parse(savedMonths)));
+    }
+  }, []);
+
+  // Sync state changes to sessionStorage only after initial mount
+  useEffect(() => {
+    if (!isMounted) return;
     sessionStorage.setItem("timeline_expanded_years", JSON.stringify(Array.from(expandedYears)));
-  }, [expandedYears]);
+  }, [expandedYears, isMounted]);
 
   useEffect(() => {
+    if (!isMounted) return;
     sessionStorage.setItem("timeline_expanded_months", JSON.stringify(Array.from(expandedMonths)));
-  }, [expandedMonths]);
+  }, [expandedMonths, isMounted]);
 
   // Group memories by year, month, and day
   const groupedMemories = memories.reduce(
     (acc: Record<number, Record<number, Record<number, Memory[]>>>, memory: Memory) => {
       const date = new Date(memory.date);
-      const year = date.getFullYear();
-      const month = date.getMonth();
-      const day = date.getDate();
+      const year = date.getUTCFullYear();
+      const month = date.getUTCMonth();
+      const day = date.getUTCDate();
 
       if (!acc[year]) acc[year] = {};
       if (!acc[year][month]) acc[year][month] = {};
@@ -225,24 +234,48 @@ const Timeline: React.FC<TimelineProps> = ({
 
                                         {/* Day Memories */}
                                         {viewMode === "grid" ? (
-                                          <Masonry
-                                            breakpointCols={{
-                                              default: 3,
-                                              1100: 2,
-                                              700: 1,
-                                            }}
-                                            className="-ml-2 flex w-auto sm:-ml-4"
-                                            columnClassName="pl-2 bg-clip-padding sm:pl-4"
-                                          >
-                                            {groupedMemories[year][month][day]
-                                              .sort(
-                                                (a, b) =>
-                                                  new Date(b.createdAt).getTime() -
-                                                  new Date(a.createdAt).getTime(),
-                                              )
-                                              .map((memory) => (
-                                                <div key={memory.id} className="mb-4">
+                                          isMounted ? (
+                                            <Masonry
+                                              breakpointCols={{
+                                                default: 3,
+                                                1100: 2,
+                                                700: 1,
+                                              }}
+                                              className="-ml-2 flex w-auto sm:-ml-4"
+                                              columnClassName="pl-2 bg-clip-padding sm:pl-4"
+                                            >
+                                              {groupedMemories[year][month][day]
+                                                .sort(
+                                                  (a, b) =>
+                                                    new Date(b.createdAt).getTime() -
+                                                    new Date(a.createdAt).getTime(),
+                                                )
+                                                .map((memory) => (
+                                                  <div key={memory.id} className="mb-4">
+                                                    <MemoryCard
+                                                      memory={memory}
+                                                      displayMode="grid"
+                                                      priority={memories[0]?.id === memory.id}
+                                                      onClick={() => onMemoryClick(memory)}
+                                                      onEdit={() => onEditMemory(memory)}
+                                                      onDelete={() => onDeleteMemory(memory.id)}
+                                                      onShareMemory={() => onShareMemory(memory)}
+                                                    />
+                                                  </div>
+                                                ))}
+                                            </Masonry>
+                                          ) : (
+                                            /* Simple list for SSR fallback */
+                                            <div className="flex flex-col space-y-4">
+                                              {groupedMemories[year][month][day]
+                                                .sort(
+                                                  (a, b) =>
+                                                    new Date(b.createdAt).getTime() -
+                                                    new Date(a.createdAt).getTime(),
+                                                )
+                                                .map((memory) => (
                                                   <MemoryCard
+                                                    key={memory.id}
                                                     memory={memory}
                                                     displayMode="grid"
                                                     priority={memories[0]?.id === memory.id}
@@ -251,9 +284,9 @@ const Timeline: React.FC<TimelineProps> = ({
                                                     onDelete={() => onDeleteMemory(memory.id)}
                                                     onShareMemory={() => onShareMemory(memory)}
                                                   />
-                                                </div>
-                                              ))}
-                                          </Masonry>
+                                                ))}
+                                            </div>
+                                          )
                                         ) : (
                                           <div className="flex flex-col space-y-4">
                                             {groupedMemories[year][month][day]
@@ -289,19 +322,25 @@ const Timeline: React.FC<TimelineProps> = ({
               ))}
 
             {/* Intersection Sentinel for Infinite Scroll */}
-            <div ref={loadMoreRef} className="flex h-20 items-center justify-center py-10">
-              {isFetchingNextPage ? (
-                <div className="flex items-center space-x-2 text-neutral-500">
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                  <span>Loading more treasures...</span>
-                </div>
-              ) : hasNextPage ? (
-                <div className="h-10" />
-              ) : (
-                <div className="text-sm font-medium text-neutral-400">
-                  No more memories to display.
-                </div>
-              )}
+            <div
+              ref={loadMoreRef}
+              className="flex h-20 items-center justify-center py-10"
+              suppressHydrationWarning
+            >
+              {isMounted ? (
+                isFetchingNextPage ? (
+                  <div className="flex items-center space-x-2 text-neutral-500">
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    <span>Loading more treasures...</span>
+                  </div>
+                ) : hasNextPage ? (
+                  <div className="h-10" />
+                ) : (
+                  <div className="text-sm font-medium text-neutral-400">
+                    No more memories to display.
+                  </div>
+                )
+              ) : null}
             </div>
           </>
         ) : (

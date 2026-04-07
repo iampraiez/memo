@@ -26,11 +26,5 @@
         }
       ]
     }
-  ],
-  "crons": [
-    {
-      "path": "/api/cron/daily-report?key=MEMO_DAILY_REPORT_SECURE_TOKEN_2026",
-      "schedule": "0 6 * * *"
-    }
   ]
 }

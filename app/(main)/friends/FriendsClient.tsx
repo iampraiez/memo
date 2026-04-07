@@ -488,12 +488,19 @@ export default function FriendsClient({ initialMemories }: FriendsClientProps) {
                         {memory.reactionCount || memory.reactions?.length || 0}
                       </span>
                     </div>
-                    <div className="flex items-center space-x-1">
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleMemoryClick(memory);
+                      }}
+                      className="hover:text-primary-600 flex items-center space-x-1 transition-colors"
+                      title="Join Discussion"
+                    >
                       <ChatCircle size={18} />
                       <span className="text-sm font-bold">
                         {memory.commentCount || memory.comments?.length || 0}
                       </span>
-                    </div>
+                    </button>
                   </div>
                 </div>
 
@@ -528,15 +535,6 @@ export default function FriendsClient({ initialMemories }: FriendsClientProps) {
                     ))}
                   </div>
                 </div>
-
-                <Button
-                  variant="primary"
-                  className="bg-primary-900 group-hover:bg-primary-600 w-full rounded-2xl shadow-lg transition-all hover:scale-[1.02] active:scale-95"
-                  onClick={() => handleMemoryClick(memory)}
-                >
-                  <ChatCircle size={18} className="mr-2" weight="fill" />
-                  <span>Join Discussion</span>
-                </Button>
               </Card>
             ))}
 

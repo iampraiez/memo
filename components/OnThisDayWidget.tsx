@@ -11,10 +11,16 @@ interface OnThisDayWidgetProps {
 }
 
 export default function OnThisDayWidget({ memories, onMemoryClick }: OnThisDayWidgetProps) {
+  const [isMounted, setIsMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   if (memories.length === 0) return null;
 
   const latestMemory = memories[0];
-  const yearsAgo = new Date().getFullYear() - new Date(latestMemory.date).getFullYear();
+  const yearsAgo = new Date().getUTCFullYear() - new Date(latestMemory.date).getUTCFullYear();
 
   return (
     <motion.div
@@ -70,7 +76,7 @@ export default function OnThisDayWidget({ memories, onMemoryClick }: OnThisDayWi
             <div className="absolute bottom-3 left-3 flex items-center space-x-1.5">
               <Calendar size={12} className="text-white/80" />
               <span className="text-[10px] font-bold text-white">
-                {new Date(latestMemory.date).toLocaleDateString()}
+                {isMounted ? new Date(latestMemory.date).toLocaleDateString() : ""}
               </span>
             </div>
           </div>

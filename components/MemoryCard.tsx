@@ -40,7 +40,12 @@ const MemoryCard: React.FC<MemoryCardProps> = ({
   priority = false,
 }) => {
   const [showMenu, setShowMenu] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
   const moodColors = {
     joyful: {
       bg: "bg-yellow-50",
@@ -158,7 +163,9 @@ const MemoryCard: React.FC<MemoryCardProps> = ({
                 Capsule Sealed
               </p>
               <p className="border-secondary-500/30 mt-1 border-t pt-1 text-xs font-bold text-white">
-                {memory.unlockDate && new Date(memory.unlockDate).toLocaleDateString()}
+                {memory.unlockDate && isMounted
+                  ? new Date(memory.unlockDate).toLocaleDateString()
+                  : ""}
               </p>
             </div>
           </div>
@@ -198,7 +205,7 @@ const MemoryCard: React.FC<MemoryCardProps> = ({
               <div className="mt-1 flex items-center space-x-3 text-xs text-neutral-500 sm:text-sm">
                 <div className="flex items-center space-x-1">
                   <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
-                  <span>{new Date(memory.date).toLocaleDateString()}</span>
+                  <span>{isMounted ? new Date(memory.date).toLocaleDateString() : ""}</span>
                 </div>
                 {memory.location && !isLocked && (
                   <div className="flex items-center space-x-1">

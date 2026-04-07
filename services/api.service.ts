@@ -44,6 +44,9 @@ class ApiService {
 
         if (status === 401) {
           console.warn("[API] Unauthorized - 401");
+          if (typeof window !== "undefined") {
+            window.location.href = "/auth/login";
+          }
         } else if (status === 403) {
           console.error("[API] Forbidden - 403");
         } else if (status >= 500) {

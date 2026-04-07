@@ -201,12 +201,16 @@ export default function TimelineClient({ initialMemories }: TimelineClientProps)
         </div>
 
         {/* On This Day Highlight */}
-        {!searchQuery && !selectedMood && onThisDayMemories.length > 0 && viewMode !== "map" && (
-          <OnThisDayWidget
-            memories={onThisDayMemories}
-            onMemoryClick={(m) => router.push(`/memory/${m.id}`)}
-          />
-        )}
+        {isMounted &&
+          !searchQuery &&
+          !selectedMood &&
+          onThisDayMemories.length > 0 &&
+          viewMode !== "map" && (
+            <OnThisDayWidget
+              memories={onThisDayMemories}
+              onMemoryClick={(m) => router.push(`/memory/${m.id}`)}
+            />
+          )}
 
         {isLoading && memories.length === 0 ? (
           <Loading fullPage text="Retrieving your memories..." />

@@ -7,6 +7,9 @@ import { and, eq, desc, or } from "drizzle-orm";
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
   const { id: targetIdentifier } = await params;
+  const { searchParams } = new URL(req.url);
+  const limitValue = searchParams.get("limit");
+  const limit = limitValue ? parseInt(limitValue, 10) : 50;
 
   try {
     // 1. Resolve targetIdentifier to a specific user
@@ -43,7 +46,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
         isOwner ? undefined : eq(memories.isPublic, true),
       ),
       orderBy: [desc(memories.date)],
-      limit: 50, // Increased limit for better UX
+      limit: limit,
       with: {
         memoryMedia: true,
         memoryTags: {

@@ -39,7 +39,7 @@ export default function ProfilePage() {
 
   const { data: memoriesData, isLoading: isLoadingMemories } = useQuery({
     queryKey: ["profile-memories", userId],
-    queryFn: () => apiService.get<{ memories: Memory[] }>(`/user/${userId}/memories`),
+    queryFn: () => apiService.get<{ memories: Memory[] }>(`/user/${userId}/memories?limit=3`),
     enabled: mounted,
   });
 

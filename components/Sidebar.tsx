@@ -166,11 +166,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClick }) => {
                       {memoryCount}
                     </span>
                   )}
-                  {item.id === "timeline" && memoryCount > 0 && (
-                    <span className="bg-primary-100 text-primary-700 ml-auto flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] font-bold shadow-sm transition-all hover:bg-neutral-50 lg:hidden">
-                      {memoryCount}
-                    </span>
-                  )}
                   {item.id === "timeline" && isActive && (
                     <div className="bg-primary-600 absolute right-4 h-1.5 w-1.5 rounded-full shadow-[0_0_10px_rgba(37,99,235,0.3)]" />
                   )}
